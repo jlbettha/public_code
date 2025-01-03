@@ -1,1 +1,1 @@
-# image_processing
+# from_scratch: ml tools from scratch
