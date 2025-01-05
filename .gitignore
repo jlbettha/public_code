@@ -1,13 +1,38 @@
+#ignore thumbnails created by windows
+Thumbs.db
+#Ignore files build by Visual Studio
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.dll
+*.lib
+*.sbr
+
 # Unfinished folders
-/DSP
-/clustering
-/image_classification
-/image_processing
-/models
-/nlp
-/time_series_sequential
-/utils
-/from_scratch/modules/image_measurements.py
+*/DSP/*
+*/clustering/*
+*/image_classification/*
+*/image_processing/*
+*/models/*
+*/nlp/*
+*/time_series_sequential/*
+*/utils/*
+*/from_scratch/modules/image_measurements.py
+*/from_scratch/k*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
