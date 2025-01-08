@@ -32,7 +32,6 @@ Thumbs.db
 */time_series_sequential/*
 */utils/*
 */from_scratch/modules/image_measurements.py
-*/from_scratch/k*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

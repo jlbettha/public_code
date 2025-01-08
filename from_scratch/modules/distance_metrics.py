@@ -82,7 +82,7 @@ def mahalinobis_dist(
         float: mahalinobis distance of point y to distribution x (exponent of multivariate gaussian)
     """
     mu = np.mean(x, axis=0)
-    dist = ((y - mu) @ np.linalg.inv(np.cov(x.T))) @ (y - mu).T
+    dist = ((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T
     if not sqrt_calc:
         return dist
     return np.sqrt(dist)

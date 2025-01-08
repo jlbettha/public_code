@@ -1,0 +1,251 @@
+""" Betthauser, 2018: k-gaussian mixture clustering
+"""
+
+import time
+from typing import Any
+import numpy as np
+from numpy.typing import NDArray
+import matplotlib.pyplot as plt
+
+# from k_means_clustering import k_means_clustering
+
+
+def _membership_prob(
+    point: NDArray[np.float64], c_mean: NDArray[np.float64], c_cov: NDArray[np.float64]
+) -> np.float64:
+    """compute probability that point to belongs to this cluster (multivariate gaussian)
+
+    Args:
+        point (NDArray[np.float64]): point to check
+        c_mean (NDArray[np.float64]): mean of cluster
+        c_cov (NDArray[np.float64]): covariance of cluster
+
+    Returns:
+        np.float64: probability that point to belongs to this cluster
+    """
+    k = c_cov.shape[0]
+    denom = np.sqrt(np.linalg.det(c_cov) * (2 * np.pi) ** k)
+    mahal_dist = ((point - c_mean) @ np.linalg.pinv(c_cov)) @ (point - c_mean).T
+    prob = np.squeeze(np.exp(-0.5 * mahal_dist) / denom)
+    return prob
+
+
+def _prob_dist_array(
+    data_pt: NDArray[np.float64],
+    k_means: NDArray[np.float64],
+    k_covs: NDArray[np.float64],
+) -> NDArray[np.float64]:
+    """_summary_
+
+    Args:
+        data_pt (NDArray[np.float64]): n-dimensional point to check
+        k_means (NDArray[np.float64]): means of k-clusters, shape: k x n
+        k_covs (NDArray[np.float64]): covariance matrices of k-clusters, shape: k x n x n
+
+    Returns:
+        NDArray[np.float64]: array of probabilities that point belongs to k clusters
+    """
+    mdist_arr = np.array(
+        [_membership_prob(data_pt, mean, cov) for mean, cov in zip(k_means, k_covs)]
+    )
+    return mdist_arr / np.sum(mdist_arr)
+
+
+def k_gaussian_mixture_clustering(
+    data: NDArray[np.float64], k: int, tolerance: float = 1e-5, plot: bool = False
+) -> tuple[Any]:
+    """Betthauser, 2018: k-means clustering
+
+    Args:
+        data (NDArray[np.float64]): unlabeled N x D, N samples of D-dim data
+        k (int): number of clusters
+        tolerance (float): convergence threshold, default is 0.001
+        plot (bool): if plots should be shown during iterations, default is False
+
+    Returns:
+        NDArray[np.uint8]: array of likeliest labels, num iters, cluster_means, cluster_covs, likelihoods
+    """
+
+    num_data_pts = data.shape[0]
+    dim = data.shape[1]
+
+    # init gmm
+    while True:
+        # _, _, cluster_means = k_means_clustering(data, k)  # init with k means
+        rand_idx = np.random.permutation(num_data_pts)
+        cluster_means = data[rand_idx[:k], :]  # init with k random points in data
+
+        cluster_covs = np.squeeze(
+            [np.eye(dim) for lbl in range(k)]
+        )  # init covs with identity
+
+        try:
+            soft_label_probs = np.array(
+                [
+                    _prob_dist_array(
+                        np.reshape(data[idx, :], (1, -1)), cluster_means, cluster_covs
+                    )
+                    for idx in range(num_data_pts)
+                ]
+            )
+        except RuntimeWarning:
+            continue
+
+        if np.any(np.isnan(soft_label_probs)):
+            continue
+
+        current_likeliest_labels = np.array(
+            [np.argmax(soft_label_probs[idx, :]) for idx in range(num_data_pts)]
+        )
+
+        if len(np.unique(current_likeliest_labels)) == k:
+            break
+
+    cluster_weights_pi_k = np.ones(k) / k
+    weighted_probs_nk = cluster_weights_pi_k * soft_label_probs
+    sum_weighted_probs_n = np.sum(weighted_probs_nk, axis=1)
+
+    log_likelihood = np.sum(np.log(sum_weighted_probs_n))  # / N
+
+    likelihoods = []
+    ll_last = log_likelihood
+
+    iters = 0
+    its = []
+    while True:  # begin E-M steps
+        iters = iters + 1
+
+        # expectation ~~~~~~~~~~~~~~~~~
+        gamma_nk = np.divide(weighted_probs_nk.T, sum_weighted_probs_n).T
+
+        sum_gamma_k = np.sum(gamma_nk, axis=0)
+
+        # maximization ~~~~~~~~~~~~~~~~
+        cluster_weights_pi_k = sum_gamma_k / num_data_pts
+
+        cluster_means = ((data.T @ gamma_nk) / sum_gamma_k).T
+
+        cluster_covs = []
+        for lbl in range(k):
+            centered_data = data - cluster_means[lbl, :]
+            ctc = (gamma_nk[:, lbl] * centered_data.T) @ centered_data
+            cluster_covs.append(ctc / sum_gamma_k[lbl])
+
+        cluster_covs = np.stack(cluster_covs)
+
+        soft_label_probs = np.array(
+            [
+                _prob_dist_array(
+                    np.reshape(data[idx, :], (1, -1)), cluster_means, cluster_covs
+                )
+                for idx in range(num_data_pts)
+            ]
+        )
+
+        weighted_probs_nk = cluster_weights_pi_k * soft_label_probs
+        sum_weighted_probs_n = np.sum(weighted_probs_nk, axis=1)
+        log_likelihood = np.sum(np.log(sum_weighted_probs_n)) / num_data_pts
+
+        if iters % 5 == 0:
+            print(f"Iter: {iters} -- Log-likelihood: {log_likelihood:.4f}", flush=True)
+
+        likelihoods.append(log_likelihood)
+        its.append(iters)
+
+        if plot:
+            current_likeliest_labels = np.array(
+                [np.argmax(soft_label_probs[idx, :]) for idx in range(num_data_pts)]
+            )
+
+            plt.subplot(1, 2, 1)
+            plt.cla()
+            plt.scatter(data[:, 0], data[:, 1], c=current_likeliest_labels)
+            plt.subplot(1, 2, 2)
+            plt.cla()
+            plt.plot(its, likelihoods)
+            plt.ylabel("log-likelihood")
+            plt.pause(0.001)
+
+        if np.abs(log_likelihood - ll_last) < tolerance:
+            print(f"k-gaussian mixture clustering took {iters} iterations.")
+            return (
+                current_likeliest_labels,
+                iters,
+                cluster_means,
+                cluster_covs,
+                likelihoods,
+            )
+
+        ll_last = log_likelihood
+
+
+def _generate_data(
+    num_clusters: int, dim: int, size_clusters: int
+) -> NDArray[np.float64]:
+    """generate synthetic data of gaussian clusters
+
+    Args:
+        num_clusters (int): true number of clusters to generate
+        dim (int): n-dimensionality of data
+        size_clusters (int): number of points in each cluster
+
+    Returns:
+        NDArray[np.float64]: synthetic data of n-dim gaussian clusters
+    """
+    means = np.random.uniform(0, 40, size=(num_clusters, dim))
+    covs = np.zeros((num_clusters, dim, dim))
+
+    for c in range(num_clusters):
+        amat = np.random.randn(dim, dim)  # + np.eye(dim)
+        amat = amat / amat.max()
+        covs[c, :, :] = amat @ amat.T
+
+    rand_factor = np.random.uniform(0, 5, size=num_clusters)
+
+    data = [
+        np.random.multivariate_normal(
+            means[c, :], covs[c, :, :] * rand_factor[c], size=(size_clusters)
+        )
+        for c in range(num_clusters)
+    ]
+
+    data = np.vstack(data)
+    rand_idx = np.random.permutation(data.shape[0])
+    data = data[rand_idx, :]
+
+    return data
+
+
+def main() -> None:
+    """_summary_"""
+    k = 6
+    num_actual_clusters = 6
+    num_dims = 3
+    num_pts_per_cluster = 500
+
+    data = _generate_data(num_actual_clusters, num_dims, num_pts_per_cluster)
+
+    labels, iters, k_means, _, loglikes = k_gaussian_mixture_clustering(
+        data, k, tolerance=1e-5, plot=False
+    )
+
+    plt.subplot(1, 2, 1)
+    plt.scatter(data[:, 0], data[:, 1], c=labels, s=3)
+    plt.scatter(
+        k_means[:, 0], k_means[:, 1], c="r", s=20, marker="x", label="Cluster means"
+    )
+
+    plt.title(f"k-gaussian mixture clustering, converged in {iters} iterations.")
+
+    plt.subplot(1, 2, 2)
+    plt.plot(np.arange(0, iters, 1), loglikes)
+    plt.xlabel("iterations")
+    plt.ylabel("log-likelihood")
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    t0 = time.time()
+    main()
+    print(f"Program took {time.time()-t0:.3f} seconds.")
