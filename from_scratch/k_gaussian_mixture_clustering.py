@@ -54,7 +54,7 @@ def _prob_dist_array(
 def k_gaussian_mixture_clustering(
     data: NDArray[np.float64], k: int, tolerance: float = 1e-5, plot: bool = False
 ) -> tuple[Any]:
-    """Betthauser, 2018: k-means clustering
+    """Betthauser, 2018: k-gaussian mixture/EM clustering
 
     Args:
         data (NDArray[np.float64]): unlabeled N x D, N samples of D-dim data
@@ -170,7 +170,6 @@ def k_gaussian_mixture_clustering(
             print(f"k-gaussian mixture clustering took {iters} iterations.")
             return (
                 current_likeliest_labels,
-                iters,
                 cluster_means,
                 cluster_covs,
                 likelihoods,
@@ -225,7 +224,7 @@ def main() -> None:
 
     data = _generate_data(num_actual_clusters, num_dims, num_pts_per_cluster)
 
-    labels, iters, k_means, _, loglikes = k_gaussian_mixture_clustering(
+    labels, k_means, _, loglikes = k_gaussian_mixture_clustering(
         data, k, tolerance=1e-5, plot=False
     )
 
@@ -235,10 +234,12 @@ def main() -> None:
         k_means[:, 0], k_means[:, 1], c="r", s=20, marker="x", label="Cluster means"
     )
 
-    plt.title(f"k-gaussian mixture clustering, converged in {iters} iterations.")
+    plt.title(
+        f"k-gaussian mixture clustering, converged in {len(loglikes)} iterations."
+    )
 
     plt.subplot(1, 2, 2)
-    plt.plot(np.arange(0, iters, 1), loglikes)
+    plt.plot(np.arange(0, len(loglikes), 1), loglikes)
     plt.xlabel("iterations")
     plt.ylabel("log-likelihood")
 
