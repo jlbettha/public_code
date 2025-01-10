@@ -7,18 +7,17 @@ Done:
 - k-means clustering
 - gaussian mixture clustering - EM
 - modules: covariance, distance metrics
-
+- logistic regr 
 
 
 
 To-do:
 - svm
-- mlp
-- logistic regr  (next)
 - linear regr w/ L0, L1, and L2 (ridge)  (next)
 - lda
 - pca  (next)
 - svd  (next)
 - decision tree
+- mlp
 - cnn
 - kalman (next)
