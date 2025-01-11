@@ -6,18 +6,18 @@ Done:
 - stochastic grad descent
 - k-means clustering
 - gaussian mixture clustering - EM
-- modules: covariance, distance metrics
-- logistic regr 
-
-
+- modules: covariance
+- modules: distance metrics -> point-to-point, point-to-distr, distr-to-distr
+- logistic regression 
+- kalman -> mouse x,y follower
+- svd (partial)
+ 
 
 To-do:
-- svm
+- pca (next)
+- svm (next)
 - linear regr w/ L0, L1, and L2 (ridge)  (next)
 - lda
-- pca  (next)
-- svd  (next)
 - decision tree
 - mlp
 - cnn
-- kalman (next)
