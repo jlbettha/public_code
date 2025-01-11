@@ -1,16 +1,26 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.typing import NDArray
 
-# import sympy as sym
 
+def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
+    """sum of squared difference between two arrays
 
-def ssd(arr1, arr2):
+    Args:
+        arr1 (NDArray[np.float64]): an array
+        arr2 (NDArray[np.float64]): another array
+
+    Returns:
+        float: sum of squared difference
+    """
     return np.sum((arr1 - arr2) ** 2)
 
 
-def main(b0: float, b1: float) -> None:
+def main() -> None:
     """_summary_"""
+    b1 = 0.23
+    b0 = -2.21
     N = 10 * 20
     noise_level = 2
     ones = np.ones(N)
@@ -24,7 +34,6 @@ def main(b0: float, b1: float) -> None:
         np.linalg.inv(x_mat.T @ x_mat) @ x_mat.T
     )  # full pinv calculation (X^T X)^-1 X^T
     b_vec = np.squeeze(pseudo_inverse @ ys)
-    # b_vec = np.squeeze(np.linalg.pinv(x_mat) @ ys) # easy-mode pinv calculation
     print(b_vec)
     ys_linalg = b_vec[0] * xs + b_vec[1]
 
@@ -44,5 +53,5 @@ def main(b0: float, b1: float) -> None:
 
 if __name__ == "__main__":
     t0 = time.time()
-    main(b1=0.23, b0=-2.21)
+    main()
     print(f"Program took {time.time() - t0:.3f} seconds.")

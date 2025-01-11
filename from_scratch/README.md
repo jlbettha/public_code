@@ -10,8 +10,7 @@ Done:
 - modules: distance metrics -> point-to-point, point-to-distr, distr-to-distr
 - logistic regression 
 - kalman -> mouse x,y follower
-- svd (partial)
- 
+- svd 
 
 To-do:
 - pca (next)
