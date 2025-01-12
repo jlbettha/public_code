@@ -1,4 +1,6 @@
-# /from_scratch: ml tools from scratch
+# /from_scratch/: ml tools from scratch
+# Manual implementations for fundamental ML methods and concepts.
+# For personal study, review, and... let's say character-building
 
 Done:
 - linear regression
@@ -11,12 +13,12 @@ Done:
 - logistic regression 
 - kalman -> mouse x,y follower
 - svd 
+- pca
 
 To-do:
-- pca (next)
-- svm (next)
 - linear regr w/ L0, L1, and L2 (ridge)  (next)
 - lda
+- mlp, basic nn
+- svm
 - decision tree
-- mlp
-- cnn
+- basic cnn

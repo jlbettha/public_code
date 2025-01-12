@@ -72,7 +72,7 @@ def _generate_data(
     for c in range(num_clusters):
         amat = np.random.randn(dim, dim)  # + np.eye(dim)
         amat = amat / amat.max()
-        covs[c, :, :] = amat @ amat.T
+        covs[c, :, :] = np.cov(amat)
 
     rand_factor = np.random.uniform(0, 5, size=num_clusters)
 
