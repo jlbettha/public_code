@@ -24,36 +24,6 @@ def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
 def least_squares(
     y: NDArray[np.float64], A: NDArray[np.float64]
 ) -> NDArray[np.float64]:
-    """_summary_
-
-    Args:
-        y (NDArray[np.float64]): _description_
-        A (NDArray[np.float64]): _description_
-
-    Returns:
-        NDArray[np.float64]: _description_
-    """
-    return 0.0
-
-
-def least_squares(
-    y: NDArray[np.float64], A: NDArray[np.float64]
-) -> NDArray[np.float64]:
-    """_summary_
-
-    Args:
-        y (NDArray[np.float64]): _description_
-        A (NDArray[np.float64]): _description_
-
-    Returns:
-        NDArray[np.float64]: _description_
-    """
-    return 0.0
-
-
-def least_squares(
-    y: NDArray[np.float64], A: NDArray[np.float64]
-) -> NDArray[np.float64]:
     """Regular least squares
     ### solve y = Ax --> x = A^-1 y = (A^T A)^-1 A^T y
     Args:
