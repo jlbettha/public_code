@@ -5,7 +5,6 @@ from numpy.typing import NDArray
 from pylops.optimization.sparsity import omp, fista
 from pylops import MatrixMult
 from sklearn.datasets import make_regression
-from principal_component_analysis import pca_projection
 
 
 def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:

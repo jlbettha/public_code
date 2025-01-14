@@ -14,9 +14,9 @@ Done:
 - kalman -> mouse x,y follower
 - svd 
 - pca
+- linear regr w/ L0, L1, and L2 (ridge) 
 
 To-do:
-- linear regr w/ L0, L1, and L2 (ridge)  (next)
 - lda
 - mlp, basic nn
 - svm
