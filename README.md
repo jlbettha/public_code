@@ -9,10 +9,10 @@ Manual implementations for fundamental ML methods and concepts.
 Ongoing for personal study, review, and... let's say character-building.
 
 ### /image_processing/:
-* currently empty, expected content by 1/15 * 
+* currently empty, expected content by 1/17 * 
 
 ### /image_segmentation/:
-* currently empty, expected content by 1/15 *  
+* currently empty, expected content by 1/17 *  
 
 ### /nlp_llm/:
 * currently empty, expected content by 2/1 *  
