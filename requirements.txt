@@ -39,3 +39,8 @@ pysoundfile
 pylops
 mouse
 keyboard
+datasets
+lightning
+transformers
+fastapi
+polars

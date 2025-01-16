@@ -15,10 +15,12 @@ Done:
 - svd 
 - pca
 - linear regr w/ L0, L1, and L2 (ridge) 
+- mlp, nn - with only functions
+- mlp, nn - object oriented for layer-wise constructions
+
 
 To-do:
-- lda
-- mlp, basic nn
+- lda (next)
 - svm
 - decision tree
-- basic cnn
+- basic cnn (next)
