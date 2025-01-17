@@ -2,7 +2,7 @@
 # Manual implementations for fundamental ML methods and concepts.
 # For personal study, review, and... let's say character-building
 
-Done:
+# Done:
 - linear regression
 - gradient descent
 - stochastic grad descent
@@ -17,10 +17,10 @@ Done:
 - linear regr w/ L0, L1, and L2 (ridge) 
 - mlp, nn - with only functions
 - mlp, nn - object oriented for layer-wise constructions
+- lda
 
-
-To-do:
-- lda (next)
+# To-do:
 - svm
 - decision tree
+- hierarchical cluster
 - basic cnn (next)
