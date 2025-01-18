@@ -23,15 +23,7 @@ Thumbs.db
 *.sbr
 
 # Unfinished folders
-*/DSP/*
-*/clustering/*
-*/image_classification/*
-*/image_processing/*
-*/models/*
-*/nlp/*
-*/time_series_sequential/*
-*/utils/*
-*/from_scratch/modules/image_measurements.py
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

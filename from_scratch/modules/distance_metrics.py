@@ -89,6 +89,12 @@ def mahalinobis_dist(
 
 
 ####  Distribution-to-distribution distance functions  ##########
+# Overlap of dist p and q
+# =======================================
+# >> Bhattacharyya coeff. (BC)
+# DONE >> Mutual Information (MI)
+# >> normalized correlation, dist corr.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2018 - compute KL divergence between two PMFs
 
