@@ -20,6 +20,9 @@ for i in range(num_iters):
 
     if i % 100_000 == 0:
         pi_est = 4 * (lt_one_ct / total_ct)
-        print("Pi estimate:", pi_est, pi_est / math.pi, i, flush=True)
+        print(
+            f"Iter {i} -- Pi estimate: {pi_est:.8f}, Error: {math.pi-pi_est:.8f}",
+            flush=True,
+        )
 
-print("Final Pi estimate:", pi_est, pi_est / math.pi, flush=True)
+print(f"Final Pi estimate: {pi_est:.8f}, Error: {math.pi-pi_est:.8f}")

@@ -89,12 +89,19 @@ def mahalinobis_dist(
 
 
 ####  Distribution-to-distribution distance functions  ##########
-# Overlap of dist p and q
-# =======================================
-# >> Bhattacharyya coeff. (BC)
-# DONE >> Mutual Information (MI)
-# >> normalized correlation, dist corr.
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+def pearson_correlation(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+    """pearson correlation between distributions
+
+    Args:
+        p (NDArray[np.float64]): array p
+        q (NDArray[np.float64]): array q
+
+    Returns:
+        np.float64: pearson correlation between normalized p and q
+    """
+    return np.corrcoef(p / np.sum(p), q / np.sum(q))[0, 1]
+
+
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2018 - compute KL divergence between two PMFs
 
@@ -269,6 +276,16 @@ def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> flo
     entropy2 = entropy(hist2)
     mut_info = entropy1 + entropy2 - joint_entropy
     return mut_info
+
+
+# TODO: Other Dist to Dist options for later
+# ===========================================
+# >> hellenger pmfs
+# >> hellinger 2 normals
+# >> renyi div pmfs - kl and shannon are renyi, a=1: special because it is only at a=1
+#                     that the chain rule of conditional probability holds exactly.
+# >> energy distance
+# >> total variation, or statistical dist
 
 
 def main() -> None:
