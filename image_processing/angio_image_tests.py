@@ -45,9 +45,9 @@ if __name__ == "__main__":
     ## Edge Potential
     img_edgepot = copy.deepcopy(img_smoothed)
     img_edgepot = ndi.gaussian_gradient_magnitude(img_edgepot, sigma=sigma)  # gradient
-    img_edgepot = image_norm(img_edgepot)  # normalize
-    img_edgepot = 1 / (1 + img_edgepot)  # P = 1/ |1+ grad(I)|
-    img_edgepot = 1 - image_norm(img_edgepot)
+    # img_edgepot = image_norm(img_edgepot)  # normalize
+    img_edgepot = 1 / np.abs(1 + img_edgepot)  # P = 1/ |1+ grad(I)|
+    img_edgepot = 1 - img_edgepot
 
     ## Edge detection, types: canny, roberts, sobel, scharr
     struct = ndi.generate_binary_structure(2, 2)
