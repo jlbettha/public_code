@@ -9,10 +9,10 @@ Manual implementations for fundamental ML methods and concepts.
 Ongoing for personal study, review, and... let's say character-building.
 
 ### /image_processing/:
-* currently empty, expected content by 1/17 * 
+
 
 ### /image_segmentation/:
-* currently empty, expected content by 1/17 *  
+
 
 ### /nlp_llm/:
 * currently empty, expected content by 2/1 *  
@@ -22,12 +22,11 @@ Ongoing for personal study, review, and... let's say character-building.
 - temporal conv net, lstm, etc
 - optical flow
 - activity recognition
-* currently empty, expected content by 1/24 *
+
 
 ### /tflow_models/ 
 Tensorflow models and implementations
-* currently empty, expected content by 1/17 *  
+
 
 ### /torch_models/:
 PyTorch versions of many models found in /tflow_models
-* currently empty, expected content by 1/24 * 
