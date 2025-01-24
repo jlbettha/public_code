@@ -110,5 +110,5 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     c9 = conv2d_block(u9, n_filters * 1, kernel_size=3, batchnorm=batchnorm)
 
     outputs = Conv2D(1, (1, 1), activation="linear")(c9)
-    model = Model(inputs=[input_tensor], outputs=[outputs])
-    return model
+	
+    return Model(inputs=[input_tensor], outputs=[outputs])
