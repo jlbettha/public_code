@@ -94,7 +94,7 @@ def autoencoder(
     return Model(inputs=[input_tensor], outputs=[decoded])
 
 
-def feature_autoencoder(
+def autoencoder_feature_bottleneck(
     input_tensor,
     dropout=0.1,
     batchnorm=True,
