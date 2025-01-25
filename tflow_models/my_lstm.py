@@ -1,3 +1,5 @@
+"""_summary_"""
+
 from keras.layers import (
     LSTM,
     Dense,
@@ -48,7 +50,7 @@ def LSTM_classification(
     dense2 = Dropout(0.10)(dense2)
 
     model_out = TimeDistributed(Dense(n_classes, activation="softmax"))(dense2)
-	
+
     return Model(inputs=input_tensor, outputs=model_out)
 
 

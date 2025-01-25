@@ -1,41 +1,29 @@
-import sys, os, math, time, pathlib
-import numpy as np
+"""_summary_"""
 
-# from matplotlib import interactive
-import matplotlib.pyplot as plt
-
-# from readDicom import *
-import fnmatch
-import json
-
-# from imageio import imwrite
-import random
-import cv2
-from scipy import ndimage as ndi
-from collections import Counter
-import pandas as pd
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 import tensorflow as tf
+from keras.layers import (
+    Conv2D,
+    LeakyReLU,
+    BatchNormalization,
+    MaxPooling2D,
+    Dropout,
+    Flatten,
+    Dense,
+    Input,
+    Reshape,
+    Conv2DTranspose,
+    UpSampling2D,
+    AveragePooling2D,
+    Layer,
+)
 
-os.environ["KERAS_BACKEND"] = "tensorflow"
-
-from keras.layers import *
-from keras.models import *
+from keras.models import Model
 from keras import backend as K
-from keras.models import load_model
-from matplotlib.path import Path
-from sklearn.preprocessing import MinMaxScaler
-
-# from sklearn.externals
-import joblib
-import random
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 
-####
 class Sampling(Layer):
-    """Uses (z_mean, z_log_var) to sample z, the vector encoding a digit."""
+    """Uses (z_mean, z_log_var) to sample z"""
 
     def call(self, inputs):
         z_mean, z_log_var = inputs
@@ -65,10 +53,9 @@ def total_loss_func(encoder_mu, encoder_log_variance):
         reconstruction_loss = vae_reconstruction_loss(y_true, y_predict)
         kl_loss = vae_kl_loss(encoder_mu, encoder_log_variance)
 
-        loss = reconstruction_loss + kl_loss
-        return loss
+        return reconstruction_loss + kl_loss
 
-    return total_loss_func
+    return vae_loss
 
 
 def my_vae_encoder(
@@ -82,7 +69,7 @@ def my_vae_encoder(
     latent_dim=32,
 ):
     conv1 = Conv2D(
-        n_filters * layer_multipliers[0], (3, 3), activation="relu", padding="same"
+        n_filters * layer_multipliers[0], (3, 3), activation="linear", padding="same"
     )(input_tensor)
     conv1 = LeakyReLU(alpha=0.1)(conv1)
     if batchnorm:
@@ -94,7 +81,7 @@ def my_vae_encoder(
     pool1 = Dropout(dropout)(pool1)
 
     conv2 = Conv2D(
-        n_filters * layer_multipliers[1], (3, 3), activation="relu", padding="same"
+        n_filters * layer_multipliers[1], (3, 3), activation="linear", padding="same"
     )(pool1)
     conv2 = LeakyReLU(alpha=0.1)(conv2)
     if batchnorm:
@@ -106,7 +93,7 @@ def my_vae_encoder(
     pool2 = Dropout(dropout)(pool2)
 
     conv3 = Conv2D(
-        n_filters * layer_multipliers[2], (3, 3), activation="relu", padding="same"
+        n_filters * layer_multipliers[2], (3, 3), activation="linear", padding="same"
     )(pool2)
     conv3 = LeakyReLU(alpha=0.1)(conv3)
     if batchnorm:
@@ -177,13 +164,13 @@ def my_vae_decoder(
 
 #### Set folders and paths
 if __name__ == "__main__":
-    # get data
+    # 1. get data
 
-    # train/val/test split
+    # 2. train/val/test split
 
-    # image pre-processing, if desired
+    # 3. image pre-processing, if desired
 
-    # initialize variables
+    # 4. initialize variables
     image_dim = 128  # Done: 128,
     feature_dim = 32
     layer_mult = [2, 3, 4]
@@ -209,6 +196,7 @@ if __name__ == "__main__":
         ),
     ]
 
+    # 5. build model
     vae_input = Input(shape=(image_dim, image_dim, 1), name="VAE_input")
     encoder, z_mean, z_log_var, reshape_param = my_vae_encoder(
         vae_input,
@@ -245,7 +233,7 @@ if __name__ == "__main__":
     except:
         print("BUILDING NEW MODEL")
 
-    #### model batch training
+    # 6. model batch training
     print("Begin model training...")
     for ep in range(num_epochs):
         # TODO: train vae
