@@ -8,25 +8,69 @@ implement certain shareable aspects using different contexts & data.
 Manual implementations for fundamental ML methods and concepts.
 Ongoing for personal study, review, and... let's say character-building.
 
-### /image_processing/:
+## /image_processing/
+* angio image/video tests
+* pdf 2 text
+* image 2 text
 
 
-### /image_segmentation/:
+## image_segmentation/
 
 
-### /nlp_llm/:
-* currently empty, expected content by 2/1 *  
-
-### /temporal_sequential/:
-- audio, time-series prediction/forecast, ML + DSP
-- temporal conv net, lstm, etc
-- optical flow
-- activity recognition
+## optical_flow/
+* horn-schunck opflow
+* lucas-kanade opflow
+* in-built keypoint tracker
+* angiogram videos showing tracking of coronary arterial blockage
 
 
-### /tflow_models/ 
+## my_modules/
+* image feature extraction
+* distance functions: point to point, point to distribution, and distr to distr
+* helper/util functions
+* a basic model builder kit (from scratch)
+
+
+## nlp_language_models/
+* working on word embedding, small language model, and translation
+
+
+## temporal_sequential/
+* mouse tracker: kalman and unscented kalman
+* audio, time-series prediction/forecast, ML + DSP
+* temporal conv net, lstm, etc (models may also be in /tflow_models/ or /torch_models/)
+* optical flow
+* activity recognition
+
+
+## tflow_models/ 
 Tensorflow models and implementations
 
+Done:
+* cnn, lstm, autoencoder, unet, vae, gan, attn and multihead, transformer, vision transformer
 
-### /torch_models/:
-PyTorch versions of many models found in /tflow_models
+To-do:
+* vq vae
+* vq gan
+* beta vae (next up)
+
+
+## torch_models/
+* PyTorch versions of many models found in /tflow_models
+
+
+## raspberrypi5_apps/
+* microphone array beamforming, sound source localization 
+* sound source separation
+* speaker identification and speech-to-text
+* stereoscopic vision for 3d scene reconstruct
+* 3d from 2d imaging model, trained from stereoscopic videos
+* IR heat mapping of images (stream/record FLIR-ONE from phone)
+* Database for queries from laptop, desktop queries rasp. pi for gpu model training and RAG
+
+## reinforcement_learning/
+
+## scene_reconstruction/
+
+## model_interpretability/
+
