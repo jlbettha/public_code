@@ -1,41 +1,52 @@
-# /public_code/: 
-ongoing project being populated with tools I've built over the years. Because
-I am unable to share many of my work products publicly, I'm taking time to 
-implement certain shareable aspects using different contexts & data. 
+### public_code/ 
+
+Ongoing refactoring project being populated with tools I've built over the years. Because
+I am unable to share many of my work products publicly, I'm taking time to implement certain
+shareable aspects using different contexts & data.
 
 ## Contents
-### /from_scratch/: 
+
+# from_scratch/  
+
 Manual implementations for fundamental ML methods and concepts.
 Ongoing for personal study, review, and... let's say character-building.
 
-## /image_processing/
+
+# image_processing/
+
 * angio image/video tests
 * pdf 2 text
 * image 2 text
 
 
-## image_segmentation/
+# image_segmentation/
+
+* content in-progress
 
 
-## optical_flow/
+# optical_flow/
+
 * horn-schunck opflow
 * lucas-kanade opflow
 * in-built keypoint tracker
 * angiogram videos showing tracking of coronary arterial blockage
 
 
-## my_modules/
+# my_modules/
+
 * image feature extraction
 * distance functions: point to point, point to distribution, and distr to distr
 * helper/util functions
 * a basic model builder kit (from scratch)
 
 
-## nlp_language_models/
+# nlp_language_models/
+
 * working on word embedding, small language model, and translation
 
 
-## temporal_sequential/
+# temporal_sequential/
+
 * mouse tracker: kalman and unscented kalman
 * audio, time-series prediction/forecast, ML + DSP
 * temporal conv net, lstm, etc (models may also be in /tflow_models/ or /torch_models/)
@@ -43,7 +54,8 @@ Ongoing for personal study, review, and... let's say character-building.
 * activity recognition
 
 
-## tflow_models/ 
+# tflow_models/  
+
 Tensorflow models and implementations
 
 Done:
@@ -55,11 +67,13 @@ To-do:
 * beta vae (next up)
 
 
-## torch_models/
+# torch_models/
+
 * PyTorch versions of many models found in /tflow_models
 
 
-## raspberrypi5_apps/
+# raspberrypi5_apps/
+
 * microphone array beamforming, sound source localization 
 * sound source separation
 * speaker identification and speech-to-text
@@ -68,9 +82,14 @@ To-do:
 * IR heat mapping of images (stream/record FLIR-ONE from phone)
 * Database for queries from laptop, desktop queries rasp. pi for gpu model training and RAG
 
-## reinforcement_learning/
+# model_interpretability/
 
-## scene_reconstruction/
+* content in-progress
 
-## model_interpretability/
+# reinforcement_learning/
 
+* coming soon
+
+# scene_reconstruction/
+
+* coming soon

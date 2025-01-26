@@ -30,7 +30,7 @@ def main() -> None:
     )
     xs = np.squeeze(xs)
 
-    ### pure linalg least squares est.
+    ### ordinary least squares est.
     x_mat = np.stack((xs, np.ones(N))).T
     b_vec = np.squeeze(np.linalg.pinv(x_mat) @ ys_noisy)  # easy-mode pinv calculation
     ys_linalg = b_vec[0] * xs + b_vec[1]
@@ -71,7 +71,10 @@ def main() -> None:
     plt.figure()
     plt.scatter(xs, ys_noisy)
     plt.plot(
-        xs, ys_linalg, c="k", label=f"Least squares: y={b_vec[0]:.2f}x+{b_vec[1]:.2f}"
+        xs,
+        ys_linalg,
+        c="k",
+        label=f"Ordinary least squares: y={b_vec[0]:.2f}x+{b_vec[1]:.2f}",
     )
     plt.plot(
         xs,

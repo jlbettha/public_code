@@ -88,9 +88,23 @@ def mahalinobis_dist(
     return np.sqrt(dist)
 
 
+def z_score(x: float, mu: float, sigma: float) -> float:
+    """Betthauser - 2017 - compute z_score of a data point
+    Args:
+        x (float): data point
+        mu (float): mean
+        sigma (float): stardard deviation
+
+    Returns:
+        float: z_score of x
+    """
+
+    return (x - mu) / sigma
+
+
 ####  Distribution-to-distribution distance functions  ##########
 def pearson_correlation(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
-    """pearson correlation between distributions
+    """Betthauser - 2018 - pearson correlation between distributions
 
     Args:
         p (NDArray[np.float64]): array p
@@ -118,7 +132,6 @@ def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     return np.sum(p * (np.log(p) - np.log(q)))
 
 
-####  Distribution-to-distribution distance functions  ##########
 def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
 
@@ -224,7 +237,7 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
 def minmax_scaling(
     data: NDArray[np.float64], max_val: float = 255
 ) -> NDArray[np.float64]:
-    """_summary_
+    """Betthauser - 2018 - min-max scaling of data
 
     Args:
         data (NDArray[np.float64]): N-D data
@@ -259,8 +272,7 @@ def joint_histogram_2d(
 
 
 def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> float:
-    """_summary_
-
+    """Betthauser - 2018 - compute mutual information between 2 images/patches
     Args:
         image1 (NDArray[np.float64]): image/patch
         image2 (NDArray[np.float64]): another image/patch for comparison
@@ -289,11 +301,7 @@ def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> flo
 
 
 def main() -> None:
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """
+    """_summary_"""
     point1 = np.array([3.25, 9.1, -2.7])
     point2 = np.array([-5.1, 0.95, 1.42])
     cluster1 = [5, 9, 3] + 1 * np.random.randn(1500, 3)

@@ -43,7 +43,7 @@ def main() -> None:
         xs,
         ys_linalg,
         c="k",
-        label=f"Least squares: y={b_vec[0]:.2f}x+{b_vec[1]:.2f}",
+        label=f"Ordinary least squares: y={b_vec[0]:.2f}x+{b_vec[1]:.2f}",
     )
     plt.xlabel("x")
     plt.ylabel("y")

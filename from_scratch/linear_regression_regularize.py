@@ -20,7 +20,7 @@ def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
     return np.sum((arr1 - arr2) ** 2)
 
 
-def least_squares(
+def ordinary_least_squares(
     y: NDArray[np.float64], A: NDArray[np.float64]
 ) -> NDArray[np.float64]:
     """Regular least squares
@@ -111,7 +111,7 @@ def main() -> None:
     # A_mat = A_mat / np.linalg.norm(A_mat, axis=0)
 
     ### Regular least squares
-    x_reg = least_squares(ys_noisy, A_mat)
+    x_reg = ordinary_least_squares(ys_noisy, A_mat)
     print(
         f"\nLSq -- sparsity {100*(num_features-np.count_nonzero(x_reg))/num_features:.1f}%,  Sum|weights| = {np.sum(np.abs(x_reg))}\n"
     )
