@@ -9,8 +9,6 @@ shareable aspects using different contexts & data.
 ### from_scratch/  
 
 Manual implementations for fundamental ML methods and concepts.
-Ongoing for personal study, review, and... let's say character-building.
-
 
 ### image_processing/
 
