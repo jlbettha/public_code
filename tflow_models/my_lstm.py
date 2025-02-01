@@ -27,6 +27,7 @@ def LSTM_classification(
     Returns:
         Model: classification decision model (one-hot encoded)
     """
+
     LSTM_model = LSTM(
         n_nodes, input_shape=input_tensor.shape, return_sequences=return_sequences
     )(input_tensor)
