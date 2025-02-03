@@ -3,6 +3,7 @@
 import time
 import numpy as np
 from numpy.typing import NDArray
+from scipy.stats import wasserstein_distance, wasserstein_distance_nd
 import matplotlib.pyplot as plt
 
 
@@ -89,7 +90,7 @@ def mahalinobis_dist(
 
 
 def z_score(x: float, mu: float, sigma: float) -> float:
-    """Betthauser - 2017 - compute z_score of a data point
+    """Betthauser - 2017 - compute z_score of a data point wrt a distribution
     Args:
         x (float): data point
         mu (float): mean
@@ -98,7 +99,6 @@ def z_score(x: float, mu: float, sigma: float) -> float:
     Returns:
         float: z_score of x
     """
-
     return (x - mu) / sigma
 
 
@@ -114,6 +114,88 @@ def pearson_correlation(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
         np.float64: pearson correlation between normalized p and q
     """
     return np.corrcoef(p / np.sum(p), q / np.sum(q))[0, 1]
+
+
+def jensen_shannon_divergence(
+    p: NDArray[np.float64], q: NDArray[np.float64]
+) -> np.float64:
+    """Betthauser - 2024 - jensen-shannon divergence
+
+    Args:
+        p (NDArray[np.float64]): PMF of distribution p
+        q (NDArray[np.float64]): PMF of distribution q
+
+    Returns:
+        np.float64: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
+                    where M = 0.5(P+Q)
+    """
+    epsilon = 1e-12
+    p = np.abs(p) + epsilon
+    q = np.abs(q) + epsilon
+    m = 0.5 * (p + q)
+    return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
+
+
+def jensen_shannon_distance(
+    p: NDArray[np.float64], q: NDArray[np.float64]
+) -> np.float64:
+    """Betthauser - 2024 - jensen-shannon distance metric
+
+    Args:
+        p (NDArray[np.float64]): PMF of distribution p
+        q (NDArray[np.float64]): PMF of distribution q
+
+    Returns:
+        np.float64: JS_distance = np.sqrt( JS_divergence )
+    """
+    epsilon = 1e-12
+    p = np.abs(p) + epsilon
+    q = np.abs(q) + epsilon
+    m = 0.5 * (p + q)
+    js_divergence = 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
+    return np.sqrt(js_divergence)
+
+
+def wasserstein_distance(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+    """Wasserstein distance or Kantorovich–Rubinstein metric
+
+        # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
+        # M, the metric is the minimum "cost" of turning one pile into the other, which is assumed to be the amount
+        # of earth that needs to be moved times the mean distance it has to be moved.
+
+    Args:
+        p (NDArray[np.float64]): PMF of distribution p
+        q (NDArray[np.float64]): PMF of distribution q
+
+    Returns:
+        np.float64: W_p(P,Q) = (1/N) * SUM_i [ ||X_i - Y_i|| ^^ p ] ^^ (1/p)
+    """
+    epsilon = 1e-12
+    p = np.abs(p) + epsilon
+    q = np.abs(q) + epsilon
+    if len(p.shape) == 2:
+        return wasserstein_distance_nd(p, q)
+    elif len(p.shape) == 1:
+        return wasserstein_distance(p, q)
+    # TODO: manual
+    return ValueError
+
+
+def wasserstein_dist_gaussian1d(
+    mu1: NDArray[np.float64],
+    C1: NDArray[np.float64],
+    mu2: NDArray[np.float64],
+    C2: NDArray[np.float64],
+) -> np.float64:
+    # Wasserstein distance of 2 gaussians ~N(mu1, C1) and ~N(mu2, C2)
+    # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
+    # M, the metric is the minimum "cost" of turning one pile into the other, which is assumed to be the amount
+    # of earth that needs to be moved times the mean distance it has to be moved.
+
+    # W(mu1, mu2) = sqrt( ||mu1-mu2||_2^2 + trace(C1 + C2-2*(C2^0.5) @ C1 @ C2^0.5) ^ 0.5 )
+
+    # TODO
+    return NotImplementedError
 
 
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
@@ -327,7 +409,7 @@ def main() -> None:
 
     print("\n  Point to cluster distances:")
     print(f"{mahalinobis_dist(point1, cluster1, sqrt_calc=False) = :.7f}")
-    print(f"{mahalinobis_dist(point1, cluster2, sqrt_calc=False) = :.7f}\n")
+    print(f"{mahalinobis_dist(point1, cluster2, sqrt_calc=True) = :.7f}\n")
 
     print("\n  Cluster to cluster distances:")
     print(f"{fisher_dist(mu_a, var_a, mu_b, var_b) = :.7f}")

@@ -20,7 +20,6 @@
 - lda
 
 # To-do:
-- svm
-- decision tree
+- decision tree (next)
 - hierarchical cluster
 - basic cnn (next)
