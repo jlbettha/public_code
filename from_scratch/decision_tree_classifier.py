@@ -5,10 +5,10 @@
 
 import time
 import numpy as np
-
-# from matplotlib import pyplot as plt
 from scipy import stats
-from sklearn.datasets import load_breast_cancer  # , load_iris
+from sklearn.datasets import load_breast_cancer, load_iris
+from sklearn import tree as sktree
+import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from numpy.typing import NDArray
 
@@ -58,7 +58,6 @@ def information_gain(
     entropy_children = (
         len(left_children) * entropy_left + len(right_children) * entropy_right
     ) / len(y)
-
     return entropy_parent - entropy_children
 
 
@@ -90,15 +89,7 @@ def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
 
 
 def accuracy(predictions, y_true) -> float:
-    """_summary_
-
-    Args:
-        predictions (list[int]): _description_
-        y (list[int]): _description_
-
-    Returns:
-        float: _description_
-    """
+    """_summary_"""
     return np.sum(predictions == y_true) / len(y_true)
 
 
@@ -115,34 +106,43 @@ class MyNode:
         self.value = value
 
     def is_leaf(self):
-        """_summary_
-
-        Returns:
-            _type_: _description_
-        """
+        """_summary_"""
         return self.value is not None
 
 
 class MyDecisionTree:
-    """_summary_"""
+    """MyDecisionTree"""
 
-    def __init__(self, min_split: int = 2, max_depth: int = 15):
+    def __init__(
+        self, min_split: int = 2, max_depth: int = 15, prune_threshold: float = 0.0
+    ):
         self.min_split = min_split
         self.max_depth = max_depth
+        self.prune_threshold = prune_threshold
         self.root = None
 
     def train(self, X: NDArray[np.float64], y: NDArray[np.float64]):
-        """_summary_
+        """build out decision tree based on train data
 
         Args:
-            X (NDArray[np.float64]): _description_
-            y (NDArray[np.float64]): _description_
+            X (NDArray[np.float64]): train data
+            y (NDArray[np.float64]): train labels
         """
         self.root = self._grow_next_branch(X, y, depth=0)
 
     def _grow_next_branch(
         self, X: NDArray[np.float64], y: NDArray[np.float64], depth: int = 0
     ):
+        """_summary_
+
+        Args:
+            X (NDArray[np.float64]): _description_
+            y (NDArray[np.float64]): _description_
+            depth (int, optional): _description_. Defaults to 0.
+
+        Returns:
+            _type_: _description_
+        """
         if len(X.shape) < 2:
             num_datapoints, num_features = 1, len(X)
             num_labels = 1
@@ -158,20 +158,23 @@ class MyDecisionTree:
         ):
             return MyNode(value=int(stats.mode(y).mode))
 
-        feature_idx = np.random.permutation(num_features)
+        # feature_idx = np.random.permutation(num_features)
+        feature_idx = np.arange(0, num_features, 1)
 
-        best_feat, best_thresh = self._best_split(X, y, feature_idx)
+        max_info_gain, best_feat, best_thresh = self._best_split(X, y, feature_idx)
+        if max_info_gain < self.prune_threshold:
+            return MyNode(value=int(stats.mode(y).mode))
+        else:
+            left_idx = np.where(X[:, best_feat] <= best_thresh)
+            right_idx = np.where(X[:, best_feat] > best_thresh)
 
-        left_idx = np.where(X[:, best_feat] <= best_thresh)
-        right_idx = np.where(X[:, best_feat] > best_thresh)
-
-        left = self._grow_next_branch(
-            np.squeeze(X[left_idx, :]), y[left_idx], depth + 1
-        )
-        right = self._grow_next_branch(
-            np.squeeze(X[right_idx, :]), y[right_idx], depth + 1
-        )
-        return MyNode(best_feat, best_thresh, left, right)
+            left = self._grow_next_branch(
+                np.squeeze(X[left_idx, :]), y[left_idx], depth + 1
+            )
+            right = self._grow_next_branch(
+                np.squeeze(X[right_idx, :]), y[right_idx], depth + 1
+            )
+            return MyNode(best_feat, best_thresh, left, right)
 
     def _best_split(self, X, y, feat_idxs):
         max_info_gain = -1e20
@@ -187,7 +190,7 @@ class MyDecisionTree:
                     split_idx = idx
                     split_thresh = thr
 
-        return split_idx, split_thresh
+        return max_info_gain, split_idx, split_thresh
 
     def _move_to_next_branch(self, x, node):
         """_summary_
@@ -201,6 +204,8 @@ class MyDecisionTree:
         """
         if node.is_leaf():
             return node.value
+
+        # if node.info_gain < self.prune_threshold:
 
         if x[node.num_features] <= node.thr:
             return self._move_to_next_branch(x, node.left_child)
@@ -220,27 +225,54 @@ class MyDecisionTree:
 
 def main() -> None:
     """decision tree classifier"""
-
+    max_depth = 10
+    min_split = 2
+    data = load_breast_cancer()
+    # X, y = iris(return_X_y=True)
     X, y = load_breast_cancer(return_X_y=True)
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
     print(f"{X_train.shape=}, {y_train.shape=}, {X_test.shape=}, {y_test.shape=}")
 
-    tree = MyDecisionTree(max_depth=40)
+    tree = MyDecisionTree(max_depth=max_depth, min_split=min_split, prune_threshold=0.0)
 
     tree.train(X_train, y_train)
 
     y_pred = tree.tree_predict(X_test)
     acc_test = accuracy(y_test, y_pred)
 
-    # trimmed_tree = prune_leaves(tree)
+    trimmed_tree = MyDecisionTree(
+        max_depth=max_depth, min_split=min_split, prune_threshold=0.1
+    )
+    trimmed_tree.train(X_train, y_train)
+    y_pred_trim = trimmed_tree.tree_predict(X_test)
+    acc_test_trim = accuracy(y_test, y_pred_trim)
 
-    print(f"Testing accuracy = {100*acc_test:.3f}%")
-    # plt.figure()
-    # plt.plot(accs[:, 0], accs[:, 1])
-    # plt.xlabel("iterations")
-    # plt.ylabel("accuracy")
-    # plt.show()
+    print(f"Testing accuracy, my model = {100*acc_test:.3f}%")
+    print(f"Testing accuracy, my model pruned = {100*acc_test_trim:.3f}%")
+
+    # compare with sklearn model and plot
+    sk_learn_tree = sktree.DecisionTreeClassifier(
+        criterion="entropy",
+        splitter="best",
+        max_depth=max_depth,
+        min_samples_split=min_split,
+    )
+    sk_learn_tree.fit(X_train, y_train)
+
+    y_sk_pred = sk_learn_tree.predict(X_test)
+    acc_sktest = accuracy(y_test, y_sk_pred)
+    print(f"Testing accuracy, sklearn model = {100*acc_sktest:.3f}%")
+
+    plt.figure(figsize=(8, 8))
+
+    sktree.plot_tree(
+        sk_learn_tree,
+        feature_names=data["feature_names"],
+        class_names=data["target_names"],
+        filled=True,
+    )
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
