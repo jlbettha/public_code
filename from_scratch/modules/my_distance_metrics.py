@@ -136,9 +136,7 @@ def jensen_shannon_divergence(
     return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
 
 
-def jensen_shannon_distance(
-    p: NDArray[np.float64], q: NDArray[np.float64]
-) -> np.float64:
+def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2024 - jensen-shannon distance metric
 
     Args:
@@ -156,7 +154,7 @@ def jensen_shannon_distance(
     return np.sqrt(js_divergence)
 
 
-def wasserstein_distance(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Wasserstein distance or Kantorovich–Rubinstein metric
 
         # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on

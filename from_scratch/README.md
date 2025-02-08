@@ -18,8 +18,8 @@
 - mlp, nn - with only functions
 - mlp, nn - object oriented for layer-wise constructions
 - lda
+- decision tree
 
 # To-do:
-- decision tree (next)
-- hierarchical cluster
-- basic cnn (next)
+- hierarchical clustering (75% done)
+- basic cnn (25% done)
