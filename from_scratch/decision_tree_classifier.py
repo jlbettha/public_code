@@ -11,8 +11,10 @@ from sklearn import tree as sktree
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from numpy.typing import NDArray
+from numba import njit
 
 
+@njit
 def entropy(hist1: NDArray[np.float64]) -> np.float64:
     """Betthauser 2016 -- Calculate joint entropy of an N-d distribution
 
@@ -24,11 +26,12 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
     """
 
     hist1 = hist1 / np.sum(hist1)
-    nz_probs = [-p * np.log(p) for p in hist1 if p > 1e-12]
+    nz_probs = np.array([-p * np.log(p) for p in hist1 if p > 1e-12])
     entrp = np.sum(nz_probs)
     return entrp
 
 
+@njit
 def information_gain(
     y: NDArray[np.float64], x_1feature: NDArray[np.float64], threshold: float
 ) -> float:
@@ -251,28 +254,28 @@ def main() -> None:
     print(f"Testing accuracy, my model pruned = {100*acc_test_trim:.3f}%")
 
     # compare with sklearn model and plot
-    sk_learn_tree = sktree.DecisionTreeClassifier(
-        criterion="entropy",
-        splitter="best",
-        max_depth=max_depth,
-        min_samples_split=min_split,
-    )
-    sk_learn_tree.fit(X_train, y_train)
+    # sk_learn_tree = sktree.DecisionTreeClassifier(
+    #     criterion="entropy",
+    #     splitter="best",
+    #     max_depth=max_depth,
+    #     min_samples_split=min_split,
+    # )
+    # sk_learn_tree.fit(X_train, y_train)
 
-    y_sk_pred = sk_learn_tree.predict(X_test)
-    acc_sktest = accuracy(y_test, y_sk_pred)
-    print(f"Testing accuracy, sklearn model = {100*acc_sktest:.3f}%")
+    # y_sk_pred = sk_learn_tree.predict(X_test)
+    # acc_sktest = accuracy(y_test, y_sk_pred)
+    # print(f"Testing accuracy, sklearn model = {100*acc_sktest:.3f}%")
 
-    plt.figure(figsize=(8, 8))
+    # plt.figure(figsize=(8, 8))
 
-    sktree.plot_tree(
-        sk_learn_tree,
-        feature_names=data["feature_names"],
-        class_names=data["target_names"],
-        filled=True,
-    )
-    plt.tight_layout()
-    plt.show()
+    # sktree.plot_tree(
+    #     sk_learn_tree,
+    #     feature_names=data["feature_names"],
+    #     class_names=data["target_names"],
+    #     filled=True,
+    # )
+    # plt.tight_layout()
+    # plt.show()
 
 
 if __name__ == "__main__":

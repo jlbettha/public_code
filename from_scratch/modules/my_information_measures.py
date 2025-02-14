@@ -2,8 +2,10 @@
 
 import numpy as np
 from numpy.typing import NDArray
+from numba import njit
 
 
+@njit
 def entropy(hist1: NDArray[np.float64]) -> np.float64:
     """Betthauser 2016 -- Calculate entropy of an 1-d distribution
 
@@ -14,11 +16,12 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
         np.float64: entropy of the ditribution
     """
     hist1 = hist1 / np.sum(hist1)
-    nz_probs = [-p * np.log(p) for p in hist1 if p > 1e-12]
+    nz_probs = np.array([-p * np.log(p) for p in hist1 if p > 1e-12])
     entrp = np.sum(nz_probs)
     return entrp
 
 
+@njit
 def information_gain(
     y: NDArray[np.float64], x_1feature: NDArray[np.float64], threshold: float
 ) -> float:
@@ -51,6 +54,7 @@ def information_gain(
     return entropy_parent - entropy_children
 
 
+@njit
 def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
     """_summary_
 
@@ -78,6 +82,7 @@ def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
     return (n + 1 - 2 * np.sum(cumx) / cumx[-1]) / n
 
 
+@njit
 def minmax_scaling(
     data: NDArray[np.float64], max_val: float = 255
 ) -> NDArray[np.float64]:
@@ -90,10 +95,11 @@ def minmax_scaling(
     Returns:
         NDArray[np.float64]: data min-max scaled in range [0, max_val]
     """
-    return max_val * (data - data.min) / (data.max - data.min)
+    return max_val * (data - data.min()) / (data.max() - data.min())
 
 
 # returns joint histogram of 2 image sections
+@njit
 def joint_histogram_2d(
     patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: float = 255.0
 ) -> NDArray[np.float64]:
@@ -115,6 +121,7 @@ def joint_histogram_2d(
     return joint_histogram
 
 
+@njit
 def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> float:
     """Betthauser - 2018 - compute mutual information between 2 images/patches
     Args:
@@ -134,6 +141,7 @@ def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> flo
     return mut_info
 
 
+@njit
 def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2018 - compute KL divergence between two PMFs
 
@@ -150,6 +158,7 @@ def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     return np.sum(p * (np.log(p) - np.log(q)))
 
 
+@njit
 def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
 
@@ -167,6 +176,7 @@ def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.f
     return jeffreys
 
 
+@njit
 def jensen_shannon_divergence(
     p: NDArray[np.float64], q: NDArray[np.float64]
 ) -> np.float64:
@@ -187,6 +197,7 @@ def jensen_shannon_divergence(
     return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
 
 
+@njit
 def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2024 - jensen-shannon distance metric
 

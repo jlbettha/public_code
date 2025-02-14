@@ -10,7 +10,7 @@ import mouse
 import keyboard
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
-
+from numba import njit
 
 # my type
 ArrayTuple = Tuple[NDArray[np.float64]]
@@ -48,6 +48,7 @@ def ukf_init(dt_: float) -> ArrayTuple:
     return A_, B_, H_, Q_, R_, c_, x_, P_
 
 
+@njit
 def ukf_correction(
     H_: NDArray[np.float64],
     R_: NDArray[np.float64],
@@ -75,6 +76,7 @@ def ukf_correction(
     return x_, P_
 
 
+@njit
 def ukf_predict(
     A_: NDArray[np.float64],
     B_: NDArray[np.float64],
@@ -104,7 +106,7 @@ def ukf_predict(
 
 if __name__ == "__main__":
 
-    plt.ion()  # interactive plots on
+    # plt.ion()  # interactive plots on
 
     # init vars
     measureNoise = 0.25

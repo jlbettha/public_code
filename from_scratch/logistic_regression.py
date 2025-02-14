@@ -8,8 +8,10 @@ from itertools import repeat
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
+from numba import njit
 
 
+@njit
 def _sigmoid(x: float | NDArray[np.float64]) -> float:
     """sigmoid(x) = 1/(1+e^-x)
 
@@ -98,6 +100,7 @@ def logistic_regression(
         ll_last = j_cost
 
 
+@njit
 def normal_cdf_at_x(x: float | int, mean: float, variance: float) -> float:
     """Normal distr. integral, cdf at x | mean, variance
 

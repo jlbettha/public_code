@@ -10,8 +10,10 @@ import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from typing import Callable
 from sklearn.metrics import accuracy_score
+from numba import njit
 
 
+@njit
 def radial_basis_func(
     a: float | NDArray[np.float64], b: float | NDArray[np.float64], gamma: float = 1.0
 ) -> float | NDArray[np.float64]:
@@ -28,6 +30,7 @@ def radial_basis_func(
     return np.exp(-gamma * (np.linalg.norm(a - b) ** 2) / 2.0)
 
 
+@njit
 def d_rbf_dx(
     a: float | NDArray[np.float64], b: float | NDArray[np.float64], gamma: float = 1.0
 ) -> float | NDArray[np.float64]:
@@ -74,20 +77,14 @@ def encode_one_hot(y, num_classes):
     return np.vstack(y_one_hot)
 
 
+@njit
 def hinge_loss(W, X, y_one_hot, C: float = 1.0):
-    # print(f"h {W.shape=}")
-    # print(f"h {X.shape=}")
-    # print(f"h {y_one_hot.shape=}")
     regularize_term = 0.5 * np.sum(W.T @ W)
     z = W @ X.T
     t = y_one_hot * z.T
-    # print(f"h {y_one_hot.shape=}")
     hinge_term = np.ones(t.shape) - t
     # hinge_term[hinge_term < 0] = 0
     hinge_term = np.maximum(hinge_term, 0)
-    # print(
-    #     f"L(w) = 0.5 * {regularize_term:.3f} + {C} * {np.sum(hinge_term):.3f} = {regularize_term + C * np.sum(hinge_term):.3f}"
-    # )
 
     return regularize_term + C * np.sum(hinge_term)
 
@@ -123,7 +120,6 @@ def support_vector_machine(
     num_samples, num_features = X.shape
 
     weights = np.random.uniform(size=(num_classes, num_features))
-    # biases = np.zeros((num_classes, 1))
 
     y_one_hot = encode_one_hot(y, num_classes)
     y_one_hot[y_one_hot == 0] = -1
@@ -136,7 +132,7 @@ def support_vector_machine(
     min_loss = loss
     losses = []
     for it in range(iters):
-        # TODO: fix iteration updates (runs, but not correctly)
+        # TODO: fix iteration updates (runs, but not 100% correctly)
         # print(f"{weights.shape=}")
         # print(f"{X.shape=}")
         # print(f"{y_one_hot.shape=}")
@@ -152,7 +148,7 @@ def support_vector_machine(
         gradient_weights[ids] = weights[ids]
 
         # print(f"{gradient_weights.shape=}")
-        # exit()
+
         ada_lr = learning_rate / (1 + it)
         weights = weights - learning_rate * gradient_weights
 
@@ -162,12 +158,12 @@ def support_vector_machine(
             min_it = it
             final_weights = weights
 
-        # if it % 2000 == 0:
-        #     losses.append(loss)
-        #     # print(f"loss: {loss:.7f}")
-        #     plt.cla()
-        #     plt.semilogy(losses)
-        #     plt.pause(0.001)
+        if it % 2000 == 0:
+            losses.append(loss)
+            # print(f"loss: {loss:.7f}")
+            plt.cla()
+            plt.semilogy(losses)
+            plt.pause(0.001)
 
         if (loss - last_loss) > 0:
             plt.close()
@@ -232,38 +228,38 @@ def main() -> None:
     print(f"Accuracy: {accuracy_score(np.array(y_pred), y_test):.4f}")
     # print(weights)
 
-    # Create a grid to plot the decision boundary
-    x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
-    y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
-    xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.05), np.arange(y_min, y_max, 0.05))
+    # # Create a grid to plot the decision boundary
+    # x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
+    # y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
+    # xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.05), np.arange(y_min, y_max, 0.05))
 
-    Z = []
-    for x in range(len(xx.ravel())):
-        for y in range(len(yy.ravel())):
-            test_pt = np.c_[x, y]
-            test_pt_rbf = np.array(
-                [
-                    radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
-                    for j in range(len(y_train))
-                ]
-            )
-            test_pt_rbf = np.append(test_pt_rbf, 1.0)
-            # print(test_pt_rbf.shape)
-            one_hot_test = weights @ test_pt_rbf
-            Z.append(np.argmax(one_hot_test))
-            # print(np.argmax(one_hot_test), y_test[i])
+    # Z = []
+    # for x in range(len(xx.ravel())):
+    #     for y in range(len(yy.ravel())):
+    #         test_pt = np.c_[x, y]
+    #         test_pt_rbf = np.array(
+    #             [
+    #                 radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
+    #                 for j in range(len(y_train))
+    #             ]
+    #         )
+    #         test_pt_rbf = np.append(test_pt_rbf, 1.0)
+    #         # print(test_pt_rbf.shape)
+    #         one_hot_test = weights @ test_pt_rbf
+    #         Z.append(np.argmax(one_hot_test))
+    #         # print(np.argmax(one_hot_test), y_test[i])
 
-    Z = Z.reshape(xx.shape)
+    # Z = Z.reshape(xx.shape)
 
-    plt.contourf(xx, yy, Z, alpha=0.3)
-    plt.scatter(X[:, 0], X[:, 1], c=y, s=30, edgecolor="k")
-    # plt.title(title)
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.xlim(x_min, x_max)
-    plt.ylim(y_min, y_max)
-    plt.gca().set_aspect("equal", adjustable="box")
-    plt.show()
+    # plt.contourf(xx, yy, Z, alpha=0.3)
+    # plt.scatter(X[:, 0], X[:, 1], c=y, s=30, edgecolor="k")
+    # # plt.title(title)
+    # plt.xlabel("Feature 1")
+    # plt.ylabel("Feature 2")
+    # plt.xlim(x_min, x_max)
+    # plt.ylim(y_min, y_max)
+    # plt.gca().set_aspect("equal", adjustable="box")
+    # plt.show()
 
 
 if __name__ == "__main__":

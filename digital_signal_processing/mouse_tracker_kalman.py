@@ -10,7 +10,7 @@ import mouse
 import keyboard
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
-
+from numba import njit
 
 # my type
 ArrayTuple = Tuple[NDArray[np.float64]]
@@ -46,6 +46,7 @@ def kalman_init(dt_: float) -> ArrayTuple:
     return A_, B_, H_, Q_, R_, c_, x_, P_
 
 
+@njit
 def kalman_correction(
     H_: NDArray[np.float64],
     R_: NDArray[np.float64],
@@ -73,6 +74,7 @@ def kalman_correction(
     return x_, P_
 
 
+@njit
 def kalman_predict(
     A_: NDArray[np.float64],
     B_: NDArray[np.float64],

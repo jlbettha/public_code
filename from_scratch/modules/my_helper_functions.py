@@ -1,15 +1,19 @@
 import numpy as np
-import math, sys
+import math
 import matplotlib.pyplot as plt
-from sklearn.metrics import *
+from sklearn.metrics import confusion_matrix
 from numpy.typing import NDArray
+from typing import Any
+from numba import vectorize, njit
 
 
-###################################################
-### Function Definitions ##########################
-###################################################
 def plot_confusion_matrix(
-    y_true, y_pred, classes, normalize=False, title=None, cmap=plt.cm.Blues
+    y_true: NDArray,
+    y_pred: NDArray,
+    classes=None,
+    normalize=False,
+    title=None,
+    cmap=plt.cm.Blues,
 ):
     """
     This function prints and plots the confusion matrix.
@@ -21,11 +25,11 @@ def plot_confusion_matrix(
         else:
             title = "Confusion matrix, without normalization"
 
-    # Compute confusion matrix
+    # compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
-    # Only use the labels that appear in the data
-    # classes = classes[unique_labels(y_true, y_pred)]
-    classes = np.unique(y_true)
+
+    if not classes:
+        classes = [str(i) for i in np.unique(y_true)]
     if normalize:
         cm = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
         print("Normalized confusion matrix")
@@ -37,11 +41,9 @@ def plot_confusion_matrix(
     fig, ax = plt.subplots()
     im = ax.imshow(cm, interpolation="nearest", cmap=cmap)
     ax.figure.colorbar(im, ax=ax)
-    # We want to show all ticks...
     ax.set(
         xticks=np.arange(cm.shape[1]),
         yticks=np.arange(cm.shape[0]),
-        # ... and label them with the respective list entries
         xticklabels=classes,
         yticklabels=classes,
         title=title,
@@ -49,10 +51,10 @@ def plot_confusion_matrix(
         xlabel="Predicted label",
     )
 
-    # Rotate the tick labels and set their alignment.
+    # Rotate tick labels
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
 
-    # Loop over data dimensions and create text annotations.
+    # text of cm values in each square
     fmt = ".2f" if normalize else "d"
     thresh = cm.max() / 2.0
     for i in range(cm.shape[0]):
@@ -81,14 +83,16 @@ def majority_filter(seq, width):
 
 
 ### stable softmax applied to vector x
+@njit
 def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum()
 
 
 ### sigmoid applied to vector x
+@vectorize
 def sigmoid(x):
-    return [1 / (1 + math.exp(-n)) for n in x]
+    return 1 / (1 + math.exp(-x))
 
 
 def anybase2decimal(number, other_base):
@@ -97,11 +101,12 @@ def anybase2decimal(number, other_base):
     )
 
 
+@njit
 def decimal2ternary(number):
-    arr = [0, 0, 0]
+    arr = np.zeros(2)
     i = 2
     while number:
-        number, arr[i] = divmod(number, 3)
+        number, arr[i] = np.divmod(number, 3)
         i = i - 1
     return arr
 
@@ -117,3 +122,23 @@ def smooth(x, window_len):
     w = np.hanning(window_len)
     y = np.convolve(w / w.sum(), s, mode="valid")
     return y
+
+
+def flatten_lists(list_of_lists: list[Any]) -> list[Any]:
+    """Betthauser 2025 - recursively flatten/unravel any depth of lists within lists
+
+    Args:
+        list_of_lists (Any list[list[list[...]]]): any depth lists within lists
+
+    Returns:
+        _type_: flattened list
+    """
+    if isinstance(list_of_lists, int):
+        return list_of_lists
+    try:
+        flat_list = list(np.ravel(list_of_lists))
+    except:
+        flat_list = []
+        for i in list_of_lists:
+            flat_list.extend(flatten_lists(i))
+    return flat_list

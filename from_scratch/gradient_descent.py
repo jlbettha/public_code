@@ -3,10 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 from sklearn.datasets import make_regression
+from numba import njit
 
-# import sympy as sym
 
-
+@njit
 def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
     """SSD: sum of squared differences between two arrays
 
@@ -17,7 +17,7 @@ def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
     Returns:
         float: sum of squared differences
     """
-    return np.sum((arr1 - arr2) ** 2)
+    return np.sum((arr1 - arr2) * (arr1 - arr2))
 
 
 def main() -> None:

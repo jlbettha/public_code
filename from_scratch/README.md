@@ -10,16 +10,20 @@
 - gaussian mixture clustering - EM
 - modules: covariance
 - modules: distance metrics -> point-to-point, point-to-distr, distr-to-distr
+- modules: loss function catalogue
+- modules: information theory functions
 - logistic regression 
 - kalman -> mouse x,y follower
+- unscented kalman -> mouse x,y follower
 - svd 
 - pca
-- linear regr w/ L0, L1, and L2 (ridge) 
+- linear regr w/ L0, L1, and L2 (ridge) regularization
+- polynomial regression w/ L0, L1, and L2 regularization
 - mlp, nn - with only functions
 - mlp, nn - object oriented for layer-wise constructions
 - lda
 - decision tree
+- hierarchical clustering
 
 # To-do:
-- hierarchical clustering (75% done)
-- basic cnn (25% done)
+- basic cnn (next)

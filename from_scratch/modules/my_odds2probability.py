@@ -1,8 +1,10 @@
 """ summary """
 
 import numpy as np
+from numba import njit
 
 
+@njit
 def prob2odds(prob: float) -> float:
     """_summary_
 
@@ -15,6 +17,7 @@ def prob2odds(prob: float) -> float:
     return prob / (1 - prob)
 
 
+@njit
 def odds2prob(odds: float) -> float:
     """_summary_
 

@@ -9,6 +9,7 @@ import keyboard
 import cv2
 from scipy import ndimage as ndi
 from numpy.typing import NDArray
+from numba import njit
 
 
 ## Implement Lucas Kanade
@@ -88,13 +89,14 @@ if __name__ == "__main__":
     for i in range(N):
         vol[i, :, :] = ndi.zoom(dicom_data.pixel_array[i, :, :], zoom=zoom_factor)
 
+    timestep = 0
     vol = image_norm(vol)
-    for _ in range(5):
+    for _ in range(15):
 
         for i in np.arange(35, vol.shape[0] - 10, 1):
             # if keyboard.is_pressed("q"):
             #     break
-
+            timestep = timestep + 1
             Iold = vol[i, :, :]
             Inew = vol[i + 1, :, :]
 
@@ -104,13 +106,15 @@ if __name__ == "__main__":
             U, V = lucas_kanade(Iold, Inew, win=21)
 
             # plt.subplot(1, 3, 1)
-            plt.cla()
+            fig = plt.cla()
             plt.imshow(Iold, cmap="gray")
             Y, X = np.mgrid[0:dim:arrow_spacing, 0:dim:arrow_spacing]
             U_small = U[Y, X]
             V_small = V[Y, X]
             plt.quiver(X, Y, U_small, V_small, color="r", scale=scale)
+            plt.axis("off")
             plt.pause(0.001)
+            plt.savefig(f"./plots/myplot_{timestep:06d}.png")
 
             # plt.subplot(1, 3, 2)
             # plt.cla()
