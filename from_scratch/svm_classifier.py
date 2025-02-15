@@ -111,7 +111,7 @@ def support_vector_machine(
     y_one_hot = encode_one_hot(deepcopy(y), num_classes)
     y_one_hot[y_one_hot == 0] = -1
 
-    loss = hinge_loss(weights, X, y_one_hot, 0.05)
+    loss = hinge_loss(weights, X, y_one_hot, 0.00)
     last_loss = loss
     min_loss = loss
     min_it = 0
@@ -126,7 +126,7 @@ def support_vector_machine(
 
         weights = weights - learning_rate * gradient_weights * (0.9999**it)
 
-        loss = hinge_loss(weights, X, y_one_hot, 0.05)
+        loss = hinge_loss(weights, X, y_one_hot, 0.00)
         if loss < min_loss:
             min_loss = loss
             min_it = it
@@ -154,14 +154,15 @@ def main() -> None:
     """_summary_"""
     ## init vars
     learning_rate = 1e-3
-    gamma = 5
+    gamma = 15
     iters = 500_000
-    c = 1
+    c = 0.1
     tol = 1e-8
 
     # X, y = load_iris(return_X_y=True)
+    # X = X[:, :2]
     X, y = make_moons(n_samples=400, noise=0.1, random_state=42)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.35)
 
     # scaler = MinMaxScaler()
     # X_train = scaler.fit_transform(X_train)
