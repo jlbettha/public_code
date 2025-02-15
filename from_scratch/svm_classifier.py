@@ -11,6 +11,7 @@ from sklearn.preprocessing import MinMaxScaler
 from typing import Callable
 from sklearn.metrics import accuracy_score
 from numba import njit
+from copy import deepcopy
 
 
 @njit
@@ -27,7 +28,8 @@ def radial_basis_func(
     Returns:
         float | NDArray[np.float64]: weight(s)
     """
-    return np.exp(-gamma * (np.linalg.norm(a - b) ** 2) / 2.0)
+    vec = a - b
+    return np.exp(-gamma * np.sum(vec * vec))
 
 
 @njit
@@ -44,8 +46,10 @@ def d_rbf_dx(
     Returns:
         float | NDArray[np.float64]: _description_
     """
-    dist = np.linalg.norm(a - b)
-    return -gamma * dist * np.exp(-gamma * (dist**2) / 2.0)
+    vec = a - b
+    ssd = np.sum(vec * vec)
+    dist = np.sqrt(ssd)
+    return -2 * gamma * dist * np.exp(-gamma * ssd)
 
 
 def compute_kernel_matrix(X, kernel_function: Callable, gamma=1.0):
@@ -78,96 +82,66 @@ def encode_one_hot(y, num_classes):
 
 
 @njit
-def hinge_loss(W, X, y_one_hot, C: float = 1.0):
-    regularize_term = 0.5 * np.sum(W.T @ W)
+def hinge_loss(W, X, y_one_hot, lambda1: float = 0.05):
+    regularize_term = 0.0
+    if lambda1 > 1e-12:
+        regularize_term = 0.5 * np.sum(W.T @ W)
     z = W @ X.T
     t = y_one_hot * z.T
     hinge_term = np.ones(t.shape) - t
-    # hinge_term[hinge_term < 0] = 0
     hinge_term = np.maximum(hinge_term, 0)
 
-    return regularize_term + C * np.sum(hinge_term)
-
-
-# def plot_decision_boundary(model, X, y, title):
-#     # Create a grid to plot the decision boundary
-#     x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
-#     y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
-#     xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
-
-#     Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
-#     Z = Z.reshape(xx.shape)
-
-#     plt.contourf(xx, yy, Z, alpha=0.3)
-#     plt.scatter(X[:, 0], X[:, 1], c=y, s=30, edgecolor="k")
-#     plt.title(title)
-#     plt.xlabel("Feature 1")
-#     plt.ylabel("Feature 2")
-#     plt.xlim(x_min, x_max)
-#     plt.ylim(y_min, y_max)
-#     plt.gca().set_aspect("equal", adjustable="box")
+    return lambda1 * regularize_term + np.sum(hinge_term)
 
 
 def support_vector_machine(
     X: NDArray[np.float64],
     y: NDArray[np.uint8],
-    learning_rate: float = 0.01,
+    learning_rate: float = 1e-3,
     iters: float = 1000,
     C: float = 1.0,
+    tol: float = 1e-3,
 ) -> None:
 
     num_classes = len(np.unique(y))
-    num_samples, num_features = X.shape
+    _, num_features = X.shape
 
     weights = np.random.uniform(size=(num_classes, num_features))
 
-    y_one_hot = encode_one_hot(y, num_classes)
+    y_one_hot = encode_one_hot(deepcopy(y), num_classes)
     y_one_hot[y_one_hot == 0] = -1
 
-    # print(y_one_hot)
-
-    # = ∑ai – ½∑aiaj yiyjK(xi•xj)
-    loss = hinge_loss(weights, X, y_one_hot, C)
+    loss = hinge_loss(weights, X, y_one_hot, 0.05)
     last_loss = loss
     min_loss = loss
+    min_it = 0
     losses = []
     for it in range(iters):
-        # TODO: fix iteration updates (runs, but not 100% correctly)
-        # print(f"{weights.shape=}")
-        # print(f"{X.shape=}")
-        # print(f"{y_one_hot.shape=}")
         z = weights @ X.T
         t = (y_one_hot * z.T).T
         ids = np.where(t > 1)
 
-        # print(f"{z.shape=}")
-        # print(f"{t.shape=}")
-
         gradient_weights = weights - C * y_one_hot.T @ X
-        # print(f"{gradient_weights.shape=}")
         gradient_weights[ids] = weights[ids]
 
-        # print(f"{gradient_weights.shape=}")
+        weights = weights - learning_rate * gradient_weights * (0.9999**it)
 
-        ada_lr = learning_rate / (1 + it)
-        weights = weights - learning_rate * gradient_weights
-
-        loss = hinge_loss(weights, X, y_one_hot, C)
+        loss = hinge_loss(weights, X, y_one_hot, 0.05)
         if loss < min_loss:
             min_loss = loss
             min_it = it
             final_weights = weights
 
-        if it % 2000 == 0:
-            losses.append(loss)
-            # print(f"loss: {loss:.7f}")
-            plt.cla()
-            plt.semilogy(losses)
-            plt.pause(0.001)
+        # if it % 10_000 == 0:
+        #     losses.append(loss)
+        #     # print(f"loss: {loss:.7f}")
+        #     plt.cla()
+        #     plt.semilogy(losses)
+        #     plt.pause(0.001)
 
-        if (loss - last_loss) > 0:
+        if np.abs(loss - last_loss) < tol or (loss - last_loss) > 0:
             plt.close()
-            print(f"SVM-RBF took {min_it+1} iterations.")
+            # print(f"SVM-RBF took {min_it+1} iterations.")
             return final_weights, min_it
 
         last_loss = loss
@@ -179,33 +153,36 @@ def support_vector_machine(
 def main() -> None:
     """_summary_"""
     ## init vars
-    learning_rate = 0.000001
-    gamma = 2
-    iters = 1_000_000
+    learning_rate = 1e-3
+    gamma = 5
+    iters = 500_000
+    c = 1
+    tol = 1e-8
 
     # X, y = load_iris(return_X_y=True)
-    X, y = make_moons(n_samples=100, noise=0.2, random_state=42)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.05)
+    X, y = make_moons(n_samples=400, noise=0.1, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
     # scaler = MinMaxScaler()
     # X_train = scaler.fit_transform(X_train)
     # X_test = scaler.transform(X_test)
 
-    num_classes = len(np.unique(y))
+    t0 = time.time()
+    X_train_rbf = compute_kernel_matrix(X_train, radial_basis_func, gamma=gamma)
+    print(f"build rbf kernel: {time.time()-t0:.3f} seconds")
 
-    def rbf_kernel(x1, x2, gamma=1.0):
-        squared_distance = np.sum((x1 - x2) ** 2)
-        return np.exp(-gamma * squared_distance)
-
-    X_train_rbf = compute_kernel_matrix(X_train, rbf_kernel, gamma=gamma)
-
-    # X = np.c_[X, X**2]
     X_train_rbf = np.c_[X_train_rbf, np.ones(X_train_rbf.shape[0])]
 
-    weights, its = support_vector_machine(X_train_rbf, y_train, learning_rate, iters)
-    print(weights.shape)
-    y_pred = []
-    X_test, y_test = X_train, y_train  # test on training data, should be close to 100%
+    t0 = time.time()
+    weights, its = support_vector_machine(
+        X_train_rbf, y_train, learning_rate=learning_rate, iters=iters, C=c, tol=tol
+    )
+    print(f"train time: {time.time()-t0:.3f} seconds in {its+1} iterations")
 
+    y_pred = []
+    # X_test, y_test = X_train, y_train  # test on training data, should be close to 100%
+
+    t0 = time.time()
     for i in range(len(y_test)):
         test_pt = X_test[i, :]
         test_pt_rbf = np.array(
@@ -215,51 +192,49 @@ def main() -> None:
             ]
         )
         test_pt_rbf = np.append(test_pt_rbf, 1.0)
-        # print(test_pt_rbf.shape)
         one_hot_test = weights @ test_pt_rbf
         y_pred.append(np.argmax(one_hot_test))
-        print(np.argmax(one_hot_test), y_test[i])
-    # x = np.linspace(0, 10, 1000)
-    # dists = radial_basis_func(x, gamma=1 / num_features)
-    # print(dists)
-    # plt.plot(x, dists)
-    # plt.show()
-    print(f"SVM-RBF took {its+1} iterations.")
-    print(f"Accuracy: {accuracy_score(np.array(y_pred), y_test):.4f}")
-    # print(weights)
+        # print(np.argmax(one_hot_test), y_test[i])
 
-    # # Create a grid to plot the decision boundary
-    # x_min, x_max = X_train[:, 0].min() - 1, X_train[:, 0].max() + 1
-    # y_min, y_max = X_train[:, 1].min() - 1, X_train[:, 1].max() + 1
-    # xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.05), np.arange(y_min, y_max, 0.05))
+    print(f"avg predict time: {(time.time()-t0)/len(y_test):.3f} seconds")
+    print(f"predict time for {len(y_test)} examples: {(time.time()-t0):.3f} seconds")
+    print(f"test accuracy: {accuracy_score(np.array(y_pred), y_test):.4f}")
 
-    # Z = []
-    # for x in range(len(xx.ravel())):
-    #     for y in range(len(yy.ravel())):
-    #         test_pt = np.c_[x, y]
-    #         test_pt_rbf = np.array(
-    #             [
-    #                 radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
-    #                 for j in range(len(y_train))
-    #             ]
-    #         )
-    #         test_pt_rbf = np.append(test_pt_rbf, 1.0)
-    #         # print(test_pt_rbf.shape)
-    #         one_hot_test = weights @ test_pt_rbf
-    #         Z.append(np.argmax(one_hot_test))
-    #         # print(np.argmax(one_hot_test), y_test[i])
+    # Create a grid to plot the decision boundary
+    delta = 0.025
+    x_min, x_max = X_test[:, 0].min() - 0.1, X_test[:, 0].max() + 0.1
+    y_min, y_max = X_test[:, 1].min() - 0.1, X_test[:, 1].max() + 0.1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, delta), np.arange(y_min, y_max, delta))
+    xx_long, yy_long = xx.ravel(), yy.ravel()
+    Z = []
+    t0 = time.time()
+    for i in range(len(xx_long)):
 
-    # Z = Z.reshape(xx.shape)
+        test_pt = np.c_[xx_long[i], yy_long[i]]
+        test_pt_rbf = np.array(
+            [
+                radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
+                for j in range(len(y_train))
+            ]
+        )
+        test_pt_rbf = np.append(test_pt_rbf, 1.0)
+        one_hot_test = weights @ test_pt_rbf
+        Z.append(np.argmax(one_hot_test))
 
-    # plt.contourf(xx, yy, Z, alpha=0.3)
-    # plt.scatter(X[:, 0], X[:, 1], c=y, s=30, edgecolor="k")
-    # # plt.title(title)
-    # plt.xlabel("Feature 1")
-    # plt.ylabel("Feature 2")
-    # plt.xlim(x_min, x_max)
-    # plt.ylim(y_min, y_max)
-    # plt.gca().set_aspect("equal", adjustable="box")
-    # plt.show()
+    print(f"avg predict time: {(time.time()-t0)/len(xx_long):.3f} seconds")
+    print(f"predict time for {len(xx_long)} examples: {(time.time()-t0):.3f} seconds")
+
+    Z = np.array(Z).reshape(xx.shape)
+
+    plt.contourf(xx, yy, Z, alpha=0.3)
+    plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test, s=30, edgecolor="k")
+    # plt.title(title)
+    plt.xlabel("Feature 1")
+    plt.ylabel("Feature 2")
+    plt.xlim(x_min, x_max)
+    plt.ylim(y_min, y_max)
+    plt.gca().set_aspect("equal", adjustable="box")
+    plt.show()
 
 
 if __name__ == "__main__":
