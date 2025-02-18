@@ -21,6 +21,13 @@ Thumbs.db
 *.dll
 *.lib
 *.sbr
+*.txt
+*.tsv
+*.feat
+*.v2
+*.vocab
+*.gz
+*.tex
 
 # Unfinished folders
 

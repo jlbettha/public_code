@@ -10,8 +10,6 @@ from torchvision import transforms
 import matplotlib.pyplot as plt
 
 
-
-
 # PyTorch Auto-Encoder class
 class PytorchDenseAE(torch.nn.Module):
     def __init__(self):
@@ -49,19 +47,14 @@ class PytorchDenseAE(torch.nn.Module):
 
 #### MAIN
 if __name__ == "__main__":
-	# Transform images to tensor
-	tensor_transform = transforms.ToTensor()
+    # Transform images to tensor
+    tensor_transform = transforms.ToTensor()
 
-	dataset = datasets.MNIST(
-		root="./data", train=True, download=True, transform=tensor_transform
-	)
-
-	loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=32, shuffle=True)
-
-
-    # Model Initialization
-    model = PytorchAE()
-
+    dataset = datasets.MNIST(
+        root="./data", train=True, download=True, transform=tensor_transform
+    )
+    loader = torch.utils.data.DataLoader(dataset=dataset, batch_size=32, shuffle=True)
+    model = PytorchDenseAE()
     loss_function = torch.nn.MSELoss()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
@@ -86,11 +79,9 @@ if __name__ == "__main__":
 
         outputs.append((epochs, img, model_out))
 
-	plt.plot(losses)
+    plt.plot(losses)
     plt.xlabel("iters")
     plt.ylabel("loss")
-
-    
 
     for i, _, img, model_out in enumerate(outputs):
         img = img.reshape(-1, 28, 28)

@@ -37,7 +37,7 @@ def cosine_similarity(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.floa
     """
     magnitude_a = np.sqrt(np.sum(a * a))
     magnitude_b = np.sqrt(np.sum(b * b))
-    csim = np.dot(a, b) / (magnitude_a * magnitude_b)
+    csim = np.sum(a * b) / (magnitude_a * magnitude_b)
     return csim
 
 
@@ -56,6 +56,7 @@ def manhattan_dist(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64
     return mand
 
 
+@njit
 def minkowski_dist(
     a: NDArray[np.float64], b: NDArray[np.float64], p: float = 1.0
 ) -> np.float64:
@@ -122,6 +123,7 @@ def pearson_correlation(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
     return np.corrcoef(p / np.sum(p), q / np.sum(q))[0, 1]
 
 
+@njit
 def jensen_shannon_divergence(
     p: NDArray[np.float64], q: NDArray[np.float64]
 ) -> np.float64:
@@ -142,6 +144,7 @@ def jensen_shannon_divergence(
     return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
 
 
+@njit
 def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Betthauser - 2024 - jensen-shannon distance metric
 
@@ -173,6 +176,7 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
 
     Returns:
         np.float64: W_p(P,Q) = (1/N) * SUM_i [ ||X_i - Y_i|| ^^ p ] ^^ (1/p)
+        mink = np.sum(np.abs(b - a) ** p) ** (1 / p)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -180,9 +184,8 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
     if len(p.shape) == 2:
         return wasserstein_distance_nd(p, q)
     elif len(p.shape) == 1:
-        return wasserstein_distance(p, q)
-    # TODO: manual
-    return ValueError
+        return minkowski_dist(p, q) / len(p)
+        # return wasserstein_distance(p, q)
 
 
 def wasserstein_dist_gaussian1d(
@@ -440,8 +443,12 @@ def main() -> None:
 if __name__ == "__main__":
     t0 = time.time()
     main()
-    print(f"Program took {time.time() - t0:.3f} seconds")
+    tf1 = time.time() - t0
+    print(f"Program took {tf1:.3f} seconds")
 
     t0 = time.time()
     main()
-    print(f"Program took {time.time() - t0:.3f} seconds")
+    tf2 = time.time() - t0
+    print(f"Program took {tf2:.3f} seconds")
+
+    print(f"njit speed-up: {tf1/tf2:.3f}x")
