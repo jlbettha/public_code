@@ -28,7 +28,9 @@ def rate_limit(calls, period):
 ## decorator
 def debug(func):
     def wrapper(*args, **kwargs):
-        print(f"Calling function '{func.__name__}(args:{args}, kwargs:{kwargs})'")
+        print(
+            f"Calling function '{func.__name__}()'"
+        )  # args:{args}, kwargs:{kwargs})'")
         result = func(*args, **kwargs)
         print(f"Result: {result}")
 
@@ -76,8 +78,8 @@ def record_time(func):
         tstart = time.perf_counter()
         result = func(*args, **kwargs)
         print(
-            f"function '{func.__name__}(args:{args}, kwargs:{kwargs})' took {time.perf_counter()-tstart:.3f} seconds."
-        )
+            f"function '{func.__name__}()' took {time.perf_counter()-tstart:.9f} seconds."
+        )  # args:{args}, kwargs:{kwargs})'
         return result
 
     return wrapper

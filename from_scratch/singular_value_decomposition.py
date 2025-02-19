@@ -94,6 +94,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    t0 = time.time()
+    tmain = time.time()
     main()
-    print(f"Program took {time.time()-t0:.3f} seconds.")
+    print(f"Program took {time.time()-tmain:.3f} seconds.")

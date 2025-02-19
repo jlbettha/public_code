@@ -103,11 +103,10 @@ def ukf_predict(
 
     return x_, P_
 
-
-if __name__ == "__main__":
-
     # plt.ion()  # interactive plots on
 
+
+def main() -> None:
     # init vars
     measureNoise = 0.25
     dim_fix = 767
@@ -195,3 +194,7 @@ if __name__ == "__main__":
             time.sleep(0.001)
         else:
             time.sleep(dt - tf)
+
+
+if __name__ == "__main__":
+    main()

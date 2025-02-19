@@ -101,7 +101,7 @@ def kalman_predict(
     return x_, P_
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     plt.ion()  # interactive plots on
 
@@ -190,3 +190,9 @@ if __name__ == "__main__":
             time.sleep(0.001)
         else:
             time.sleep(dt - tf)
+
+
+if __name__ == "__main__":
+    tmain = time.time()
+    main()
+    print(f"Program took {time.time()-tmain:.3f} seconds.")
