@@ -10,6 +10,13 @@ shareable aspects using different contexts & data.
 
 Manual implementations for fundamental ML methods and concepts.
 
+### data_compression/
+
+* DCT compression
+* k-means compression
+* k-medians compression
+* orthonormal compression
+
 ### image_processing/
 
 * angio image/video tests
@@ -18,6 +25,11 @@ Manual implementations for fundamental ML methods and concepts.
 
 
 ### image_segmentation/
+
+* content in-progress
+
+
+### image_classification/
 
 * content in-progress
 
@@ -32,13 +44,16 @@ Manual implementations for fundamental ML methods and concepts.
 
 ### my_modules/
 
-* image feature extraction
+* image feature extraction tools
 * distance functions: point to point, point to distribution, and distr to distr
 * helper/util functions
 * a basic model builder kit (from scratch)
+* loss functions
+* information theory tools
+* image quality assessment tools
+* all modules are also in ./from_scratch/
 
-
-### nlp_language_models/
+### nlp_and_language_models/
 
 * working on word embedding, small language model, and translation
 
@@ -67,27 +82,6 @@ To-do:
 
 ### torch_models/
 
-* PyTorch versions of many models found in /tflow_models
-
-
-### raspberrypi5_apps/
-
-* microphone array beamforming, sound source localization 
-* sound source separation
-* speaker identification and speech-to-text
-* stereoscopic vision for 3d scene reconstruct
-* 3d from 2d imaging model, trained from stereoscopic videos
-* IR heat mapping of images (stream/record FLIR-ONE from phone)
-* Database for queries from laptop, desktop queries rasp. pi for gpu model training and RAG
-
-### model_interpretability/
-
 * content in-progress
+* PyTorch versions of certain models found in /tflow_models
 
-### reinforcement_learning/
-
-* coming soon
-
-### scene_reconstruction/
-
-* coming soon

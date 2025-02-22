@@ -62,10 +62,10 @@ def main() -> None:
     lin_reg = LinearRegression()
     lin_reg.fit(X_poly, f_x_er)
 
-    lin_reg_l2 = Ridge(alpha=0.5)
+    lin_reg_l2 = Ridge(alpha=0.2)
     lin_reg_l2.fit(X_poly, f_x_er)
 
-    lin_reg_l1 = Lasso(alpha=0.5, tol=1e-5, max_iter=1500)
+    lin_reg_l1 = Lasso(alpha=0.2, tol=1e-7, max_iter=10000)
     lin_reg_l1.fit(X_poly, f_x_er)
 
     # plots
@@ -99,7 +99,7 @@ def main() -> None:
         label="Lasso Est.",
         c="orange",
     )
-    plt.ylim([-20, 60])
+    plt.ylim([-10, 60])
     plt.xlabel("x")
     plt.ylabel("f(x)")
     ax.legend()
