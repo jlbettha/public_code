@@ -9,29 +9,38 @@ from sklearn.datasets import load_iris, load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from numpy.typing import NDArray
+from numba import njit
 
 
+@njit
 def relu(wx_b):
     return np.maximum(wx_b, 0)
 
 
+@njit
+# @vectorize
 def d_relu_dz(z):
     return z > 0
 
 
+@njit
 def softmax(z):
     num_s = z.shape[1]
-    A = np.array([np.exp(z[:, n]) / np.sum(np.exp(z[:, n])) for n in range(num_s)])
-    return A.T
+    A = np.ones(z.shape)
+    for n in range(num_s):
+        A[:, n] = np.exp(z[:, n]) / np.sum(np.exp(z[:, n]))
+    return A
 
 
+@njit
 def encode_one_hot(y, num_classes):
     y_one_hot = np.zeros((y.shape[0], num_classes))
     for n in range(y.shape[0]):
         y_one_hot[n, y[n]] = 1
-    return np.vstack(y_one_hot)
+    return y_one_hot
 
 
+@njit
 def forward(W1, b1, W2, b2, X):
     z1 = W1 @ X.T + b1
     A1 = relu(z1)
@@ -40,6 +49,7 @@ def forward(W1, b1, W2, b2, X):
     return z1, A1, z2, A2
 
 
+@njit
 def back_prop(z1, A1, A2, W2, X, y):
     num_classes = A2.shape[0]
     N = y.shape[0]
@@ -53,6 +63,7 @@ def back_prop(z1, A1, A2, W2, X, y):
     return dW1, db1, dW2, db2
 
 
+@njit
 def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, eta):
     W1 = W1 - eta * dW1
     b1 = b1 - eta * db1
@@ -62,10 +73,12 @@ def update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, eta):
     return W1, b1, W2, b2
 
 
+@njit
 def get_predictions(A2):
     return np.argmax(A2, 0)
 
 
+@njit
 def accuracy(predictions, y):
     return np.sum(predictions == y) / y.shape[0]
 
@@ -97,8 +110,8 @@ def main() -> None:
     """artificial neural network"""
 
     ## init vars
-    iterations = 1500
-    eta = 0.05
+    iterations = 2500
+    eta = 0.02
 
     # X, y = load_iris(return_X_y=True)
     X, y = load_digits(return_X_y=True)
@@ -123,20 +136,15 @@ def main() -> None:
     )
 
     print(f"Training accuracy = {100*accs[-1, 1]:.3f}%")
-    # plt.figure()
-    # plt.plot(accs[:, 0], accs[:, 1])
-    # plt.xlabel("iterations")
-    # plt.ylabel("accuracy")
-    # plt.show()
 
     y_pred = make_predictions(X_test, W1, b1, W2, b2)
     acc_test = accuracy(y_pred, y_test)
+
     print(f"Test accuracy = {100*acc_test:.3f}%")
 
-    index = np.random.randint(400)
-
+    index = np.random.randint(X_test.shape[0] - 1)
     current_image = X_test[index, :]
-    prediction = make_predictions(X_train[index, :], W1, b1, W2, b2)
+    prediction = y_pred[index]
     label = y_test[index]
 
     current_image = current_image.reshape((8, 8)) * 255

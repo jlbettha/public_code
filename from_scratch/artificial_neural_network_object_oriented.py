@@ -9,7 +9,7 @@ import time
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import *
 from sklearn.datasets import load_iris, load_digits
-
+from numba import njit
 from modules.my_loss_functions import mean_squared_error, mse_derivative
 
 
@@ -34,6 +34,7 @@ class FullyConnectedLayer(GenericLayer):
         self.input = input
         return np.dot(self.weights, self.input) + self.biases
 
+    @njit
     def backprop(self, gradient_outputs, learning_rate):
         gradient_weights = np.dot(gradient_outputs, self.input.T)
         gradient_inputs = np.dot(self.weights.T, gradient_outputs)
