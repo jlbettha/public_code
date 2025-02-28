@@ -53,10 +53,6 @@ Manual implementations for fundamental ML methods and concepts.
 * image quality assessment tools
 * all modules are also in ./from_scratch/
 
-### nlp_and_language_models/
-
-* working on word embedding, small language model, and translation
-
 
 ### temporal_sequential/
 
