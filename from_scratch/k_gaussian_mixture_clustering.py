@@ -1,15 +1,16 @@
-""" Betthauser, 2018: k-gaussian mixture clustering
-"""
+"""Betthauser, 2018: k-gaussian mixture clustering"""
 
 import time
 from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
+from numba import njit
 
 # from k_means_clustering import k_means_clustering
 
 
+@njit
 def _membership_prob(
     point: NDArray[np.float64], c_mean: NDArray[np.float64], c_cov: NDArray[np.float64]
 ) -> np.float64:
@@ -26,8 +27,9 @@ def _membership_prob(
     k = c_cov.shape[0]
     denom = np.sqrt(np.linalg.det(c_cov) * (2 * np.pi) ** k)
     mahal_dist = ((point - c_mean) @ np.linalg.pinv(c_cov)) @ (point - c_mean).T
-    prob = np.squeeze(np.exp(-0.5 * mahal_dist) / denom)
-    return prob
+    # prob = np.squeeze(np.exp(-0.5 * mahal_dist) / denom)
+    prob = np.exp(-0.5 * mahal_dist[0][0]) / denom  # jit-friendly edit
+    return prob + 1e-12
 
 
 def _prob_dist_array(
@@ -48,11 +50,16 @@ def _prob_dist_array(
     mdist_arr = np.array(
         [_membership_prob(data_pt, mean, cov) for mean, cov in zip(k_means, k_covs)]
     )
-    return mdist_arr / np.sum(mdist_arr)
+
+    return mdist_arr
 
 
 def k_gaussian_mixture_clustering(
-    data: NDArray[np.float64], k: int, tolerance: float = 1e-5, plot: bool = False
+    data: NDArray[np.float64],
+    k: int,
+    tolerance: float = 1e-5,
+    plot: bool = False,
+    max_iters: int = 200,
 ) -> tuple[Any]:
     """Betthauser, 2018: k-gaussian mixture/EM clustering
 
@@ -94,6 +101,7 @@ def k_gaussian_mixture_clustering(
         if np.any(np.isnan(soft_label_probs)):
             continue
 
+        # soft_label_probs = np.squeeze(soft_label_probs)
         current_likeliest_labels = np.array(
             [np.argmax(soft_label_probs[idx, :]) for idx in range(num_data_pts)]
         )
@@ -106,6 +114,11 @@ def k_gaussian_mixture_clustering(
     sum_weighted_probs_n = np.sum(weighted_probs_nk, axis=1)
 
     log_likelihood = np.sum(np.log(sum_weighted_probs_n))  # / N
+
+    best_llhd = log_likelihood
+    best_means = cluster_means
+    best_covs = cluster_covs
+    best_labels = current_likeliest_labels
 
     likelihoods = []
     ll_last = log_likelihood
@@ -146,32 +159,39 @@ def k_gaussian_mixture_clustering(
         sum_weighted_probs_n = np.sum(weighted_probs_nk, axis=1)
         log_likelihood = np.sum(np.log(sum_weighted_probs_n)) / num_data_pts
 
-        if iters % 5 == 0:
+        if iters % 10 == 0:
             print(f"Iter: {iters} -- Log-likelihood: {log_likelihood:.4f}", flush=True)
 
         likelihoods.append(log_likelihood)
         its.append(iters)
 
-        if plot:
-            current_likeliest_labels = np.array(
-                [np.argmax(soft_label_probs[idx, :]) for idx in range(num_data_pts)]
-            )
+        current_likeliest_labels = np.array(
+            [np.argmax(soft_label_probs[idx, :]) for idx in range(num_data_pts)]
+        )
 
+        if log_likelihood > best_llhd:
+            best_llhd = log_likelihood
+            best_means = cluster_means
+            best_covs = cluster_covs
+            best_labels = current_likeliest_labels
+
+        if plot:
             plt.subplot(1, 2, 1)
             plt.cla()
-            plt.scatter(data[:, 0], data[:, 1], c=current_likeliest_labels)
+            plt.scatter(data[:, 0], data[:, 1], c=current_likeliest_labels, s=3)
             plt.subplot(1, 2, 2)
             plt.cla()
             plt.plot(its, likelihoods)
             plt.ylabel("log-likelihood")
             plt.pause(0.001)
 
-        if np.abs(log_likelihood - ll_last) < tolerance:
+        if np.abs(log_likelihood - ll_last) < tolerance or iters > max_iters:
+            plt.close()
             print(f"k-gaussian mixture clustering took {iters} iterations.")
             return (
-                current_likeliest_labels,
-                cluster_means,
-                cluster_covs,
+                best_labels,
+                best_means,
+                best_covs,
                 likelihoods,
             )
 
@@ -209,23 +229,23 @@ def _generate_data(
     ]
 
     data = np.vstack(data)
-    rand_idx = np.random.permutation(data.shape[0])
-    data = data[rand_idx, :]
+    # rand_idx = np.random.permutation(data.shape[0])
+    # data = data[rand_idx, :]
 
     return data
 
 
 def main() -> None:
     """_summary_"""
-    k = 6
-    num_actual_clusters = 6
-    num_dims = 3
+    k = 7
+    num_actual_clusters = 7
+    num_dims = 2
     num_pts_per_cluster = 500
 
     data = _generate_data(num_actual_clusters, num_dims, num_pts_per_cluster)
 
     labels, k_means, _, loglikes = k_gaussian_mixture_clustering(
-        data, k, tolerance=1e-5, plot=False
+        data, k, tolerance=1e-5, plot=False, max_iters=150
     )
 
     plt.subplot(1, 2, 1)

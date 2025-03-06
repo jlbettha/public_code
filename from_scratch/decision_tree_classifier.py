@@ -1,6 +1,6 @@
 # pylint: disable=C0103
-""" Betthauser, 2022 - Decision tree from scratch
-        Currently, "load_breast_cancer" dataset.
+"""Betthauser, 2022 - Decision tree from scratch
+Currently, "load_breast_cancer" dataset.
 """
 
 import time
@@ -64,6 +64,7 @@ def information_gain(
     return entropy_parent - entropy_children
 
 
+@njit
 def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
     """_summary_
 

@@ -1,4 +1,4 @@
-""" module summary """
+"""module summary"""
 
 import time
 import numpy as np
@@ -75,6 +75,7 @@ def minkowski_dist(
 
 
 ####  Point-to-distribution distance functions  ##########
+@njit
 def mahalinobis_dist(
     y: NDArray[np.float64], x: NDArray[np.float64], sqrt_calc: bool = True
 ) -> np.float64:
@@ -87,7 +88,10 @@ def mahalinobis_dist(
     Returns:
         float: mahalinobis distance of point y to distribution x (exponent of multivariate gaussian)
     """
-    mu = np.mean(x, axis=0)
+    # mu = np.mean(x, axis=0)
+    mu = np.array(
+        [np.mean(x[:, i]) for i in range(x.shape[1])]
+    )  # jit-friendly version (axis=0 is a problem)
     dist = ((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T
     if not sqrt_calc:
         return dist
@@ -163,6 +167,7 @@ def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
     return np.sqrt(js_divergence)
 
 
+@njit
 def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
     """Wasserstein distance or Kantorovich–Rubinstein metric
 
@@ -182,7 +187,7 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
     if len(p.shape) == 2:
-        return wasserstein_distance_nd(p, q)
+        return None  # wasserstein_distance_nd(p, q)
     elif len(p.shape) == 1:
         return minkowski_dist(p, q) / len(p)
         # return wasserstein_distance(p, q)
@@ -432,8 +437,8 @@ def main() -> None:
     print(f"{fisher_dist(mu_a, var_a, mu_b, var_b) = :.7f}")
     print(f"{bhattacharyya_dist(mu_a, var_a, mu_b, var_b) = :.3f}")
     print(f"{kl_div_bidirectional(distr_a, distr_b) = :.3f}")
-    print(f"{kl_div_gaussian1d_bidirectional(mu_a, var_a, mu_b, var_b) = :.3f}\n")
-
+    print(f"{kl_div_gaussian1d_bidirectional(mu_a, var_a, mu_b, var_b) = :.3f}")
+    print(f"{wasserstein_dist(distr_a, distr_b) = :.3f}\n")
     # plt.figure()
     # plt.scatter(cluster1[:, 0], cluster1[:, 1])
     # plt.scatter(cluster2[:, 0], cluster2[:, 1])
@@ -449,6 +454,7 @@ if __name__ == "__main__":
     t0 = time.time()
     main()
     tf2 = time.time() - t0
-    print(f"Program took {tf2:.3f} seconds")
+    print(f"1st run took {tf1:.3f} seconds")
+    print(f"2nd run took {tf2:.3f} seconds")
 
     print(f"njit speed-up: {tf1/tf2:.3f}x")
