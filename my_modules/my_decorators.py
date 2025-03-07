@@ -1,5 +1,6 @@
 import time
 import random
+from functools import wraps
 
 
 ## decorator
@@ -7,6 +8,7 @@ def rate_limit(calls, period):
     def decorator(func):
         last_calls = []
 
+        @wraps(func)
         def wrapper(*args, **kwargs):
             nonlocal last_calls
             now = time.time()
@@ -27,6 +29,7 @@ def rate_limit(calls, period):
 
 ## decorator
 def debug(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         print(f"Calling function '{func.__name__}(args:{args}, kwargs:{kwargs})'")
         result = func(*args, **kwargs)
@@ -38,6 +41,7 @@ def debug(func):
 ## decorator
 def type_enforce(*expected_types):
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             for arg, exp_type in zip(args, expected_types):
                 if not isinstance(arg, exp_type):
@@ -52,6 +56,7 @@ def type_enforce(*expected_types):
 ## decorator
 def retry(retries=3, exception=Exception, delay=1):
     def decorator(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             attempts = 0
             while attempts < retries:
@@ -72,6 +77,7 @@ def retry(retries=3, exception=Exception, delay=1):
 
 ## decorator
 def record_time(func):
+    @wraps(func)
     def wrapper(*args, **kwargs):
         tstart = time.perf_counter()
         result = func(*args, **kwargs)
