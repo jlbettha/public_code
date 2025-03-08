@@ -4,6 +4,7 @@ Created on Wed Mar 20 00:33:40 2024
 @author: jlbetthauser
 """
 
+import time
 import numpy as np
 from scipy import ndimage as ndi
 import math
@@ -14,6 +15,7 @@ from skimage.color import rgb2gray
 from skimage.util import img_as_float
 from scipy.ndimage import gaussian_laplace
 from numpy.typing import NDArray
+from numba import njit
 
 # from skimage.restoration import estimate_sigma
 # from skimage.measure import blur_effect
@@ -75,6 +77,7 @@ def otsu_threshold(img, nbins=0.1):
     return thr
 
 
+@njit
 def bhattacharyya_dist(mu1, v1, mu2, v2):
     part1 = 0.25 * np.log(0.25 * (v1 / v2 + v2 / v1 + 2))
     part2 = 0.25 * (((mu1 - mu2) ** 2) / (v1 + v2))
@@ -98,6 +101,7 @@ def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
 
 
 ## sigma
+@njit
 def estimate_variance(img):
     return np.nanvar(img)
 
@@ -115,12 +119,13 @@ def estimate_noise(img: NDArray[np.float64]) -> float:
     h, w = img.shape
     mfilter = [[1, -2, 1], [-2, 4, -2], [1, -2, 1]]
 
-    sum_t = np.sum(np.sum(np.absolute(convolve2d(img, mfilter))))
-    sigma = sum_t * math.sqrt(0.5 * math.pi) / (6 * (w - 2) * (h - 2))
+    sum_t = np.sum(np.absolute(convolve2d(img, mfilter)))
+    sigma = sum_t * np.sqrt(0.5 * np.pi) / (6 * (w - 2) * (h - 2))
     return sigma
 
 
 ## snr
+@njit
 def signal_to_noise(img: NDArray[np.float64]) -> float:
     """A rough analogue to signal-to-noise ratio of the input data.
         Returns the snr of img, here defined as the mean
@@ -132,7 +137,7 @@ def signal_to_noise(img: NDArray[np.float64]) -> float:
     Returns:
         float: snr
     """
-    anz = img[img > 1]
+    anz = img  # img[img > 1]
     n = anz.shape[0]
     if n <= 1:
         return 0.0
@@ -144,7 +149,7 @@ def signal_to_noise(img: NDArray[np.float64]) -> float:
 def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
     # lap = cv2.convertScaleAbs(cv2.Laplacian(img, 5))
     lap = np.abs(gaussian_laplace(img, sigma=3))
-    return np.mean(lap[lap > 1])
+    return np.mean(lap[lap > 0])
 
 
 def jlb_iqa(img):
@@ -158,3 +163,23 @@ def jlb_iqa(img):
     est_var = estimate_variance(img)
     otsu = otsu_interclass_distance(img)
     return (snr, est_noise, blur2, lap_edge_str, est_var, otsu)
+
+
+def main() -> None:
+    img = cv2.imread("einstein.jpg")
+    img = rgb2gray(img)
+    print(jlb_iqa(img))
+
+
+if __name__ == "__main__":
+    tmain = time.time()
+    main()
+    tfirst = time.time() - tmain
+    print(f"Program took {tfirst:.3f} seconds.")
+
+    tmain = time.time()
+    main()
+    tlast = time.time() - tmain
+    print(f"Program took {tlast:.3f} seconds.")
+
+    print(f"njit speed-up: {tfirst/tlast:.3f}x")
