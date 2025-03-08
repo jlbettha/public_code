@@ -82,21 +82,21 @@ def majority_filter(seq, width):
     return np.squeeze(result)
 
 
-### stable softmax applied to vector x
-@njit
-def softmax(x):
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum()
-
-
-### sigmoid applied to vector x
+### sigmoid applied to z
 @vectorize
-def sigmoid(x):
-    return 1 / (1 + math.exp(-x))
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+
+### stable softmax applied to z
+@njit
+def softmax(z):
+    e_z = np.exp(z - np.max(z))
+    return e_z / e_z.sum()
 
 
 def anybase2decimal(number, other_base):
-    return sum(
+    return np.sum(
         [(int(v) * other_base**i) for i, v in enumerate(list(str(number))[::-1])]
     )
 
