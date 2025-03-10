@@ -33,7 +33,7 @@ def sigmoid(z):
 
 @njit
 def d_sigmoid_dz(z):
-    raise NotImplementedError
+    return NotImplemented
 
 
 ### stable softmax applied to z
@@ -45,7 +45,7 @@ def softmax(z):
 
 @njit
 def d_softmax_dz(z):
-    raise NotImplementedError
+    return NotImplemented
 
 
 @njit
@@ -64,25 +64,29 @@ def gelu_approx(z):
     return 0.5 * z * term
 
 
-@njit
+# @njit
 def d_gelu_approx_dz(z):
     s = z / np.sqrt(2)
-    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
+    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(
+        -(x**2)
+    )  # TODO: make this line jit-friendly
     approx = np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * z**3))
-    raise 0.5 + 0.5 * approx + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
+    return 0.5 + 0.5 * approx + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
 ### gaussian error linear unit (gelu) activation applied to z
-@njit
+# @njit
 def gelu(z):
-    cdf = 0.5 * (1.0 + erf(z / np.sqrt(2.0)))
+    cdf = 0.5 * (1.0 + erf(z / np.sqrt(2.0)))  # TODO: make this line jit-friendly
     return z * cdf
 
 
-@njit
+# @njit
 def d_gelu_dz(z):
     s = z / np.sqrt(2)
-    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
+    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(
+        -(x**2)
+    )  # TODO: make this line jit-friendly
     return 0.5 + 0.5 * erf(s) + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
