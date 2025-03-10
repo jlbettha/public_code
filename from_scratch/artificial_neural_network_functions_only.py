@@ -10,26 +10,10 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from numpy.typing import NDArray
 from numba import njit
+from modules.my_acivations import relu, d_relu_dz, swish, d_swish_dz, softmax_jit
 
-
-@njit
-def relu(wx_b):
-    return np.maximum(wx_b, 0)
-
-
-@njit
-# @vectorize
-def d_relu_dz(z):
-    return z > 0
-
-
-@njit
-def softmax(z):
-    num_s = z.shape[1]
-    A = np.ones(z.shape)
-    for n in range(num_s):
-        A[:, n] = np.exp(z[:, n]) / np.sum(np.exp(z[:, n]))
-    return A
+relu = swish  # alias
+d_relu_dz = d_swish_dz  # alias
 
 
 @njit
@@ -45,7 +29,7 @@ def forward(W1, b1, W2, b2, X):
     z1 = W1 @ X.T + b1
     A1 = relu(z1)
     z2 = W2 @ A1 + b2
-    A2 = softmax(z2)
+    A2 = softmax_jit(z2)
     return z1, A1, z2, A2
 
 
@@ -142,15 +126,24 @@ def main() -> None:
 
     print(f"Test accuracy = {100*acc_test:.3f}%")
 
-    index = np.random.randint(X_test.shape[0] - 1)
-    current_image = X_test[index, :]
-    prediction = y_pred[index]
-    label = y_test[index]
+    dim = 5
+    idx = np.random.permutation(len(y_test))
 
-    current_image = current_image.reshape((8, 8)) * 255
-    plt.gray()
-    plt.imshow(current_image, interpolation="nearest")
-    plt.title(f"truth: {label}, predict: {prediction}")
+    plt.figure(figsize=(7, 7))
+    for i in range(dim**2):
+        img = np.squeeze(X_test[idx[i], ...]).reshape((8, 8)) * 255
+        lbl = y_test[idx[i]]
+        prd = y_pred[idx[i]]
+
+        plt.subplot(dim, dim, i + 1)
+        plt.imshow(img, cmap="gray", interpolation="none")
+        plt.axis("off")
+        clr = "Red"
+        if lbl == prd:
+            clr = "Green"
+        plt.title(f"True: {lbl}, Pred: {prd}", color=clr, fontsize=8)
+
+    plt.tight_layout()
     plt.show()
 
 

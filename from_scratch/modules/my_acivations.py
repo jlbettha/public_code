@@ -1,5 +1,5 @@
 import numpy as np
-from numba import njit
+from numba import njit, vectorize
 from scipy.special import erf
 
 
@@ -31,19 +31,30 @@ def sigmoid(z):
     return (1 + np.exp(-z)) ** -1
 
 
+@njit
 def d_sigmoid_dz(z):
     raise NotImplementedError
 
 
 ### stable softmax applied to z
-@njit
 def softmax(z):
-    e_z = np.exp(z - np.max(z))
-    return e_z / np.sum(e_z)
+    maxz = np.max(z)
+    e_z = np.exp(z - maxz)
+    return e_z * (np.sum(e_z) ** -1)
 
 
+@njit
 def d_softmax_dz(z):
     raise NotImplementedError
+
+
+@njit
+def softmax_jit(z):
+    num_s = z.shape[1]
+    sftmx = np.ones(z.shape)
+    for n in range(num_s):
+        sftmx[:, n] = np.exp(z[:, n]) / np.sum(np.exp(z[:, n]))
+    return sftmx
 
 
 ### approx. gaussian error linear unit (gelu) activation applied to z
@@ -53,8 +64,12 @@ def gelu_approx(z):
     return 0.5 * z * term
 
 
+@njit
 def d_gelu_approx_dz(z):
-    raise NotImplementedError
+    s = z / np.sqrt(2)
+    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
+    approx = np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * z**3))
+    raise 0.5 + 0.5 * approx + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
 ### gaussian error linear unit (gelu) activation applied to z
@@ -64,8 +79,11 @@ def gelu(z):
     return z * cdf
 
 
+@njit
 def d_gelu_dz(z):
-    raise NotImplementedError
+    s = z / np.sqrt(2)
+    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
+    return 0.5 + 0.5 * erf(s) + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
 ### swish activation applied to z, equals silu when beta = 1
