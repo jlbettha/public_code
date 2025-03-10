@@ -64,29 +64,28 @@ def gelu_approx(z):
     return 0.5 * z * term
 
 
-# @njit
+@vectorize
+def erf_prime(x):
+    return (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
+
+
+@njit
 def d_gelu_approx_dz(z):
     s = z / np.sqrt(2)
-    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(
-        -(x**2)
-    )  # TODO: make this line jit-friendly
     approx = np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * z**3))
     return 0.5 + 0.5 * approx + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
 ### gaussian error linear unit (gelu) activation applied to z
-# @njit
+@njit
 def gelu(z):
-    cdf = 0.5 * (1.0 + erf(z / np.sqrt(2.0)))  # TODO: make this line jit-friendly
-    return z * cdf
+    s = z / np.sqrt(2)
+    return z * 0.5 * (1.0 + erf(s))
 
 
-# @njit
+@njit
 def d_gelu_dz(z):
     s = z / np.sqrt(2)
-    erf_prime = lambda x: (2 / np.sqrt(np.pi)) * np.exp(
-        -(x**2)
-    )  # TODO: make this line jit-friendly
     return 0.5 + 0.5 * erf(s) + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
 
 
