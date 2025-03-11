@@ -290,7 +290,7 @@ def main() -> None:
     minval, maxval, count = 1, 10_000_000, 80_000
     real_array = np.random.randint(minval, maxval, size=count).astype(np.uint64)
     print(
-        f"Sorting array length {count}, uniformly chosen from Z in [{minval}, {maxval}]."
+        f"Sorting array length {count:,}, uniformly chosen from Z in [{minval}, {maxval:,}]."
     )
     insertion_sort(real_array.copy())
     selection_sort(real_array.copy())

@@ -4,6 +4,7 @@ import cv2
 from numpy.typing import NDArray
 from scipy import ndimage as ndi
 from skimage import feature
+from my_distance_metrics import minmax_scaling
 
 # import matplotlib.pyplot as plt
 
@@ -189,81 +190,9 @@ def jh5_image_features(image: NDArray[np.float64]) -> NDArray[np.float64]:
     return joint_hist_5
 
 
-def entropy(hist1: NDArray[np.float64]) -> np.float64:
-    """Betthauser 2016 -- Calculate joint entropy of an N-d distribution
-
-    Args:
-        hist1 (NDArray[np.float64]): an N-D histogram or PMF
-
-    Returns:
-        np.float64: entropy of the ditribution
-    """
-    hist1 = hist1 / np.sum(hist1)
-    nz_probs = [-p * np.log(p) for p in hist1 if p > 1e-12]
-    entrp = np.sum(nz_probs)
-    return entrp
-
-
-def minmax_scaling(
-    data: NDArray[np.float64], max_val: float = 255
-) -> NDArray[np.float64]:
-    """_summary_
-
-    Args:
-        data (NDArray[np.float64]): N-D data
-        max_val (float, optional): max desired output value. Defaults to 255.
-
-    Returns:
-        NDArray[np.float64]: data min-max scaled in range [0, max_val]
-    """
-    return max_val * (data - data.min) / (data.max - data.min)
-
-
-# returns joint histogram of 2 image sections
-def joint_histogram_2d(
-    patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: float = 255.0
-) -> NDArray[np.float64]:
-    """Computes joint histogram of 2 image sections/patches
-    Args:
-        img1 (NDArray[np.float64]): image patch 1
-        img2 (NDArray[np.float64]): image patch 2
-        bins (float): number of bins
-    Returns:
-        NDArray[np.float64]: joint_histogram
-    """
-    patch1 = minmax_scaling(patch1, max_val=bins).astype(np.uint8)
-    patch2 = minmax_scaling(patch2, max_val=bins).astype(np.uint8)
-
-    joint_histogram = np.zeros(bins, bins)
-    for i in range(patch1.shape[0]):
-        for j in range(patch1.shape[1]):
-            joint_histogram[patch2[i, j], patch1[i, j]] += 1
-    return joint_histogram
-
-
-def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> float:
-    """_summary_
-
-    Args:
-        image1 (NDArray[np.float64]): image/patch
-        image2 (NDArray[np.float64]): another image/patch for comparison
-
-    Returns:
-        float: mutual information between the two images/patches
-    """
-    joint_hist = joint_histogram_2d(image1, image2)
-    joint_entropy = entropy(joint_hist)
-    hist1 = np.sum(joint_hist, axis=0)
-    hist2 = np.sum(joint_hist, axis=1)
-    entropy1 = entropy(hist1)
-    entropy2 = entropy(hist2)
-    mut_info = entropy1 + entropy2 - joint_entropy
-    return mut_info
-
-
 def main() -> None:
     """_summary_"""
-    raise NotImplementedError
+    pass
 
 
 if __name__ == "__main__":

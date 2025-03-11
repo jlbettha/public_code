@@ -7,7 +7,6 @@ Created on Wed Mar 20 00:33:40 2024
 import time
 import numpy as np
 from scipy import ndimage as ndi
-import math
 import cv2
 from scipy.signal import convolve2d
 from skimage.filters import threshold_otsu, sobel
@@ -16,19 +15,19 @@ from skimage.util import img_as_float
 from scipy.ndimage import gaussian_laplace
 from numpy.typing import NDArray
 from numba import njit
+from typing import Callable
 
 # from skimage.restoration import estimate_sigma
 # from skimage.measure import blur_effect
 # from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 
-try:
-    from numpy import AxisError
-except ImportError:
-    from numpy.exceptions import AxisError
-
-
-def blurriness2(image, h_size=11, channel_axis=None, reduce_func=np.mean) -> float:
+def blurriness2(
+    image: NDArray[np.float64],
+    h_size: int = 11,
+    channel_axis: int = None,
+    reduce_func: Callable = np.mean,
+) -> float:
     """metric that indicates the strength of blur in an image (0 for no blur, 1 for maximal blur).
             [1] Frederique Crete, et al. "The blur effect: perception and estimation with a new
             no-reference perceptual blur metric" Proc. SPIE 6492 (2007)
@@ -70,7 +69,7 @@ def blurriness2(image, h_size=11, channel_axis=None, reduce_func=np.mean) -> flo
     return B if reduce_func is None else reduce_func(B)
 
 
-def otsu_threshold(img, nbins=0.1):
+def otsu_threshold(img: NDArray[np.float64]) -> float:
     blur = cv2.GaussianBlur(img, (5, 5), 0)
     thr = threshold_otsu(blur)
     # _,thr = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -78,7 +77,7 @@ def otsu_threshold(img, nbins=0.1):
 
 
 @njit
-def bhattacharyya_dist(mu1, v1, mu2, v2):
+def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
     part1 = 0.25 * np.log(0.25 * (v1 / v2 + v2 / v1 + 2))
     part2 = 0.25 * (((mu1 - mu2) ** 2) / (v1 + v2))
     return part1 + part2
@@ -100,13 +99,11 @@ def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
     return bhattacharyya_dist(mu1, v1, mu2, v2)
 
 
-## sigma
 @njit
-def estimate_variance(img):
+def estimate_variance(img: NDArray[np.float64]) -> float:
     return np.nanvar(img)
 
 
-# blur
 def estimate_noise(img: NDArray[np.float64]) -> float:
     """_summary_
 
@@ -153,6 +150,14 @@ def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
 
 
 def jlb_iqa(img):
+    """Compute all 6 no-reference measures
+
+    Args:
+        img (_type_): gray-scale (2D) image
+
+    Returns:
+        tuple[float]: tuple of no-reference measures
+    """
     img[img > 255] = 255
     img[img < 0] = 0
     img = img.astype(np.float64)

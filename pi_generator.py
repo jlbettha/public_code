@@ -32,7 +32,9 @@ def main() -> None:
         #     flush=True,
         # )
     pi_est = 4 * (lt_one_ct / total_ct)
-    print(f"Final Pi estimate: {pi_est:.8f}, Error: {np.pi-pi_est:.8f}")
+    print(
+        f"Final Pi estimate: {pi_est:.8f}, Error: {np.pi-pi_est:.8f}, Iters.: {num_iters:_}"
+    )
 
 
 if __name__ == "__main__":

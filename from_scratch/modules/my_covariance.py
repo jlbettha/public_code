@@ -4,8 +4,7 @@ import numpy as np
 
 
 def covariance(x_mat: NDArray[np.float64]) -> NDArray[np.float64]:
-    """_summary_
-
+    """
     Args:
         x_mat (NDArray[float]): (n x m) matrix where n is number of samples, and m is number of features
 

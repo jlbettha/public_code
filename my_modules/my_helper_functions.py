@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from numpy.typing import NDArray
 from typing import Any
-from numba import vectorize, njit
+from numba import njit
 
 
 def plot_confusion_matrix(
@@ -80,19 +80,6 @@ def majority_filter(seq, width):
         a = seq[i : i + width]
         result.append(max(set(a), key=a.count))
     return np.squeeze(result)
-
-
-### sigmoid applied to z
-@vectorize
-def sigmoid(z):
-    return 1 / (1 + np.exp(-z))
-
-
-### stable softmax applied to z
-@njit
-def softmax(z):
-    e_z = np.exp(z - np.max(z))
-    return e_z / e_z.sum()
 
 
 def anybase2decimal(number, other_base):

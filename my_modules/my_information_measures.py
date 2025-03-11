@@ -3,6 +3,7 @@
 import numpy as np
 from numpy.typing import NDArray
 from numba import njit
+from my_distance_metrics import minmax_scaling
 
 
 @njit
@@ -80,22 +81,6 @@ def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
     n = len(x)
     cumx = np.cumsum(sorted_x, dtype=np.float64)
     return (n + 1 - 2 * np.sum(cumx) / cumx[-1]) / n
-
-
-@njit
-def minmax_scaling(
-    data: NDArray[np.float64], max_val: float = 255
-) -> NDArray[np.float64]:
-    """Betthauser - 2018 - min-max scaling of data
-
-    Args:
-        data (NDArray[np.float64]): N-D data
-        max_val (float, optional): max desired output value. Defaults to 255.
-
-    Returns:
-        NDArray[np.float64]: data min-max scaled in range [0, max_val]
-    """
-    return max_val * (data - data.min()) / (data.max() - data.min())
 
 
 # returns joint histogram of 2 image sections

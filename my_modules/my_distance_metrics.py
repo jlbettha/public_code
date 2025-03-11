@@ -193,11 +193,12 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
         # return wasserstein_distance(p, q)
 
 
+@njit
 def wasserstein_dist_gaussian1d(
     mu1: NDArray[np.float64],
-    C1: NDArray[np.float64],
+    cov1: NDArray[np.float64],
     mu2: NDArray[np.float64],
-    C2: NDArray[np.float64],
+    cov2: NDArray[np.float64],
 ) -> np.float64:
     # Wasserstein distance of 2 gaussians ~N(mu1, C1) and ~N(mu2, C2)
     # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
@@ -205,9 +206,9 @@ def wasserstein_dist_gaussian1d(
     # of earth that needs to be moved times the mean distance it has to be moved.
 
     # W(mu1, mu2) = sqrt( ||mu1-mu2||_2^2 + trace(C1 + C2-2*(C2^0.5) @ C1 @ C2^0.5) ^ 0.5 )
-
-    # TODO
-    return NotImplementedError
+    norm = np.sum((mu1 - mu2) ** 2)
+    covterm = np.trace(cov1 + cov2 - 2 * ((cov2**0.5) @ cov1) @ (cov2**0.5)) ** 0.5
+    return np.sqrt(norm + covterm)
 
 
 @njit
