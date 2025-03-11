@@ -10,10 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from numpy.typing import NDArray
 from numba import njit
-from modules.my_acivations import relu, d_relu_dz, swish, d_swish_dz, softmax_jit
-
-relu = swish  # alias
-d_relu_dz = d_swish_dz  # alias
+from modules.my_activations import relu, d_relu_dz, softmax_jit
 
 
 @njit
@@ -67,6 +64,7 @@ def accuracy(predictions, y):
     return np.sum(predictions == y) / y.shape[0]
 
 
+# @njit
 def gradient_descent(X, y, eta, iterations, W1, b1, W2, b2):
     accs = []
     for i in range(iterations):
@@ -74,14 +72,15 @@ def gradient_descent(X, y, eta, iterations, W1, b1, W2, b2):
 
         dW1, db1, dW2, db2 = back_prop(z1, A1, A2, W2, X, y)
         W1, b1, W2, b2 = update_params(W1, b1, W2, b2, dW1, db1, dW2, db2, eta)
-        if i % 100 == 0:
+        if i % 200 == 0:
             predictions = get_predictions(A2)
             acc = accuracy(predictions, y)
             accs.append([i, acc])
             print(f"Iteration {i}: accuracy = {acc:.4f}", flush=True)
+            # print(i, "-", acc)
 
-    accs = np.vstack(accs)
-    return W1, b1, W2, b2, accs
+    # accs = np.vstack(accs)
+    return W1, b1, W2, b2  # , accs
 
 
 def make_predictions(X, W1, b1, W2, b2):
@@ -94,7 +93,7 @@ def main() -> None:
     """artificial neural network"""
 
     ## init vars
-    iterations = 2500
+    iterations = 3000
     eta = 0.02
 
     # X, y = load_iris(return_X_y=True)
@@ -105,21 +104,23 @@ def main() -> None:
     num_features = X.shape[1]
     num_nodes_1 = 6
 
-    W1 = np.random.uniform(size=(num_nodes_1, num_features))
-    b1 = np.random.uniform(size=(num_nodes_1, 1))
-    W2 = np.random.uniform(size=(num_classes, num_nodes_1))
-    b2 = np.random.uniform(size=(num_classes, 1))
+    W1 = np.random.uniform(low=0, high=1, size=(num_nodes_1, num_features))
+    b1 = np.random.uniform(low=0, high=1, size=(num_nodes_1, 1))
+    W2 = np.random.uniform(low=0, high=1, size=(num_classes, num_nodes_1))
+    b2 = np.random.uniform(low=0, high=1, size=(num_classes, 1))
+    # W1 = np.random.randn(num_nodes_1, num_features)
+    # b1 = np.random.randn(num_nodes_1, 1)
+    # W2 = np.random.randn(num_classes, num_nodes_1)
+    # b2 = np.random.randn(num_classes, 1)
 
     scaler = MinMaxScaler()
     X = scaler.fit_transform(X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25)
 
-    W1, b1, W2, b2, accs = gradient_descent(
-        X_train, y_train, eta, iterations, W1, b1, W2, b2
-    )
+    W1, b1, W2, b2 = gradient_descent(X_train, y_train, eta, iterations, W1, b1, W2, b2)
 
-    print(f"Training accuracy = {100*accs[-1, 1]:.3f}%")
+    # print(f"Training accuracy = {100*accs[-1, 1]:.3f}%")
 
     y_pred = make_predictions(X_test, W1, b1, W2, b2)
     acc_test = accuracy(y_pred, y_test)

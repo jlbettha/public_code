@@ -1,5 +1,6 @@
 import numpy as np
-from numba import njit, vectorize
+from numba import njit
+
 from scipy.special import erf
 
 
@@ -28,19 +29,20 @@ def d_prelu_dz(z, a):
 ### sigmoid applied to z
 @njit
 def sigmoid(z):
-    return (1 + np.exp(-z)) ** -1
+    return 1 / (1 + np.exp(-z))
 
 
 @njit
 def d_sigmoid_dz(z):
-    return NotImplemented
+    sig = 1 / (1 + np.exp(-z))
+    return sig * (1 - sig)
 
 
 ### stable softmax applied to z
 def softmax(z):
-    maxz = np.max(z)
-    e_z = np.exp(z - maxz)
-    return e_z * (np.sum(e_z) ** -1)
+    z_maxz = z - np.max(z)
+    e_z = np.exp(z_maxz)
+    return e_z / np.sum(e_z)
 
 
 @njit
@@ -64,7 +66,7 @@ def gelu_approx(z):
     return 0.5 * z * term
 
 
-@vectorize
+@njit
 def erf_prime(x):
     return (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
 
@@ -77,13 +79,13 @@ def d_gelu_approx_dz(z):
 
 
 ### gaussian error linear unit (gelu) activation applied to z
-@njit
+# @njit
 def gelu(z):
     s = z / np.sqrt(2)
     return z * 0.5 * (1.0 + erf(s))
 
 
-@njit
+# @njit
 def d_gelu_dz(z):
     s = z / np.sqrt(2)
     return 0.5 + 0.5 * erf(s) + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
