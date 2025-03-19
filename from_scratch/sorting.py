@@ -11,6 +11,15 @@ NumArray = NDArray[np.float64]  # type alias
 @record_time
 @njit
 def counting_sort(arr: NumArray) -> NumArray:
+    """Counting sort algorithm
+        time complexity: O(?), space: O(?)
+
+    Args:
+        nums (NumArray): unsorted array of numbers
+
+    Returns:
+        NumArray: sorted array of numbers
+    """
     size = len(arr)
     output = np.zeros(size)
     count = np.zeros(max(arr) + 1)
@@ -40,7 +49,7 @@ def counting_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def bubble_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Bubble sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
@@ -60,7 +69,7 @@ def bubble_sort(arr: NumArray) -> NumArray:
 # @record_time
 # @njit
 def merge_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Merge sort algorithm
         time complexity: O(n log n), space: O(n)
 
     Args:
@@ -74,7 +83,16 @@ def merge_sort(arr: NumArray) -> NumArray:
 
 
 # @njit
-def _partition(arr, start, end):
+def _partition(arr: NumArray, start: int, end: int) -> int:
+    """Choose pivot index
+    Args:
+        arr (NumArray): unsorted array of numbers
+        start (int): starting index segment
+        end (int): ending index of segment
+
+    Returns:
+        int: pivot index
+    """
     # pivot = arr[start]
     # low = start + 1
     # high = end
@@ -98,12 +116,14 @@ def _partition(arr, start, end):
 
 # @record_time
 # @njit
-def quick_sort(arr: NumArray, start, end) -> NumArray:
+def quick_sort(arr: NumArray, start: int, end: int) -> NumArray:
     """Quick sort: recursive
         time complexity: O(n log n to n**2), space: O(n)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
+        start (int): starting index segment
+        end (int): ending index of segment
 
     Returns:
         NumArray: sorted array of numbers
@@ -112,8 +132,8 @@ def quick_sort(arr: NumArray, start, end) -> NumArray:
     #     return
 
     # p = _partition(arr, start, end)
-    # arr = quick_sort(arr, start, p - 1)
-    # arr = quick_sort(arr, p + 1, end)
+    # arr = quick_sort(arr, start, p)
+    # arr = quick_sort(arr, p, end)
 
     return NotImplementedError
 
@@ -121,7 +141,7 @@ def quick_sort(arr: NumArray, start, end) -> NumArray:
 @record_time
 @njit
 def tim_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Timsort algorithm
         time complexity: O(n log n), space: O(n)
 
     Args:
@@ -130,7 +150,7 @@ def tim_sort(arr: NumArray) -> NumArray:
     Returns:
         NumArray: sorted array of numbers
     """
-
+    # TODO: implement my own version
     return np.sort(
         arr
     )  # python default is timsort, but not sure about numpy/option-select
@@ -157,7 +177,7 @@ def _heapify(arr, n, i):
 @record_time
 @njit
 def heap_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Heap sort algorithm
         time complexity: O(n log n), space: O(1)
 
     Args:
@@ -182,7 +202,7 @@ def heap_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def selection_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Selection sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
@@ -203,7 +223,7 @@ def selection_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def insertion_sort(arr: NumArray) -> NumArray:
-    """_summary_
+    """Insertion sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
@@ -223,7 +243,7 @@ def insertion_sort(arr: NumArray) -> NumArray:
 
 
 @njit
-def _counting_sort_radix(arr, lsd):
+def _counting_sort_radix(arr: NumArray, lsd: int) -> NumArray:
     count_arr = np.zeros(10).astype(np.uint64)
     n = len(arr)
 
@@ -250,6 +270,15 @@ def _counting_sort_radix(arr, lsd):
 @record_time
 @njit
 def radix_sort(arr: NumArray) -> NumArray:
+    """Radix sort algorithm (base-10)
+        time complexity: O(?), space: O(?)
+
+    Args:
+        nums (NumArray): unsorted array of numbers
+
+    Returns:
+        NumArray: sorted array of numbers
+    """
     max_val = max(arr)
 
     # number of digits in max_val
@@ -270,24 +299,24 @@ def radix_sort(arr: NumArray) -> NumArray:
 
 
 def main() -> None:
-    primer_list = np.array([56, 79, 11, 42, 2, 4, 8]).astype(np.uint64)
-    print(f"Unsorted array: {primer_list}")
+    warmup_list = np.array([56, 79, 11, 42, 2, 4, 8]).astype(np.uint64)
+    print(f"Unsorted array: {warmup_list}")
 
-    print(insertion_sort(primer_list.copy()))
-    print(selection_sort(primer_list.copy()))
-    print(heap_sort(primer_list.copy()))
-    print(tim_sort(primer_list.copy()))
-    print(radix_sort(primer_list.copy()))
-    print(bubble_sort(primer_list.copy()))
-    print(counting_sort(primer_list.copy()))
+    print(insertion_sort(warmup_list.copy()))
+    print(selection_sort(warmup_list.copy()))
+    print(heap_sort(warmup_list.copy()))
+    print(tim_sort(warmup_list.copy()))
+    print(radix_sort(warmup_list.copy()))
+    print(bubble_sort(warmup_list.copy()))
+    print(counting_sort(warmup_list.copy()))
 
-    # print(quick_sort(primer_list, 0, len(primer_list)))
+    # print(quick_sort(warmup_list, 0, len(warmup_list)))
     # t0 = time.time()
-    # print(merge_sort(primer_list.copy()))
+    # print(merge_sort(warmup_list.copy()))
     # print(f"function 'merge_sort()' took {time.time()-t0:.9f} seconds.")
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    minval, maxval, count = 1, 10_000_000, 80_000
+    minval, maxval, count = 1, 1_000_000, 50_000
     real_array = np.random.randint(minval, maxval, size=count).astype(np.uint64)
     print(
         f"Sorting array length {count:,}, uniformly chosen from Z in [{minval}, {maxval:,}]."

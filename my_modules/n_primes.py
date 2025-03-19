@@ -140,16 +140,16 @@ def n_primes_a_sieve(n: int) -> NDArray[np.int64]:
 
 def main() -> None:
     n = 30000
-    _ = n_primes_bf(3)  # jit compile function on smaller run ("priming the jit")
+    _ = n_primes_bf(3)  # jit compile function on smaller run
     _ = n_primes_basic(3)
 
     t0 = time.time()
     _ = n_primes_bf(n)
-    print(f"Brute force took {time.time()-t0:.3f} seconds to generate {n:_} primes.")
+    print(f"Brute force took {time.time()-t0:.3f} seconds.")
 
     t0 = time.time()
     _ = n_primes_basic(n)
-    print(f"Basic method took {time.time()-t0:.3f} seconds to generate {n:_} primes.")
+    print(f"Basic method took {time.time()-t0:.3f} seconds.")
 
 
 if __name__ == "__main__":

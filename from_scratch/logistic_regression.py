@@ -1,5 +1,4 @@
-""" Betthauser, 2020: logistic regresssion
-"""
+"""Betthauser, 2020: logistic regresssion"""
 
 import time
 import math
@@ -9,6 +8,8 @@ import numpy as np
 from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from numba import njit
+
+# TODO: there is a bug, also extend functionality to multiclass
 
 
 @njit
@@ -22,8 +23,13 @@ def _sigmoid(x: float | NDArray[np.float64]) -> float:
         float: sigmoid(x)
     """
     # sigx = (1 + np.exp(x)) ** -1
-    sigx = 1.0 / (1 + np.exp(-x))
-    return sigx
+    return 1 / (1 + np.exp(-x))
+
+
+@njit
+def _d_sigmoid_dz(z):
+    sig = 1 / (1 + np.exp(-z))
+    return sig * (1 - sig)
 
 
 def logistic_regression(
@@ -49,8 +55,9 @@ def logistic_regression(
     dim = xs.shape[1]
 
     # init conditions
-    wts = np.zeros(dim)
-    sigmoid_all_wx_b = _sigmoid(np.dot(xs, wts))
+    wts = np.random.randn(dim)
+    wx_b = np.dot(xs, wts)
+    sigmoid_all_wx_b = _sigmoid(wx_b)
 
     pointwise_costs1 = ys * np.log(sigmoid_all_wx_b)
     pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b)
@@ -63,9 +70,11 @@ def logistic_regression(
         iters = iters + 1
 
         # update weights with gradient descent,  rule: d_loss/dwt_j = (1/N)*SUM[sigmoid(x_i)-y_i)*x_j_i]
+        # z = np.dot(xs.T, sigmoid_all_wx_b - ys)
         wts = wts - learning_rate * np.dot(xs.T, sigmoid_all_wx_b - ys) / num_pts
 
-        sigmoid_all_wx_b = _sigmoid(np.dot(xs, wts))
+        wx_b = np.dot(xs, wts)
+        sigmoid_all_wx_b = _sigmoid(wx_b)
 
         pointwise_costs1 = ys * np.log(sigmoid_all_wx_b)
         pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b)
@@ -119,7 +128,7 @@ def main() -> None:
     """_summary_"""
 
     # generate data
-    num_points = 200
+    num_points = 100
     xrange = [5, 80]
     mid_range = (xrange[0] + xrange[1]) / 2
     mean = np.random.uniform(0.75 * mid_range, 1.25 * mid_range)
@@ -130,7 +139,7 @@ def main() -> None:
     prob_xs_equal_1 = list(map(normal_cdf_at_x, xs, repeat(mean), repeat(variance)))
 
     ## generate labels from noise + probabilities
-    err = 0.10
+    err = 0.05
     random_prob_error = err * np.random.normal(size=num_points)
     prob_xs_plus_err = np.array(prob_xs_equal_1) + random_prob_error
     prob_xs_plus_err[prob_xs_plus_err > 1] = 1.0
@@ -147,7 +156,7 @@ def main() -> None:
 
     xs = np.stack((xs, np.ones(num_points))).T
     weights, _ = logistic_regression(
-        xs, labels, learning_rate=0.001, tolerance=1e-9, plot=False
+        xs, labels, learning_rate=0.003, tolerance=1e-8, plot=False
     )
 
     est_prob_xs = _sigmoid(np.dot(xs, weights))
@@ -166,7 +175,7 @@ def main() -> None:
         c=labels,
         cmap="Spectral",
         s=8,
-        label=f"Synthetic labels, error: \u00B1{err:.2f}",
+        label=f"Synthetic labels, error: \u00b1{err:.2f}",
     )
     plt.plot(
         xs[:, 0],

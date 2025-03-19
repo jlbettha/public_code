@@ -4,6 +4,11 @@ import matplotlib.pyplot as plt
 from numpy.typing import NDArray
 
 
+def a_star() -> None:
+
+    raise NotImplementedError
+
+
 def main() -> None:
 
     raise NotImplementedError

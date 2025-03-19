@@ -129,3 +129,11 @@ def flatten_lists(list_of_lists: list[Any]) -> list[Any]:
         for i in list_of_lists:
             flat_list.extend(flatten_lists(i))
     return flat_list
+
+
+def main() -> None:
+    print("my_helper_functions.py is a module")
+
+
+if __name__ == "__main__":
+    main()

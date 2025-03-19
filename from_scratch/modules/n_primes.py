@@ -140,7 +140,7 @@ def n_primes_a_sieve(n: int) -> NDArray[np.int64]:
 
 def main() -> None:
     n = 30000
-    _ = n_primes_bf(3)  # jit compile function on smaller run ("priming the jit")
+    _ = n_primes_bf(3)  # jit compile function on smaller run
     _ = n_primes_basic(3)
 
     t0 = time.time()

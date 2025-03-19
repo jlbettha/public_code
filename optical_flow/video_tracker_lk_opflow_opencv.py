@@ -13,7 +13,7 @@ def select_point(event: None, x: float, y: float, *_):
         old_points = np.array([[x, y]], dtype=np.float32)
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     cap = cv2.VideoCapture(0)
 
@@ -64,3 +64,7 @@ if __name__ == "__main__":
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+if __name__ == "__main__":
+    main()

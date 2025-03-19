@@ -199,3 +199,11 @@ def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
     m = 0.5 * (p + q)
     js_divergence = 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
     return np.sqrt(js_divergence)
+
+
+def main() -> None:
+    print("my_information_measures.py is a module")
+
+
+if __name__ == "__main__":
+    main()

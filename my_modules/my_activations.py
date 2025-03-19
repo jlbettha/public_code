@@ -102,3 +102,11 @@ def d_swish_dz(z):
     denom = 4 * (np.cosh(z / 2) ** 2)
     numer = z + np.sinh(z)
     return 0.5 + numer / denom
+
+
+def main() -> None:
+    print("my_activations.py is a module")
+
+
+if __name__ == "__main__":
+    main()

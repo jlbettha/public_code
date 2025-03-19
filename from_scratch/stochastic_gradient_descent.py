@@ -47,7 +47,7 @@ def main() -> None:
     # der_obj_db1 -->  -2 SUM (y-xb0-b1)
 
     ### gradient descent
-    learning_rate = 0.03
+    learning_rate = 0.01
     mini_idx = np.random.randint(0, N, size=mini_batch_size)
     w_est = np.random.randn(2)
     sse = ssd(x_mat @ w_est, ys_noisy) / N
@@ -56,12 +56,11 @@ def main() -> None:
     while True:
         k += 1
         dw = gradient_d_ssd_dw(x_mat[mini_idx, :], ys_noisy[mini_idx], w_est)
-        w_est = w_est - learning_rate * (0.99999**k) * dw / mini_batch_size
+        w_est = w_est - learning_rate * dw / mini_batch_size  # * (0.99999**k)
 
         sse = ssd(x_mat @ w_est, ys_noisy) / N
 
         mini_idx = np.random.randint(0, N, size=mini_batch_size)
-        # print(sse)
 
         sse_diff = np.abs(last_sse - sse)
 
@@ -71,7 +70,6 @@ def main() -> None:
         last_sse = sse
 
         if k % 100 == 0:
-            # print(sse_diff, flush=True)
             y_est = x_mat @ w_est
             plt.cla()
             plt.scatter(xs, ys_noisy)
@@ -91,9 +89,6 @@ def main() -> None:
             plt.pause(0.001)
 
     plt.close()
-    # print(w_vec)
-    # print(w_est)
-    # print(k)
 
     y_est = x_mat @ w_est
 
@@ -106,6 +101,7 @@ def main() -> None:
         xs,
         y_est,
         c="r",
+        ls=":",
         label=f"Stochastic gradient descent: y={w_est[0]:.2f}x+{w_est[1]:.2f}, {k} iters.",
     )
     plt.legend()

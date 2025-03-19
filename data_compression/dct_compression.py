@@ -1,5 +1,5 @@
-""" Betthauser, 2018: Discrete cosine transform compression 
-    >> Use when number of features (datapoint dimensions) is large.
+"""Betthauser, 2018: Discrete cosine transform compression
+>> Use when number of features (datapoint dimensions) is large.
 """
 
 import time
@@ -32,13 +32,12 @@ def dct_compression(data: NDArray[np.float64], factor: float = 0.2) -> ArrayTupl
 
 
 def normalize_image(img: NDArray[np.float64]) -> NDArray[np.uint8]:
-    """_summary_
-
+    """Min-max scale image to range [0,255] as uint8
     Args:
-        img (NDArray[np.float64]): _description_
+        img (NDArray[np.float64]): input image
 
     Returns:
-        NDArray[np.uint8]: _description_
+        NDArray[np.uint8]: scaled image
     """
     return ((img - img.min()) / (img.max() - img.min()) * 255).astype(np.uint8)
 

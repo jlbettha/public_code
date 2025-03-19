@@ -1,9 +1,3 @@
-from detectron2.structures import ImageList
-from torch import nn
-
-
-""" Parts of the U-Net model """
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -20,7 +14,7 @@ class DoubleConv(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True)
+            nn.ReLU(inplace=True),
         )
 
     def forward(self, x):
@@ -33,8 +27,7 @@ class Down(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
-            nn.MaxPool2d(2),
-            DoubleConv(in_channels, out_channels)
+            nn.MaxPool2d(2), DoubleConv(in_channels, out_channels)
         )
 
     def forward(self, x):
@@ -49,9 +42,11 @@ class Up(nn.Module):
 
         # if bilinear, use the normal convolutions to reduce the number of channels
         if bilinear:
-            self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+            self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
         else:
-            self.up = nn.ConvTranspose2d(in_channels // 2, in_channels // 2, kernel_size=2, stride=2)
+            self.up = nn.ConvTranspose2d(
+                in_channels // 2, in_channels // 2, kernel_size=2, stride=2
+            )
 
         self.conv = DoubleConv(in_channels, out_channels)
 
@@ -61,10 +56,15 @@ class Up(nn.Module):
         diffY = torch.tensor([x2.size()[2] - x1.size()[2]])
         diffX = torch.tensor([x2.size()[3] - x1.size()[3]])
 
-        x1 = F.pad(x1, [torch.div(diffX, 2, rounding_mode='floor'),
-                        diffX - torch.div(diffX, 2, rounding_mode='floor'),
-                        torch.div(diffY, 2, rounding_mode='floor'),
-                        diffY - torch.div(diffY, 2, rounding_mode='floor')])
+        x1 = F.pad(
+            x1,
+            [
+                torch.div(diffX, 2, rounding_mode="floor"),
+                diffX - torch.div(diffX, 2, rounding_mode="floor"),
+                torch.div(diffY, 2, rounding_mode="floor"),
+                diffY - torch.div(diffY, 2, rounding_mode="floor"),
+            ],
+        )
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
@@ -79,7 +79,7 @@ class OutConv(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, cfg, bilinear = True, device=torch.device('cuda')):
+    def __init__(self, cfg, bilinear=True, device=torch.device("cuda")):
         super(UNet, self).__init__()
         n_channels = 3
         out_channels = cfg.MODEL.MASK_FORMER.NUM_OBJECT_QUERIES
@@ -88,13 +88,17 @@ class UNet(nn.Module):
         self.size_divisibility = cfg.MODEL.MASK_FORMER.SIZE_DIVISIBILITY
         self.device = device
 
-        pixel_mean = cfg.MODEL.PIXEL_MEAN,
-        pixel_std = cfg.MODEL.PIXEL_STD,
-        self.register_buffer("pixel_mean", torch.Tensor(pixel_mean).view(1, -1, 1, 1), False)
-        self.register_buffer("pixel_std", torch.Tensor(pixel_std).view(1, -1, 1, 1), False)
+        pixel_mean = (cfg.MODEL.PIXEL_MEAN,)
+        pixel_std = (cfg.MODEL.PIXEL_STD,)
+        self.register_buffer(
+            "pixel_mean", torch.Tensor(pixel_mean).view(1, -1, 1, 1), False
+        )
+        self.register_buffer(
+            "pixel_std", torch.Tensor(pixel_std).view(1, -1, 1, 1), False
+        )
 
-        print('pixel_mean:', self.pixel_mean)
-        print('pixel_std:', self.pixel_std)
+        print("pixel_mean:", self.pixel_mean)
+        print("pixel_std:", self.pixel_std)
 
         self.inc = DoubleConv(n_channels, 64)
         self.down1 = Down(64, 128)
@@ -122,19 +126,18 @@ class UNet(nn.Module):
 
         return logits
 
-    def forward_base(self, batched_inputs, keys, get_train=False, get_eval=False, raw_sem_seg=None):
-        # key = keys[0]
-        # images = [x[key].to(self.device) for x in batched_inputs]
-        # images = [(x - self.pixel_mean) / self.pixel_std for x in images]
-        # images = ImageList.from_tensors(images, self.size_divisibility)
-        # return [{'sem_seg': x} for x in self.forward(images.tensor/255.)]
+    def forward_base(
+        self, batched_inputs, keys, get_train=False, get_eval=False, raw_sem_seg=None
+    ):
 
         images = (batched_inputs[keys[0]] - self.pixel_mean) / self.pixel_std
 
         r = self(images)
         ret = []
         for i in range(images.shape[0]):
-            ret.append({
-                'sem_seg': r[i],
-            })
+            ret.append(
+                {
+                    "sem_seg": r[i],
+                }
+            )
         return ret

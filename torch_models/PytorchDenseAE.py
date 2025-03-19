@@ -45,8 +45,7 @@ class PytorchDenseAE(torch.nn.Module):
         return decoded
 
 
-#### MAIN
-if __name__ == "__main__":
+def main() -> None:
     # Transform images to tensor
     tensor_transform = transforms.ToTensor()
 
@@ -89,3 +88,7 @@ if __name__ == "__main__":
 
         model_out = model_out.reshape(-1, 28, 28)
         plt.imshow(img)
+
+
+if __name__ == "__main__":
+    main()

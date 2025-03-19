@@ -1,5 +1,4 @@
-""" _summary_
-"""
+"""_summary_"""
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -72,7 +71,7 @@ def image_norm(img: NDArray[np.float64]) -> NDArray[np.float64]:
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     dicom_file = "./data/42211"
     factor = 2
@@ -125,3 +124,7 @@ if __name__ == "__main__":
             # plt.imshow(V)
             # plt.tight_layout()
             # plt.pause(0.001)
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,4 @@
-""" Betthauser, 2017: linear discriminant analysis
-"""
+"""Betthauser, 2017: linear discriminant analysis"""
 
 import time
 from typing import Any
@@ -53,7 +52,7 @@ def _generate_data(
 def _get_class_means_covs(
     X: NDArray[np.float64], y: NDArray[np.float64]
 ) -> NDArray[np.float64]:
-    """_summary_
+    """compute class-wise means and covariances
 
     Args:
         X (NDArray[np.float64]): data, shape: n x m

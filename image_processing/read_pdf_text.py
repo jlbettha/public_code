@@ -7,7 +7,8 @@ Created on Wed Dec  1 14:07:16 2021
 import os, time
 from pypdf import PdfReader
 
-if __name__ == "__main__":
+
+def main() -> None:
 
     ### Set folders and paths
     input_root = "./data/"
@@ -37,3 +38,7 @@ if __name__ == "__main__":
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("PDF Read took {:.6f} seconds".format(time.time() - t0))
+
+
+if __name__ == "__main__":
+    main()

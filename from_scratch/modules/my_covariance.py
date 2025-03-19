@@ -4,7 +4,7 @@ import numpy as np
 
 
 def covariance(x_mat: NDArray[np.float64]) -> NDArray[np.float64]:
-    """
+    """Compute covariance of a matrix
     Args:
         x_mat (NDArray[float]): (n x m) matrix where n is number of samples, and m is number of features
 
@@ -18,8 +18,8 @@ def covariance(x_mat: NDArray[np.float64]) -> NDArray[np.float64]:
     return x_cov
 
 
-if __name__ == "__main__":
-    x_mat1 = np.random.rand(1000, 5)
+def main() -> None:
+    x_mat1 = np.random.rand(1000, 200)
     x_matT = x_mat1.T
 
     t0 = time.time()
@@ -30,11 +30,15 @@ if __name__ == "__main__":
     npcov = np.cov(x_matT)
     tcov = time.time() - t1
 
-    print("my_cov: ", mycov)
-    print("np_cov: ", npcov)
+    # print("my_cov: ", mycov)
+    # print("np_cov: ", npcov)
 
-    print(f"my_cov time: {tfcov}")
-    print(f"np_cov time: {tcov}")
+    print(f"my_cov([{x_mat1.shape[0]} x {x_mat1.shape[1]}]) time: {tfcov}")
+    print(f"np.cov([{x_mat1.shape[0]} x {x_mat1.shape[1]}]) time: {tcov}")
 
     if np.sum(np.abs(mycov - npcov)) < 1e-9:
-        print("sanity achieved!")
+        print("my_cov() == np.cov(): sanity achieved!")
+
+
+if __name__ == "__main__":
+    main()

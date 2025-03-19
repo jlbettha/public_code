@@ -16,8 +16,8 @@ def mean_squared_error(ytrue, ypred):
 
 def mse_derivative(ytrue, ypred):
     return 2 * (ypred - ytrue) / np.size(ytrue)
-	
-	
+
+
 def vae_loss(mean, var) -> float:
     """_summary_
 
@@ -410,3 +410,11 @@ def unet3p_hybrid_loss() -> float:
         return 0.6 * FTV + 0.1 * SSIM + 0.1 * JAC + 0.2 * WCE
 
     return loss
+
+
+def main() -> None:
+    print("my_loss_functions.py is a module")
+
+
+if __name__ == "__main__":
+    main()

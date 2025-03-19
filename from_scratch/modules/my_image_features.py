@@ -191,11 +191,8 @@ def jh5_image_features(image: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def main() -> None:
-    """_summary_"""
-    pass
+    print("my_image_features.py is a module")
 
 
 if __name__ == "__main__":
-    t0 = time.time()
     main()
-    print(f"Program took {time.time() - t0:.3f} seconds")

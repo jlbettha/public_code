@@ -23,7 +23,7 @@ def identity(image, **kwargs):
     return image
 
 
-if __name__ == "__main__":
+def main() -> None:
     pwd = os.getcwd()
     dicom_file = "./data/42211"
     dicom_data = pydicom.dcmread(dicom_file)
@@ -137,3 +137,7 @@ if __name__ == "__main__":
 
     plt.tight_layout()
     plt.show()
+
+
+if __name__ == "__main__":
+    main()

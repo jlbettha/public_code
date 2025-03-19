@@ -46,7 +46,7 @@ def main() -> None:
     # der_obj_db1 -->  -2 SUM (y-xb0-b1)
 
     ### gradient descent
-    learning_rate = 0.03
+    learning_rate = 0.02
     w_est = np.random.randn(2)
     sse = ssd(x_mat @ w_est, ys_noisy) / N
     last_sse = sse
@@ -109,7 +109,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-
     tmain = time.time()
     main()
     print(f"Program took {time.time()-tmain:.3f} seconds.")

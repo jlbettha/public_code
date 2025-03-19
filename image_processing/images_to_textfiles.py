@@ -66,7 +66,7 @@ def image_directory_to_textfiles(image_path: str, output_textfile_path: str) -> 
     return None
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     ### Set folders and paths
     image_path = "C:/Users/jlbetthauser/OneDrive/Images/"
@@ -78,3 +78,7 @@ if __name__ == "__main__":
     image_directory_to_textfiles(image_path, text_path)
 
     print("Image conversion took {:.6f} seconds".format(time.time() - t0))
+
+
+if __name__ == "__main__":
+    main()

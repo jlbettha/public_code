@@ -46,10 +46,14 @@ def pdf_directory_to_textfiles(pdf_root: str, text_root: str) -> None:
     return None
 
 
-if __name__ == "__main__":
+def main() -> None:
     t0 = time.time()
 
     pdf_root = "C:/Users/jlbetthauser/Documents/Code/Python/temp_code_playground/image2text_outputs/"
     pdf_directory_to_textfiles(pdf_root, pdf_root)
 
     print("PDF reads took {:.6f} seconds".format(time.time() - t0))
+
+
+if __name__ == "__main__":
+    main()
