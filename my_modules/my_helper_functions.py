@@ -71,8 +71,18 @@ def plot_confusion_matrix(
     return ax
 
 
-### filter a prediction stream to stabilize/improve accuracy (penalty is delay), input width=1 for no filter
-def majority_filter(seq, width):
+###
+def majority_filter(seq: NDArray[np.int8], width: int) -> int:
+    """majority vote filter for temporal classification streams/sequences
+        to stabilize/improve accuracy (penalty is delay), input width=1 for no filter
+
+    Args:
+        seq (NDArray[np.float64]): raw prediction sequence
+        width (int): filter length/width
+
+    Returns:
+        int: majority vote
+    """
     offset = width // 2
     seq = [0] * offset + seq
     result = []
@@ -82,14 +92,31 @@ def majority_filter(seq, width):
     return np.squeeze(result)
 
 
-def anybase2decimal(number, other_base):
+def anybase2decimal(number: int, other_base: int) -> int:
+    """convert any base number to decimal
+
+    Args:
+        number (int): _description_
+        other_base (int): _description_
+
+    Returns:
+        int: _description_
+    """
     return np.sum(
         [(int(v) * other_base**i) for i, v in enumerate(list(str(number))[::-1])]
     )
 
 
 @njit
-def decimal2ternary(number):
+def decimal2ternary(number: int) -> int:
+    """convert decimal to ternary
+
+    Args:
+        number (int): _description_
+
+    Returns:
+        int: _description_
+    """
     arr = np.zeros(2)
     i = 2
     while number:
@@ -98,7 +125,20 @@ def decimal2ternary(number):
     return arr
 
 
-def smooth(x, window_len):
+def smooth(x: NDArray[np.float64], window_len: int) -> NDArray[np.float64]:
+    """generic decent smoothing procedure (appropriate smoothing will always be data dependent)
+
+    Args:
+        x (NDArray[np.float64]): raw signal
+        window_len (int): smoothing window length
+
+    Raises:
+        ValueError: _description_
+        ValueError: _description_
+
+    Returns:
+        NDArray[np.float64]: smoothed signal
+    """
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.")
     if x.size < window_len:
@@ -118,7 +158,7 @@ def flatten_lists(list_of_lists: list[Any]) -> list[Any]:
         list_of_lists (Any list[list[list[...]]]): any depth lists within lists
 
     Returns:
-        _type_: flattened list
+        list[Any]: flattened list
     """
     if isinstance(list_of_lists, int):
         return list_of_lists

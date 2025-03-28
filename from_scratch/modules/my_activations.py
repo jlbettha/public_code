@@ -5,8 +5,8 @@ from scipy.special import erf
 
 
 @njit
-def relu(wx_b):
-    return np.maximum(wx_b, 0)
+def relu(z):
+    return np.maximum(z, 0)
 
 
 @njit

@@ -1,4 +1,4 @@
-""" summary """
+"""summary"""
 
 import numpy as np
 from numba import njit
@@ -6,7 +6,7 @@ from numba import njit
 
 @njit
 def prob2odds(prob: float) -> float:
-    """_summary_
+    """convert probability to odds
 
     Args:
         prob (float): probability
@@ -19,7 +19,7 @@ def prob2odds(prob: float) -> float:
 
 @njit
 def odds2prob(odds: float) -> float:
-    """_summary_
+    """convert odds to probability
 
     Args:
         odds (float): odds

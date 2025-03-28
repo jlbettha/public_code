@@ -57,14 +57,14 @@ def information_gain(
 
 @njit
 def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
-    """_summary_
+    """Betthauser - 2024 - Get gini index, a measure of inequality (e.g., 0.0 means equal ditribution)
 
     Args:
         x (NDArray[np.float64]): _description_
-        w (NDArray[np.float64], optional): _description_. Defaults to None.
+        w (NDArray[np.float64], optional): sample weights. Defaults to None.
 
     Returns:
-        float: _description_
+        float: gini index/coefficient
     """
     if w is not None:
         w = np.asarray(w)
@@ -88,7 +88,7 @@ def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
 def joint_histogram_2d(
     patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: float = 255.0
 ) -> NDArray[np.float64]:
-    """Computes joint histogram of 2 image sections/patches
+    """Betthauser - 2018 - Computes joint histogram of 2 image sections/patches
     Args:
         img1 (NDArray[np.float64]): image patch 1
         img2 (NDArray[np.float64]): image patch 2

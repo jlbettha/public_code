@@ -11,11 +11,10 @@ import cv2
 from scipy.signal import convolve2d
 from skimage.filters import threshold_otsu, sobel
 from skimage.color import rgb2gray
-from skimage.util import img_as_float
 from scipy.ndimage import gaussian_laplace
 from numpy.typing import NDArray
 from numba import njit
-from typing import Callable
+from my_distance_metrics import minmax_scaling, bhattacharyya_dist
 
 # from skimage.restoration import estimate_sigma
 # from skimage.measure import blur_effect
@@ -25,8 +24,6 @@ from typing import Callable
 def blurriness2(
     image: NDArray[np.float64],
     h_size: int = 11,
-    channel_axis: int = None,
-    reduce_func: Callable = np.mean,
 ) -> float:
     """metric that indicates the strength of blur in an image (0 for no blur, 1 for maximal blur).
             [1] Frederique Crete, et al. "The blur effect: perception and estimation with a new
@@ -34,59 +31,52 @@ def blurriness2(
             https://hal.archives-ouvertes.fr/hal-00232709:DOI:'10.1117/12.702790'
 
     Args:
-        image (_type_): image
+        image (NDArray): image
         h_size (int, optional): Size of the re-blurring filter. Defaults to 11.
-        channel_axis (_type_, optional): if None, the image is assumed to be grayscale (single-channel).
-                                        Otherwise, this parameter indicates which axis of the array
-                                        corresponds to color channels.. Defaults to None.
-        reduce_func (_type_, optional): Function used to calculate the aggregation of blur metrics along all
-                                        axes. If set to None, the entire list is returned, where the i-th
-                                        element is the blur metric along the i-th axis.. Defaults to np.mean.
 
     Returns:
         float: Blur metric in [0,1]: by default, the maximum (JLB changed to mean) of blur metrics along all axes.
     """
 
-    if channel_axis is not None:
-        image = np.moveaxis(image, channel_axis, -1)
-        image = rgb2gray(image)
-
-    n_axes = image.ndim
-    image = img_as_float(image)
-    shape = image.shape
-    B = []
-
-    slices = tuple([slice(2, s - 1) for s in shape])
-    for ax in range(n_axes):
+    B = np.zeros(2)
+    slices = tuple([slice(2, s - 1) for s in image.shape])
+    for ax in range(image.ndim):
         filt_im = ndi.uniform_filter1d(image, h_size, axis=ax)
         im_sharp = np.abs(sobel(image, axis=ax))
         im_blur = np.abs(sobel(filt_im, axis=ax))
         T = np.maximum(0, im_sharp - im_blur)
         M1 = np.sum(im_sharp[slices])
         M2 = np.sum(T[slices])
-        B.append(np.abs(M1 - M2) / M1)
+        B[ax] = np.abs(M1 - M2) / M1
 
-    return B if reduce_func is None else reduce_func(B)
+    return np.max(B)
 
 
 def otsu_threshold(img: NDArray[np.float64]) -> float:
+    """Calculate otsu's threshold
+
+    Args:
+        img (NDArray[np.float64]): input image
+
+    Returns:
+        float: otsu's threshold
+    """
     blur = cv2.GaussianBlur(img, (5, 5), 0)
     thr = threshold_otsu(blur)
     # _,thr = cv2.threshold(blur,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     return thr
 
 
-@njit
-def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
-    part1 = 0.25 * np.log(0.25 * (v1 / v2 + v2 / v1 + 2))
-    part2 = 0.25 * (((mu1 - mu2) ** 2) / (v1 + v2))
-    return part1 + part2
-
-
 def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
+    """_summary_
+
+    Args:
+        img (NDArray[np.float64]): input image
+
+    Returns:
+        float: bhattacharya distance between image data above otsu threshold and below threshold
+    """
     threshold = otsu_threshold(img)
-    if threshold >= 255 or threshold <= 0:
-        return 0.0
 
     mu1, v1 = np.nanmean(img[img >= threshold]), np.nanvar(img[img >= threshold])
     mu2, v2 = np.nanmean(img[img < threshold]), np.nanvar(img[img < threshold])
@@ -114,7 +104,7 @@ def estimate_noise(img: NDArray[np.float64]) -> float:
         float: noise estimate
     """
     h, w = img.shape
-    mfilter = [[1, -2, 1], [-2, 4, -2], [1, -2, 1]]
+    mfilter = np.array([[1, -2, 1], [-2, 4, -2], [1, -2, 1]])
 
     sum_t = np.sum(np.absolute(convolve2d(img, mfilter)))
     sigma = sum_t * np.sqrt(0.5 * np.pi) / (6 * (w - 2) * (h - 2))
@@ -122,7 +112,7 @@ def estimate_noise(img: NDArray[np.float64]) -> float:
 
 
 ## snr
-@njit
+# @njit
 def signal_to_noise(img: NDArray[np.float64]) -> float:
     """A rough analogue to signal-to-noise ratio of the input data.
         Returns the snr of img, here defined as the mean
@@ -134,16 +124,23 @@ def signal_to_noise(img: NDArray[np.float64]) -> float:
     Returns:
         float: snr
     """
-    anz = img  # img[img > 1]
-    n = anz.shape[0]
-    if n <= 1:
-        return 0.0
+    anz = img[img > 0]
     m = np.nanmean(anz)
     sdv = np.sqrt(np.nanvar(anz))
+    if sdv == 0.0:
+        return 0.0
     return m / sdv
 
 
 def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
+    """_summary_
+
+    Args:
+        img (NDArray[np.float64]): _description_
+
+    Returns:
+        float: _description_
+    """
     # lap = cv2.convertScaleAbs(cv2.Laplacian(img, 5))
     lap = np.abs(gaussian_laplace(img, sigma=3))
     return np.mean(lap[lap > 0])
@@ -158,9 +155,6 @@ def jlb_iqa(img):
     Returns:
         tuple[float]: tuple of no-reference measures
     """
-    img[img > 255] = 255
-    img[img < 0] = 0
-    img = img.astype(np.float64)
     snr = signal_to_noise(img)
     est_noise = estimate_noise(img)
     blur2 = blurriness2(img)
@@ -173,7 +167,10 @@ def jlb_iqa(img):
 def main() -> None:
     img = cv2.imread("einstein.jpg")
     img = rgb2gray(img)
-    print(jlb_iqa(img))
+    img = minmax_scaling(img) / 255.0
+
+    snr, est_noise, blur2, lap_edge_str, est_var, otsu = jlb_iqa(img)
+    print(f"{snr=}, {est_noise=}, {blur2=}, {lap_edge_str=}, {est_var=}, {otsu=}")
 
 
 if __name__ == "__main__":
@@ -187,4 +184,4 @@ if __name__ == "__main__":
     tlast = time.time() - tmain
     print(f"Program took {tlast:.3f} seconds.")
 
-    print(f"njit speed-up: {tfirst/tlast:.3f}x")
+    print(f"jit speed-up: {tfirst/tlast:.3f}x")
