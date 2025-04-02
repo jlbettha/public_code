@@ -1,6 +1,6 @@
 # pylint: disable=C0103
-""" Betthauser, 2022 - Hierarchical clustering from scratch
-        Currently, "load_breast_cancer" dataset.
+"""Betthauser, 2022 - Hierarchical clustering from scratch
+Currently, "load_breast_cancer" dataset.
 """
 
 import time
@@ -91,7 +91,6 @@ def main() -> None:
     # X = scaler.fit_transform(X)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.01)
-    print(f"{X_train.shape=}, {y_train.shape=}, {X_test.shape=}, {y_test.shape=}")
 
     tiny_noise = 1e-11 * np.random.uniform(size=(X_train.shape[0], X_train.shape[1]))
     X_train = X_train + tiny_noise
@@ -115,6 +114,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

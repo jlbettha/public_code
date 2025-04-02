@@ -447,14 +447,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    t0 = time.time()
+    t0 = time.perf_counter()
     main()
-    tf1 = time.time() - t0
+    tf1 = time.perf_counter() - t0
     print(f"Program took {tf1:.3f} seconds")
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     main()
-    tf2 = time.time() - t0
+    tf2 = time.perf_counter() - t0
     print(f"1st run took {tf1:.3f} seconds")
     print(f"2nd run took {tf2:.3f} seconds")
 

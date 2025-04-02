@@ -1,5 +1,4 @@
-""" Betthauser, 2020: support vector machine, RBF kernel (for now)
-"""
+"""Betthauser, 2020: support vector machine, RBF kernel (for now)"""
 
 import time
 import numpy as np
@@ -168,22 +167,22 @@ def main() -> None:
     # X_train = scaler.fit_transform(X_train)
     # X_test = scaler.transform(X_test)
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     X_train_rbf = compute_kernel_matrix(X_train, radial_basis_func, gamma=gamma)
-    print(f"build rbf kernel: {time.time()-t0:.3f} seconds")
+    print(f"build rbf kernel: {time.perf_counter()-t0:.3f} seconds")
 
     X_train_rbf = np.c_[X_train_rbf, np.ones(X_train_rbf.shape[0])]
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     weights, its = support_vector_machine(
         X_train_rbf, y_train, learning_rate=learning_rate, iters=iters, C=c, tol=tol
     )
-    print(f"train time: {time.time()-t0:.3f} seconds in {its+1} iterations")
+    print(f"train time: {time.perf_counter()-t0:.3f} seconds in {its+1} iterations")
 
     y_pred = []
     # X_test, y_test = X_train, y_train  # test on training data, should be close to 100%
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     for i in range(len(y_test)):
         test_pt = X_test[i, :]
         test_pt_rbf = np.array(
@@ -197,8 +196,10 @@ def main() -> None:
         y_pred.append(np.argmax(one_hot_test))
         # print(np.argmax(one_hot_test), y_test[i])
 
-    print(f"avg predict time: {(time.time()-t0)/len(y_test):.3f} seconds")
-    print(f"predict time for {len(y_test)} examples: {(time.time()-t0):.3f} seconds")
+    print(f"avg predict time: {(time.perf_counter()-t0)/len(y_test):.3f} seconds")
+    print(
+        f"predict time for {len(y_test)} examples: {(time.perf_counter()-t0):.3f} seconds"
+    )
     print(f"test accuracy: {accuracy_score(np.array(y_pred), y_test):.4f}")
 
     # Create a grid to plot the decision boundary
@@ -208,7 +209,7 @@ def main() -> None:
     xx, yy = np.meshgrid(np.arange(x_min, x_max, delta), np.arange(y_min, y_max, delta))
     xx_long, yy_long = xx.ravel(), yy.ravel()
     Z = []
-    t0 = time.time()
+    t0 = time.perf_counter()
     for i in range(len(xx_long)):
 
         test_pt = np.c_[xx_long[i], yy_long[i]]
@@ -222,8 +223,10 @@ def main() -> None:
         one_hot_test = weights @ test_pt_rbf
         Z.append(np.argmax(one_hot_test))
 
-    print(f"avg predict time: {(time.time()-t0)/len(xx_long):.3f} seconds")
-    print(f"predict time for {len(xx_long)} examples: {(time.time()-t0):.3f} seconds")
+    print(f"avg predict time: {(time.perf_counter()-t0)/len(xx_long):.3f} seconds")
+    print(
+        f"predict time for {len(xx_long)} examples: {(time.perf_counter()-t0):.3f} seconds"
+    )
 
     Z = np.array(Z).reshape(xx.shape)
 
@@ -239,6 +242,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

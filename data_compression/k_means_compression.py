@@ -1,6 +1,6 @@
-""" Betthauser, 2018: k-means compression
-    >> Use when number of samples is large. 
-    >> Use when compressed data do not need to be members of original data.
+"""Betthauser, 2018: k-means compression
+>> Use when number of samples is large.
+>> Use when compressed data do not need to be members of original data.
 """
 
 import time
@@ -91,6 +91,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    t0 = time.time()
+    t0 = time.perf_counter()
     main()
-    print(f"Program took {time.time()-t0:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-t0:.3f} seconds.")

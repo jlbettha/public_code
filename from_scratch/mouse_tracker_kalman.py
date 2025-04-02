@@ -138,7 +138,7 @@ def main() -> None:
     plt.legend()
 
     while True:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         cursor = np.array(mouse.get_position())
         cursor[1] = dim_fix - cursor[1]
@@ -184,7 +184,7 @@ def main() -> None:
             plt.close()
             break
 
-        tf = time.time() - t0
+        tf = time.perf_counter() - t0
 
         if tf > dt:
             time.sleep(0.001)
@@ -193,6 +193,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

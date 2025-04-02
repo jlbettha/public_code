@@ -1,5 +1,5 @@
-""" Betthauser, J. 2023 - personal manual object oriented implementation for building 
-        layer-wise prediction models.
+"""Betthauser, J. 2023 - personal manual object oriented implementation for building
+layer-wise prediction models.
 """
 
 import numpy as np
@@ -149,6 +149,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

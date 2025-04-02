@@ -140,7 +140,7 @@ def main() -> None:
     plt.legend()
 
     while True:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         ## Get real current x,y position of cursor
         cursor = np.array(mouse.get_position())
@@ -188,7 +188,7 @@ def main() -> None:
             plt.close()
             break
 
-        tf = time.time() - t0
+        tf = time.perf_counter() - t0
 
         if tf > dt:
             time.sleep(0.001)

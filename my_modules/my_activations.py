@@ -1,9 +1,9 @@
 import numpy as np
 from numba import njit
-
 from scipy.special import erf
 
 
+### relu applied to z
 @njit
 def relu(z):
     return np.maximum(z, 0)
@@ -14,6 +14,7 @@ def d_relu_dz(z):
     return z > 0
 
 
+### prelu applied to z
 @njit
 def prelu(z, a):
     return np.maximum(z, a * z)

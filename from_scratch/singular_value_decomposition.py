@@ -1,5 +1,5 @@
 # pylint: disable=C0103
-""" Betthauser, 2020: 
+"""Betthauser, 2020:
 SVD: sigular value decomposition, A = U @ SIGMA @ V.T
 """
 
@@ -94,6 +94,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

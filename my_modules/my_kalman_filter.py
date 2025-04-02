@@ -101,7 +101,7 @@ def kalman_predict(
     return x_, P_
 
 
-if __name__ == "__main__":
+def main() -> None:
 
     plt.ion()  # interactive plots on
 
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     plt.legend()
 
     while True:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         cursor = np.array(mouse.get_position())
         cursor[1] = dim_fix - cursor[1]
@@ -184,9 +184,15 @@ if __name__ == "__main__":
             plt.close()
             break
 
-        tf = time.time() - t0
+        tf = time.perf_counter() - t0
 
         if tf > dt:
             time.sleep(0.001)
         else:
             time.sleep(dt - tf)
+
+
+if __name__ == "__main__":
+    tmain = time.perf_counter()
+    main()
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

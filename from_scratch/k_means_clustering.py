@@ -1,5 +1,4 @@
-""" Betthauser, 2018: k-means clustering
-"""
+"""Betthauser, 2018: k-means clustering"""
 
 import time
 import numpy as np
@@ -70,11 +69,11 @@ def _generate_data(
     covs = np.zeros((num_clusters, dim, dim))
 
     for c in range(num_clusters):
-        amat = np.random.randn(dim, dim)  # + np.eye(dim)
+        amat = np.random.randn(dim, dim)
         amat = amat / amat.max()
-        covs[c, :, :] = np.cov(amat)
+        covs[c, :, :] = amat @ amat.T
 
-    rand_factor = np.random.uniform(0, 5, size=num_clusters)
+    rand_factor = np.random.uniform(0, 3, size=num_clusters)
 
     data = [
         np.random.multivariate_normal(
@@ -92,10 +91,10 @@ def _generate_data(
 
 def main() -> None:
     """_summary_"""
-    k = 8
-    num_actual_clusters = 8
+    k = 7
+    num_actual_clusters = 7
     num_dims = 2
-    num_pts_per_cluster = 500
+    num_pts_per_cluster = 400
 
     data = _generate_data(num_actual_clusters, num_dims, num_pts_per_cluster)
     labels, iters, k_means = k_means_clustering(data, k, plot=False)
@@ -110,6 +109,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

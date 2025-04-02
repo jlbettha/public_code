@@ -143,13 +143,16 @@ def main() -> None:
     _ = n_primes_bf(3)  # jit compile function on smaller run
     _ = n_primes_basic(3)
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     _ = n_primes_bf(n)
-    print(f"Brute force took {time.time()-t0:.3f} seconds.")
+    tfirst = time.perf_counter() - t0
+    print(f"Brute force took {tfirst:.3f} seconds.")
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     _ = n_primes_basic(n)
-    print(f"Basic method took {time.time()-t0:.3f} seconds.")
+    tlast = time.perf_counter() - t0
+    print(f"Basic method took {tlast:.3f} seconds.")
+    print(f"jit speed-up: {tfirst/tlast:.3f}x")
 
 
 if __name__ == "__main__":

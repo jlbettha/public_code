@@ -77,21 +77,24 @@ def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
         float: bhattacharya distance between image data above otsu threshold and below threshold
     """
     threshold = otsu_threshold(img)
-
-    mu1, v1 = np.nanmean(img[img >= threshold]), np.nanvar(img[img >= threshold])
-    mu2, v2 = np.nanmean(img[img < threshold]), np.nanvar(img[img < threshold])
-    if v1 <= 0 or v2 <= 0 or np.isnan(v1) or np.isnan(v2):
+    img = img.ravel()
+    img = img[np.nonzero(img)]
+    img_hi = img[np.where(img >= threshold)]
+    img_lo = img[np.where(img < threshold)]
+    mu1, v1 = np.mean(img_hi), np.var(img_hi)
+    mu2, v2 = np.mean(img_lo), np.var(img_lo)
+    if v1 <= 0 or v2 <= 0:
         return 0.0
-    if mu1 <= 0 or mu2 <= 0 or np.isnan(mu1) or np.isnan(mu2):
-        return 0.0
-    if np.isinf(v1) or np.isinf(v2) or np.isinf(mu1) or np.isinf(mu2):
+    if mu1 <= 0 or mu2 <= 0:
         return 0.0
     return bhattacharyya_dist(mu1, v1, mu2, v2)
 
 
 @njit
 def estimate_variance(img: NDArray[np.float64]) -> float:
-    return np.nanvar(img)
+    img = img.ravel()
+    img = img[np.nonzero(img)]
+    return np.var(img)
 
 
 def estimate_noise(img: NDArray[np.float64]) -> float:
@@ -112,7 +115,7 @@ def estimate_noise(img: NDArray[np.float64]) -> float:
 
 
 ## snr
-# @njit
+@njit
 def signal_to_noise(img: NDArray[np.float64]) -> float:
     """A rough analogue to signal-to-noise ratio of the input data.
         Returns the snr of img, here defined as the mean
@@ -124,9 +127,10 @@ def signal_to_noise(img: NDArray[np.float64]) -> float:
     Returns:
         float: snr
     """
-    anz = img[img > 0]
-    m = np.nanmean(anz)
-    sdv = np.sqrt(np.nanvar(anz))
+    img = img.ravel()
+    anz = img[np.nonzero(img)]
+    m = np.mean(anz)
+    sdv = np.sqrt(np.var(anz))
     if sdv == 0.0:
         return 0.0
     return m / sdv
@@ -143,10 +147,10 @@ def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
     """
     # lap = cv2.convertScaleAbs(cv2.Laplacian(img, 5))
     lap = np.abs(gaussian_laplace(img, sigma=3))
-    return np.mean(lap[lap > 0])
+    return np.mean(lap[np.nonzero(lap)])
 
 
-def jlb_iqa(img):
+def jlb_iqa(img: NDArray[np.float64]) -> tuple[float]:
     """Compute all 6 no-reference measures
 
     Args:
@@ -161,7 +165,7 @@ def jlb_iqa(img):
     lap_edge_str = laplacian_edge_strength(img)
     est_var = estimate_variance(img)
     otsu = otsu_interclass_distance(img)
-    return (snr, est_noise, blur2, lap_edge_str, est_var, otsu)
+    return snr, est_noise, blur2, lap_edge_str, est_var, otsu
 
 
 def main() -> None:
@@ -174,14 +178,14 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    tfirst = time.time() - tmain
+    tfirst = time.perf_counter() - tmain
     print(f"Program took {tfirst:.3f} seconds.")
 
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    tlast = time.time() - tmain
+    tlast = time.perf_counter() - tmain
     print(f"Program took {tlast:.3f} seconds.")
 
     print(f"jit speed-up: {tfirst/tlast:.3f}x")

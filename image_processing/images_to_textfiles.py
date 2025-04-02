@@ -73,11 +73,11 @@ def main() -> None:
     text_path = "C:/Users/jlbetthauser/Documents/Code/Python/temp_code_playground/image2text_outputs/"
 
     #### images to text
-    t0 = time.time()
+    t0 = time.perf_counter()
 
     image_directory_to_textfiles(image_path, text_path)
 
-    print("Image conversion took {:.6f} seconds".format(time.time() - t0))
+    print("Image conversion took {:.6f} seconds".format(time.perf_counter() - t0))
 
 
 if __name__ == "__main__":

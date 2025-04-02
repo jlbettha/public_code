@@ -26,7 +26,7 @@ def main() -> None:
 
     coeffs = np.array([3, 0, 2.5, 1, 0, 1, 0, 0.2, 0.5, 0, 0.0])
     poly_degree = len(coeffs) - 1
-    xs = np.linspace(-1.7, 1.7, 25)
+    xs = np.linspace(-1.7, 1.7, 35)
 
     f_x = (
         np.array(
@@ -133,6 +133,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    tmain = time.time()
+    tmain = time.perf_counter()
     main()
-    print(f"Program took {time.time()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

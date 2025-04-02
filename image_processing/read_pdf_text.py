@@ -23,7 +23,7 @@ def main() -> None:
     print(pdf_files)
 
     #### PDF to text
-    t0 = time.time()
+    t0 = time.perf_counter()
     pdf = PdfReader(input_root + "nsf-reference-writers-guide.pdf")
     num_pages = pdf.get_num_pages()
     # info = pdf.getDocumentInfo()
@@ -37,7 +37,7 @@ def main() -> None:
         print(text)
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("PDF Read took {:.6f} seconds".format(time.time() - t0))
+    print("PDF Read took {:.6f} seconds".format(time.perf_counter() - t0))
 
 
 if __name__ == "__main__":

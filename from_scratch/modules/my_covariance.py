@@ -22,13 +22,13 @@ def main() -> None:
     x_mat1 = np.random.rand(1000, 200)
     x_matT = x_mat1.T
 
-    t0 = time.time()
+    t0 = time.perf_counter()
     mycov = covariance(x_mat1)
-    tfcov = time.time() - t0
+    tfcov = time.perf_counter() - t0
 
-    t1 = time.time()
+    t1 = time.perf_counter()
     npcov = np.cov(x_matT)
-    tcov = time.time() - t1
+    tcov = time.perf_counter() - t1
 
     # print("my_cov: ", mycov)
     # print("np_cov: ", npcov)

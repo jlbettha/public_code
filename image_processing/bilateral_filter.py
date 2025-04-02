@@ -1,16 +1,16 @@
-"""Betthauser, 2018 - 
-    This function implements 2-D bilateral filtering using
-    the method outlined in:
+"""Betthauser, 2018 -
+This function implements 2-D bilateral filtering using
+the method outlined in:
 
-    C. Tomasi and R. Manduchi. Bilateral Filtering for 
-    Gray and Color Images. In Proceedings of the IEEE 
-    International Conference on Computer Vision, 1998. 
+C. Tomasi and R. Manduchi. Bilateral Filtering for
+Gray and Color Images. In Proceedings of the IEEE
+International Conference on Computer Vision, 1998.
 
-    w is the half-size of the bilateral filter window. The standard
-    deviations of the bilateral filter are given by SIGMA,
-    where the spatial-domain standard deviation is given by
-    sigma_d and the intensity-domain standard deviation is
-    given by sigma_r.
+w is the half-size of the bilateral filter window. The standard
+deviations of the bilateral filter are given by SIGMA,
+where the spatial-domain standard deviation is given by
+sigma_d and the intensity-domain standard deviation is
+given by sigma_r.
 """
 
 import time
@@ -202,6 +202,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    t0 = time.time()
+    t0 = time.perf_counter()
     main()
-    print(f"Program took {time.time()-t0:.3f} seconds.")
+    print(f"Program took {time.perf_counter()-t0:.3f} seconds.")
