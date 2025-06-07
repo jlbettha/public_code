@@ -171,15 +171,15 @@ def bilateral_filter_color(
 def main() -> None:
     """_summary_"""
     #  img = Image.open("lena_noisy.png")
-    img = Image.open("31734105968_14c1b75765_o.jpg")
+    img = Image.open("./data/31734105968_14c1b75765_o.jpg")
     img = np.array(img)
     print(img.shape)
 
-    # scale_factor = 0.50  # percent of original size
-    # width = int(img.shape[1] * scale_factor)
-    # height = int(img.shape[0] * scale_factor)
-    # dim = (width, height)
-    # img = cv2.resize(img, dim, interpolation=cv2.INTER_CUBIC)
+    scale_factor = 0.75  # percent of original size
+    width = int(img.shape[1] * scale_factor)
+    height = int(img.shape[0] * scale_factor)
+    dim = (width, height)
+    img = cv2.resize(img, dim, interpolation=cv2.INTER_CUBIC)
 
     filt_image = bilateral_filter(img)
 

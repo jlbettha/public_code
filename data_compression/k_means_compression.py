@@ -83,7 +83,6 @@ def main() -> None:
         zorder=1,
         marker="o",
         label="Cluster means",
-        cmap="gist_ncar",
     )
     plt.title(f"k-means clustering, converged in {iters} iterations.")
     plt.legend()

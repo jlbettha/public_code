@@ -84,7 +84,6 @@ def main() -> None:
         zorder=1,
         marker="o",
         label="Cluster medians",
-        cmap="gist_ncar",
     )
     plt.title(f"k-medians clustering, converged in {iters} iterations.")
     plt.legend()
