@@ -1,21 +1,14 @@
 [project]
-name = "from-scratch"
+name = "modules"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "keyboard>=0.13.5",
     "matplotlib>=3.10.3",
-    "mouse>=0.7.1",
     "numba>=0.61.2",
-    "pandas>=2.3.0",
-    "pylops>=2.4.0",
+    "opencv-python>=4.11.0.86",
+    "scikit-image>=0.25.2",
     "scikit-learn>=1.7.0",
     "scipy>=1.15.3",
-]
-
-[tool.uv.workspace]
-members = [
-    "modules",
 ]

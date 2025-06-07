@@ -1,5 +1,4 @@
 import numpy as np
-import math
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 from numpy.typing import NDArray
