@@ -39,7 +39,7 @@ def logistic_regression(
     tolerance: float = 1e-6,
     plot: bool = False,
 ) -> Any:
-    """_summary_
+    """logistic_regression
 
     Args:
         xs (NDArray[np.float64]): data points + appended bias column of 1s
@@ -139,7 +139,7 @@ def main() -> None:
     prob_xs_equal_1 = list(map(normal_cdf_at_x, xs, repeat(mean), repeat(variance)))
 
     ## generate labels from noise + probabilities
-    err = 0.05
+    err = 0.00005
     random_prob_error = err * np.random.normal(size=num_points)
     prob_xs_plus_err = np.array(prob_xs_equal_1) + random_prob_error
     prob_xs_plus_err[prob_xs_plus_err > 1] = 1.0

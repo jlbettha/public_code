@@ -299,16 +299,16 @@ def radix_sort(arr: NumArray) -> NumArray:
 
 
 def main() -> None:
-    warmup_list = np.array([56, 79, 11, 42, 2, 4, 8]).astype(np.uint64)
-    print(f"Unsorted array: {warmup_list}")
+    warmup_array = np.array([56, 79, 11, 42, 2, 4, 8]).astype(np.uint64)
+    print(f"Unsorted array: {warmup_array}")
 
-    print(insertion_sort(warmup_list.copy()))
-    print(selection_sort(warmup_list.copy()))
-    print(heap_sort(warmup_list.copy()))
-    print(tim_sort(warmup_list.copy()))
-    print(radix_sort(warmup_list.copy()))
-    print(bubble_sort(warmup_list.copy()))
-    print(counting_sort(warmup_list.copy()))
+    print(insertion_sort(warmup_array.copy()))
+    print(selection_sort(warmup_array.copy()))
+    print(heap_sort(warmup_array.copy()))
+    print(tim_sort(warmup_array.copy()))
+    print(radix_sort(warmup_array.copy()))
+    print(bubble_sort(warmup_array.copy()))
+    print(counting_sort(warmup_array.copy()))
 
     # print(quick_sort(warmup_list, 0, len(warmup_list)))
     # t0 = time.time()

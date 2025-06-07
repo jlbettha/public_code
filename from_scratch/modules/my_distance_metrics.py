@@ -20,7 +20,8 @@ def euclidean_dist(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64
     Returns:
         np.float64: euclidean distance between points A and B
     """
-    c = np.sqrt(np.sum((b - a) * (b - a)))
+    diff = b - a
+    c = np.sqrt(np.sum(diff * diff))
     return c
 
 
@@ -92,7 +93,8 @@ def mahalinobis_dist(
     mu = np.array(
         [np.mean(x[:, i]) for i in range(x.shape[1])]
     )  # jit-friendly version (axis=0 is a problem)
-    dist = ((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T
+    diff_y_mu = y - mu
+    dist = (diff_y_mu @ np.linalg.pinv(np.cov(x.T))) @ diff_y_mu.T
     if not sqrt_calc:
         return dist
     return np.sqrt(dist)
@@ -242,7 +244,9 @@ def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.f
     epsilon = 1e-12
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
-    jeffreys = np.sum(p * (np.log(p) - np.log(q)) + q * (np.log(q) - np.log(p)))
+    log_p = np.log(p)
+    log_q = np.log(q)
+    jeffreys = np.sum(p * (log_p - log_q) + q * (log_q - log_p))
     return jeffreys
 
 
@@ -259,7 +263,8 @@ def kl_div_gaussian1d(mu1: float, v1: float, mu2: float, v2: float) -> float:
     Returns:
         float: _description_
     """
-    return np.log(v2 / v1) + ((v1 + (mu1 - mu2) * (mu1 - mu2)) / (2 * v2)) - 0.5
+    diff_mu = mu1 - mu2
+    return np.log(v2 / v1) + ((v1 + diff_mu * diff_mu) / (2 * v2)) - 0.5
 
 
 @njit
@@ -296,7 +301,8 @@ def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
         float: Bhattacharyya distance
     """
     part1 = 0.25 * np.log(0.25 * (v1 / v2 + v2 / v1 + 2))
-    part2 = 0.25 * (((mu1 - mu2) * (mu1 - mu2)) / (v1 + v2))
+    diff_mu = mu1 - mu2
+    part2 = 0.25 * ((diff_mu * diff_mu) / (v1 + v2))
     return part1 + part2
 
 
@@ -316,7 +322,8 @@ def fisher_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
         float: Fisher distance
 
     """
-    fish = ((mu1 - mu2) * (mu1 - mu2)) / (v1 + v2)
+    diff_mu = mu1 - mu2
+    fish = (diff_mu * diff_mu) / (v1 + v2)
     return fish
 
 
@@ -349,7 +356,8 @@ def minmax_scaling(
     Returns:
         NDArray[np.float64]: data min-max scaled in range [0, max_val]
     """
-    return max_val * (data - data.min()) / (data.max() - data.min())
+    d_min = data.min()
+    return max_val * (data - d_min) / (data.max() - d_min)
 
 
 # returns joint histogram of 2 image sections
