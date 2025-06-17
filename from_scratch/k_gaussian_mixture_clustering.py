@@ -175,7 +175,7 @@ def k_gaussian_mixture_clustering(
             best_covs = cluster_covs
             best_labels = current_likeliest_labels
 
-        if plot:
+        if plot:            
             plt.subplot(1, 2, 1)
             plt.cla()
             plt.scatter(data[:, 0], data[:, 1], c=current_likeliest_labels, s=3)
