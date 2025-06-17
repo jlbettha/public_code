@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "gdcm>=1.1",
+    "ipykernel>=6.29.5",
     "keyboard>=0.13.5",
     "matplotlib>=3.10.3",
     "numba>=0.61.2",

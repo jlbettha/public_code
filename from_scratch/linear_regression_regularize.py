@@ -62,7 +62,7 @@ def lsq_ell_2_ridge(
 
 
 def sparse_ell_1_lasso(
-    y: NDArray[np.float64], A: NDArray[np.float64], lambda1: float = 0.2
+    y: NDArray[np.float64], A: NDArray[np.float64], lambda1: float = 0.25
 ) -> NDArray[np.float64]:
     """Lasso Regression: least squares w/ L1 penalty
     ### let y = Ax --> solve argmin_x: 1/(2n)*||Ax-y||^2_2 + lambda*||x||_1

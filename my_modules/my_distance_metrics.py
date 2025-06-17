@@ -92,14 +92,14 @@ def mahalinobis_dist(
     mu = np.array(
         [np.mean(x[:, i]) for i in range(x.shape[1])]
     )  # jit-friendly version (axis=0 is a problem)
-    dist = ((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T
+    dist = np.float64(((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T)
     if not sqrt_calc:
         return dist
     return np.sqrt(dist)
 
 
 @njit
-def z_score(x: float, mu: float, sigma: float) -> float:
+def z_score(x: np.float64, mu: np.float64, sigma: np.float64) -> np.float64:
     """Betthauser - 2017 - compute z_score of a data point wrt a distribution
     Args:
         x (float): data point
@@ -145,7 +145,7 @@ def jensen_shannon_divergence(
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
     m = 0.5 * (p + q)
-    return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
+    return np.float64(0.5 * (kl_divergence(p, m) + kl_divergence(q, m)))
 
 
 @njit
@@ -168,7 +168,7 @@ def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
 
 
 @njit
-def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64 | None:
     """Wasserstein distance or Kantorovich–Rubinstein metric
 
         # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
@@ -247,7 +247,7 @@ def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.f
 
 
 @njit
-def kl_div_gaussian1d(mu1: float, v1: float, mu2: float, v2: float) -> float:
+def kl_div_gaussian1d(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
     """Betthauser - 2018 - compute KL divergence between two normal distributions
 
     Args:
@@ -264,8 +264,8 @@ def kl_div_gaussian1d(mu1: float, v1: float, mu2: float, v2: float) -> float:
 
 @njit
 def kl_div_gaussian1d_bidirectional(
-    mu1: float, v1: float, mu2: float, v2: float
-) -> float:
+    mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64
+) -> np.float64:
     """Betthauser - 2018 - compute KL divergence between two normal distributions
 
     Args:
@@ -284,7 +284,7 @@ def kl_div_gaussian1d_bidirectional(
 
 
 @njit
-def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
+def bhattacharyya_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
     """Betthauser - 2021 - compute Bhattacharyya distance between two normal distributions
     Args:
         mu1 (float): mean of distribution 1
@@ -301,7 +301,7 @@ def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
 
 
 @njit
-def fisher_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
+def fisher_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
     """Betthauser - 2019 - compute Fisher distance between two normal distributions
         Note: Be aware that fisher_dist always = 0 if means are same,
         whereas bhat_dist only = 0 when means and vaiances are same.
@@ -355,7 +355,7 @@ def minmax_scaling(
 # returns joint histogram of 2 image sections
 @njit
 def joint_histogram_2d(
-    patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: float = 255.0
+    patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: int = 255
 ) -> NDArray[np.float64]:
     """Computes joint histogram of 2 image sections/patches
     Args:
@@ -365,10 +365,10 @@ def joint_histogram_2d(
     Returns:
         NDArray[np.float64]: joint_histogram
     """
-    patch1 = minmax_scaling(patch1, max_val=bins).astype(np.uint8)
-    patch2 = minmax_scaling(patch2, max_val=bins).astype(np.uint8)
+    patch1 = minmax_scaling(patch1, max_val=bins).astype(int)
+    patch2 = minmax_scaling(patch2, max_val=bins).astype(int)
 
-    joint_histogram = np.zeros(bins, bins)
+    joint_histogram = np.zeros((bins, bins)).astype(int)
     for i in range(patch1.shape[0]):
         for j in range(patch1.shape[1]):
             joint_histogram[patch2[i, j], patch1[i, j]] += 1
@@ -443,7 +443,7 @@ def main() -> None:
     # plt.figure()
     # plt.scatter(cluster1[:, 0], cluster1[:, 1])
     # plt.scatter(cluster2[:, 0], cluster2[:, 1])
-    # plt.show()
+    plt.show()
 
 
 if __name__ == "__main__":

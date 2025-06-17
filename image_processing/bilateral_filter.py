@@ -18,8 +18,9 @@ import numpy as np
 import cv2
 import PIL.Image as Image
 from numpy.typing import NDArray
+# import matplotlib
+# matplotlib.use('TkAgg') 
 import matplotlib.pyplot as plt
-
 
 def normalize_image(img: NDArray[np.float64]) -> NDArray[np.float64]:
     """_summary_
@@ -175,7 +176,7 @@ def main() -> None:
     img = np.array(img)
     print(img.shape)
 
-    scale_factor = 0.75  # percent of original size
+    scale_factor = 0.8  # percent of original size
     width = int(img.shape[1] * scale_factor)
     height = int(img.shape[0] * scale_factor)
     dim = (width, height)
