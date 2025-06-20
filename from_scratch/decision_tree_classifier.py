@@ -7,19 +7,18 @@ import time
 import numpy as np
 from scipy import stats
 from sklearn.datasets import load_breast_cancer, load_iris
-from sklearn import tree as sktree
-import matplotlib.pyplot as plt
+# from sklearn import tree as sktree
+# import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from numpy.typing import NDArray
 from numba import njit
 
 
 @njit
-def entropy(hist1: NDArray[np.float64]) -> np.float64:
+def entropy(hist1: np.ndarray[float]) -> float:
     """Betthauser 2016 -- Calculate joint entropy of an N-d distribution
 
     Args:
-        hist1 (NDArray[np.float64]): an N-D histogram or PMF
+        hist1 (np.ndarray[float]): an N-D histogram or PMF
 
     Returns:
         np.float64: entropy of the ditribution
@@ -33,13 +32,13 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
 
 @njit
 def information_gain(
-    y: NDArray[np.float64], x_1feature: NDArray[np.float64], threshold: float
+    y: np.ndarray[float], x_1feature: np.ndarray[float], threshold: float
 ) -> float:
     """Information gain = entropy(parent) - weighted avg of entropy(children)
 
     Args:
-        y (NDArray[np.float64]): _description_
-        x_1feature (NDArray[np.float64]): _description_
+        y (np.ndarray[float]): _description_
+        x_1feature (np.ndarray[float]): _description_
         threshold (float): _description_
 
     Returns:
@@ -65,12 +64,12 @@ def information_gain(
 
 
 @njit
-def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
+def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
     """_summary_
 
     Args:
-        x (NDArray[np.float64]): _description_
-        w (NDArray[np.float64], optional): _description_. Defaults to None.
+        x (np.ndarray[float]): _description_
+        w (np.ndarray[float], optional): _description_. Defaults to None.
 
     Returns:
         float: _description_
@@ -125,23 +124,23 @@ class MyDecisionTree:
         self.prune_threshold = prune_threshold
         self.root = None
 
-    def train(self, X: NDArray[np.float64], y: NDArray[np.float64]):
+    def train(self, X: np.ndarray[float], y: np.ndarray[float]):
         """build out decision tree based on train data
 
         Args:
-            X (NDArray[np.float64]): train data
-            y (NDArray[np.float64]): train labels
+            X (np.ndarray[float]): train data
+            y (np.ndarray[float]): train labels
         """
         self.root = self._grow_next_branch(X, y, depth=0)
 
     def _grow_next_branch(
-        self, X: NDArray[np.float64], y: NDArray[np.float64], depth: int = 0
+        self, X: np.ndarray[float], y: np.ndarray[float], depth: int = 0
     ):
         """_summary_
 
         Args:
-            X (NDArray[np.float64]): _description_
-            y (NDArray[np.float64]): _description_
+            X (np.ndarray[float]): _description_
+            y (np.ndarray[float]): _description_
             depth (int, optional): _description_. Defaults to 0.
 
         Returns:
@@ -215,11 +214,11 @@ class MyDecisionTree:
             return self._move_to_next_branch(x, node.left_child)
         return self._move_to_next_branch(x, node.right_child)
 
-    def tree_predict(self, X_test: NDArray[np.float64]) -> list[int]:
+    def tree_predict(self, X_test: np.ndarray[float]) -> np.ndarray[int]:
         """predictor for MyDecisionTree class
 
         Args:
-            xtest (NDArray[np.float]): unseen test data
+            xtest (np.ndarray[float]): unseen test data
 
         Returns:
             list[int]: prediction list

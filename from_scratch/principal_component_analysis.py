@@ -5,22 +5,19 @@ PCA: principal component data projection
 
 import time
 import numpy as np
-from numpy.typing import NDArray
 from singular_value_decomposition import singular_value_decomposition
 import matplotlib.pyplot as plt
 
 
-def pca_projection(
-    A: NDArray[np.float64], use_my_svd: bool = False
-) -> NDArray[np.float64]:
+def pca_projection(A: np.ndarray[float], use_my_svd: bool = False) -> np.ndarray[float]:
     """PCA principal component data projection of A
 
     Args:
-        A (NDArray[np.float64]): m x n matrix of m samples of n-dim data
+        A (np.ndarray[float]): m x n matrix of m samples of n-dim data
         use_my_svd (bool, optional): Use my manual SVD implement. Defaults to False.
 
     Returns:
-        NDArray[np.float64]: principal component projection
+        np.ndarray[float]: principal component projection
     """
 
     A_c = A - np.mean(A, axis=0)
@@ -37,7 +34,7 @@ def pca_projection(
 
 def _generate_data(
     num_clusters: int, dim: int, size_clusters: int
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     """generate synthetic data of gaussian clusters
 
     Args:
@@ -46,7 +43,7 @@ def _generate_data(
         size_clusters (int): number of points in each cluster
 
     Returns:
-        NDArray[np.float64]: synthetic data of n-dim gaussian clusters
+        np.ndarray[float]: synthetic data of n-dim gaussian clusters
     """
 
     means = np.random.uniform(0, 20, size=(num_clusters, dim))

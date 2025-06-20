@@ -8,13 +8,13 @@ from matplotlib import pyplot as plt
 from sklearn.datasets import load_iris, load_digits
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from numpy.typing import NDArray
 from numba import njit
 from modules.my_activations import relu, d_relu_dz, softmax_jit
 
 
 @njit
-def encode_one_hot(y, num_classes):
+def encode_one_hot(y):
+    num_classes = len( np.unique(y) )
     y_one_hot = np.zeros((y.shape[0], num_classes))
     for n in range(y.shape[0]):
         y_one_hot[n, y[n]] = 1
@@ -32,9 +32,8 @@ def forward(W1, b1, W2, b2, X):
 
 @njit
 def back_prop(z1, A1, A2, W2, X, y):
-    num_classes = A2.shape[0]
     N = y.shape[0]
-    y_one_hot = encode_one_hot(y, num_classes)
+    y_one_hot = encode_one_hot(y)
     dZ2 = A2 - y_one_hot.T
     dW2 = (dZ2 @ A1.T) / N
     db2 = np.expand_dims(np.sum(dZ2, axis=1) / N, axis=1)

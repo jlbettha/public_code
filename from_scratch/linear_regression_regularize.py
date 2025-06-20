@@ -1,36 +1,22 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 from pylops.optimization.sparsity import omp, fista
 from pylops import MatrixMult
 from sklearn.datasets import make_regression
 
 
-def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
-    """sum of squared difference between two arrays
-
-    Args:
-        arr1 (NDArray[np.float64]): an array
-        arr2 (NDArray[np.float64]): another array
-
-    Returns:
-        float: sum of squared difference
-    """
-    return np.sum((arr1 - arr2) ** 2)
-
-
 def ordinary_least_squares(
-    y: NDArray[np.float64], A: NDArray[np.float64]
-) -> NDArray[np.float64]:
+    y: np.ndarray[float], A: np.ndarray[float]
+) -> np.ndarray[float]:
     """Regular least squares
     ### solve y = Ax --> x = A^-1 y = (A^T A)^-1 A^T y
     Args:
-        y (NDArray[np.float64]): _description_
-        A (NDArray[np.float64]): _description_
+        y (np.ndarray[float]]): _description_
+        A (np.ndarray[float]): _description_
 
     Returns:
-        NDArray[np.float64]: n x 1 weights vector x
+        np.ndarray[float]: n x 1 weights vector x
     """
 
     pseudo_inverse = np.linalg.inv(A.T @ A) @ A.T
@@ -39,20 +25,20 @@ def ordinary_least_squares(
 
 
 def lsq_ell_2_ridge(
-    y: NDArray[np.float64],
-    A: NDArray[np.float64],
+    y: np.ndarray[float],
+    A: np.ndarray[float],
     lambda2: float = 0.2,
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     """Ridge Regression: least squares w/ L2 penalty
     ### let y = Ax --> solve argmin_x: 1/(2n)*||Ax-y||^2_2 + lambda*||x||^2_2
     ### Tikhonov closed-form: x = (lambda*I + A^T A)^-1 A^T y
     Args:
-        y (NDArray[np.float64]): _description_
-        A (NDArray[np.float64]): _description_
+        y (np.ndarray[float]): _description_
+        A (np.ndarray[float]): _description_
         lambda2 (float, optional): regularization param. Defaults to 0.2.
 
     Returns:
-        NDArray[np.float64]: n x 1 weights vector x
+        np.ndarray[float]: n x 1 weights vector x
     """
     ###
 
@@ -62,18 +48,18 @@ def lsq_ell_2_ridge(
 
 
 def sparse_ell_1_lasso(
-    y: NDArray[np.float64], A: NDArray[np.float64], lambda1: float = 0.25
-) -> NDArray[np.float64]:
+    y: np.ndarray[float], A: np.ndarray[float], lambda1: float = 0.25
+) -> np.ndarray[float]:
     """Lasso Regression: least squares w/ L1 penalty
     ### let y = Ax --> solve argmin_x: 1/(2n)*||Ax-y||^2_2 + lambda*||x||_1
 
     Args:
-        y (NDArray[np.float64]): _description_
-        A (NDArray[np.float64]): _description_
+        y (np.ndarray[float]): _description_
+        A (np.ndarray[float]): _description_
         lambda1 (float, optional): regularization param. Defaults to 0.2.
 
     Returns:
-        NDArray[np.float64]: n x 1 weights vector x
+        np.ndarray[float]: n x 1 weights vector x
     """
 
     Aop = MatrixMult(A)
@@ -81,17 +67,15 @@ def sparse_ell_1_lasso(
     return x_l1
 
 
-def sparse_ell_0_omp(
-    y: NDArray[np.float64], A: NDArray[np.float64]
-) -> NDArray[np.float64]:
+def sparse_ell_0_omp(y: np.ndarray[float], A: np.ndarray[float]) -> np.ndarray[float]:
     """Sparse Regression: least squares w/ L0 penalty
     ### let y = Ax --> solve argmin_x: 1/(2n)*||Ax-y||^2_2 + lambda*||x||_0
     Args:
-        y (NDArray[np.float64]): m x 1
-        A (NDArray[np.float64]): m x n
+        y (np.ndarray[float]): m x 1
+        A (np.ndarray[float]): m x n
 
     Returns:
-        NDArray[np.float64]: n x 1 weights vector x
+        np.ndarray[float]: n x 1 weights vector x
     """
 
     Aop = MatrixMult(A)

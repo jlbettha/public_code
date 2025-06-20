@@ -1,18 +1,17 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 from sklearn.datasets import make_regression
 from numba import njit
 
 
 @njit
-def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
+def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
     """SSD: sum of squared differences between two arrays
 
     Args:
-        arr1 (NDArray[np.float64]): an array
-        arr2 (NDArray[np.float64]): another array
+        arr1 (np.ndarray[float]): an array
+        arr2 (np.ndarray[float]): another array
 
     Returns:
         float: sum of squared differences

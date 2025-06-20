@@ -1,11 +1,9 @@
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 from numba import njit
 from modules.my_decorators import record_time
 
-NumArray = NDArray[np.float64]  # type alias
+NumArray = np.ndarray[float]  # type alias
 
 
 @record_time

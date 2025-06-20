@@ -1,23 +1,9 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 from sklearn.datasets import make_regression
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
-
-
-def ssd(arr1: NDArray[np.float64], arr2: NDArray[np.float64]) -> float:
-    """sum of squared difference between two arrays
-
-    Args:
-        arr1 (NDArray[np.float64]): an array
-        arr2 (NDArray[np.float64]): another array
-
-    Returns:
-        float: sum of squared difference
-    """
-    return np.sum((arr1 - arr2) ** 2)
 
 
 def main() -> None:

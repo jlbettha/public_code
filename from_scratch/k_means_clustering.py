@@ -3,13 +3,12 @@
 import time
 import numpy as np
 from typing import Any
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import cdist
 
 
 def k_means_clustering(
-    data: NDArray[np.float64], k: int, plot: bool = False
+    data: np.ndarray[float], k: int, plot: bool = False
 ) -> tuple[Any]:
     """Betthauser, 2018: k-means clustering
 
@@ -54,7 +53,7 @@ def k_means_clustering(
 
 def _generate_data(
     num_clusters: int, dim: int, size_clusters: int
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     """generate synthetic data of gaussian clusters
 
     Args:
@@ -63,7 +62,7 @@ def _generate_data(
         size_clusters (int): number of points in each cluster
 
     Returns:
-        NDArray[np.float64]: synthetic data of n-dim gaussian clusters
+        np.ndarray[float]: synthetic data of n-dim gaussian clusters
     """
     means = np.random.uniform(0, 40, size=(num_clusters, dim))
     covs = np.zeros((num_clusters, dim, dim))

@@ -1,7 +1,6 @@
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
 
 
 def beam_search() -> None:

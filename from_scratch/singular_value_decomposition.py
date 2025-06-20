@@ -5,20 +5,19 @@ SVD: sigular value decomposition, A = U @ SIGMA @ V.T
 
 import time
 import numpy as np
-from numpy.typing import NDArray
 
 
 def singular_value_decomposition(
-    A: NDArray[np.float64], tolerance: float = 1e-8
-) -> tuple[NDArray[np.float64]]:
+    A: np.ndarray[float], tolerance: float = 1e-8
+) -> np.ndarray[float]:
     """SVD of matrix A
 
     Args:
-        A (NDArray[np.float64]): m x n matrix to decompose
+        A (np.ndarray[float]): m x n matrix to decompose
         tolerance (float): optional, default = 1e-9
 
     Returns:
-        tuple[NDArray[np.float64]]: U, sigmas, V
+        tuple[np.ndarray[float]]: U, sigmas, V
     """
     m, n = A.shape
     k = np.min([m, n])

@@ -1,20 +1,19 @@
 """_summary_"""
 
 import numpy as np
-from numpy.typing import NDArray
 from numba import njit
 from my_distance_metrics import minmax_scaling
 
 
 @njit
-def entropy(hist1: NDArray[np.float64]) -> np.float64:
+def entropy(hist1: np.ndarray[float]) -> float:
     """Betthauser 2016 -- Calculate entropy of an 1-d distribution
 
     Args:
-        hist1 (NDArray[np.float64]): an N-D histogram or PMF
+        hist1 (np.ndarray[float]): an N-D histogram or PMF
 
     Returns:
-        np.float64: entropy of the ditribution
+        float: entropy of the ditribution
     """
     hist1 = hist1 / np.sum(hist1)
     nz_probs = np.array([-p * np.log(p) for p in hist1 if p > 1e-12])
@@ -24,13 +23,13 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
 
 @njit
 def information_gain(
-    y: NDArray[np.float64], x_1feature: NDArray[np.float64], threshold: float
+    y: np.ndarray[float], x_1feature: np.ndarray[float], threshold: float
 ) -> float:
     """Information gain = entropy(parent) - weighted avg of entropy(children)
 
     Args:
-        y (NDArray[np.float64]): _description_
-        x_1feature (NDArray[np.float64]): _description_
+        y (np.ndarray[float]): _description_
+        x_1feature (np.ndarray[float]): _description_
         threshold (float): _description_
 
     Returns:
@@ -56,12 +55,12 @@ def information_gain(
 
 
 @njit
-def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
+def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
     """Betthauser - 2024 - Get gini index, a measure of inequality (e.g., 0.0 means equal ditribution)
 
     Args:
-        x (NDArray[np.float64]): _description_
-        w (NDArray[np.float64], optional): sample weights. Defaults to None.
+        x (np.ndarray[float]): _description_
+        w (np.ndarray[float]], optional): sample weights. Defaults to None.
 
     Returns:
         float: gini index/coefficient
@@ -86,15 +85,15 @@ def gini_index(x: NDArray[np.float64], w: NDArray[np.float64] = None) -> float:
 # returns joint histogram of 2 image sections
 @njit
 def joint_histogram_2d(
-    patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: float = 255.0
-) -> NDArray[np.float64]:
+    patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0
+) -> np.ndarray[float]:
     """Betthauser - 2018 - Computes joint histogram of 2 image sections/patches
     Args:
-        img1 (NDArray[np.float64]): image patch 1
-        img2 (NDArray[np.float64]): image patch 2
+        img1 (np.ndarray[float]): image patch 1
+        img2 (np.ndarray[float]): image patch 2
         bins (float): number of bins
     Returns:
-        NDArray[np.float64]: joint_histogram
+        np.ndarray[float]: joint_histogram
     """
     patch1 = minmax_scaling(patch1, max_val=bins).astype(np.uint8)
     patch2 = minmax_scaling(patch2, max_val=bins).astype(np.uint8)
@@ -107,11 +106,11 @@ def joint_histogram_2d(
 
 
 @njit
-def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> float:
+def mutual_info(image1: np.ndarray[float], image2: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute mutual information between 2 images/patches
     Args:
-        image1 (NDArray[np.float64]): image/patch
-        image2 (NDArray[np.float64]): another image/patch for comparison
+        image1 (np.ndarray[float]): image/patch
+        image2 (np.ndarray[float]): another image/patch for comparison
 
     Returns:
         float: mutual information between the two images/patches
@@ -127,15 +126,15 @@ def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> flo
 
 
 @njit
-def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def kl_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute KL divergence between two PMFs
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64:  KL divergence KL(p||q)
+        float:  KL divergence KL(p||q)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -144,15 +143,15 @@ def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
 
 
 @njit
-def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def kl_div_bidirectional(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: Jeffreys bi-directional KL divergence KL(p||q) + KL(q||p)
+        float: Jeffreys bi-directional KL divergence KL(p||q) + KL(q||p)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -162,17 +161,15 @@ def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.f
 
 
 @njit
-def jensen_shannon_divergence(
-    p: NDArray[np.float64], q: NDArray[np.float64]
-) -> np.float64:
+def jensen_shannon_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2024 - jensen-shannon divergence
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
+        float: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
                     where M = 0.5(P+Q)
     """
     epsilon = 1e-12
@@ -183,15 +180,15 @@ def jensen_shannon_divergence(
 
 
 @njit
-def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def jensen_shannon_dist(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2024 - jensen-shannon distance metric
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: JS_distance = np.sqrt( JS_divergence )
+        float: JS_distance = np.sqrt( JS_divergence )
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon

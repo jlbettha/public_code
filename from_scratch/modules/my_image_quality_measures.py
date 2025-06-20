@@ -12,7 +12,6 @@ from scipy.signal import convolve2d
 from skimage.filters import threshold_otsu, sobel
 from skimage.color import rgb2gray
 from scipy.ndimage import gaussian_laplace
-from numpy.typing import NDArray
 from numba import njit
 from my_distance_metrics import minmax_scaling, bhattacharyya_dist
 
@@ -22,7 +21,7 @@ from my_distance_metrics import minmax_scaling, bhattacharyya_dist
 
 
 def blurriness2(
-    image: NDArray[np.float64],
+    image: np.ndarray[float],
     h_size: int = 11,
 ) -> float:
     """metric that indicates the strength of blur in an image (0 for no blur, 1 for maximal blur).
@@ -31,7 +30,7 @@ def blurriness2(
             https://hal.archives-ouvertes.fr/hal-00232709:DOI:'10.1117/12.702790'
 
     Args:
-        image (NDArray): image
+        image (np.ndarray[float]): image
         h_size (int, optional): Size of the re-blurring filter. Defaults to 11.
 
     Returns:
@@ -52,11 +51,11 @@ def blurriness2(
     return np.max(B)
 
 
-def otsu_threshold(img: NDArray[np.float64]) -> float:
+def otsu_threshold(img: np.ndarray[float]) -> float:
     """Calculate otsu's threshold
 
     Args:
-        img (NDArray[np.float64]): input image
+        img (np.ndarray[float]): input image
 
     Returns:
         float: otsu's threshold
@@ -67,11 +66,11 @@ def otsu_threshold(img: NDArray[np.float64]) -> float:
     return thr
 
 
-def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
+def otsu_interclass_distance(img: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        img (NDArray[np.float64]): input image
+        img (np.ndarray[float]): input image
 
     Returns:
         float: bhattacharya distance between image data above otsu threshold and below threshold
@@ -91,17 +90,25 @@ def otsu_interclass_distance(img: NDArray[np.float64]) -> float:
 
 
 @njit
-def estimate_variance(img: NDArray[np.float64]) -> float:
+def estimate_variance(img: np.ndarray[float]) -> float:
+    """_summary_
+
+    Args:
+        img (np.ndarray[float]): _description_
+
+    Returns:
+        float: _description_
+    """
     img = img.ravel()
     img = img[np.nonzero(img)]
     return np.var(img)
 
 
-def estimate_noise(img: NDArray[np.float64]) -> float:
+def estimate_noise(img: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        img (NDArray[np.float64]): image
+        img (np.ndarray[float]): image
 
     Returns:
         float: noise estimate
@@ -116,13 +123,13 @@ def estimate_noise(img: NDArray[np.float64]) -> float:
 
 ## snr
 @njit
-def signal_to_noise(img: NDArray[np.float64]) -> float:
+def signal_to_noise(img: np.ndarray[float]) -> float:
     """A rough analogue to signal-to-noise ratio of the input data.
         Returns the snr of img, here defined as the mean
         divided by the standard deviation.
 
     Args:
-        img (NDArray[np.float64]): image
+        img (np.ndarray[float]): image
 
     Returns:
         float: snr
@@ -136,11 +143,11 @@ def signal_to_noise(img: NDArray[np.float64]) -> float:
     return m / sdv
 
 
-def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
+def laplacian_edge_strength(img: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        img (NDArray[np.float64]): _description_
+        img (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
@@ -150,7 +157,7 @@ def laplacian_edge_strength(img: NDArray[np.float64]) -> float:
     return np.mean(lap[np.nonzero(lap)])
 
 
-def jlb_iqa(img: NDArray[np.float64]) -> tuple[float]:
+def jlb_iqa(img: np.ndarray[float]) -> tuple[float]:
     """Compute all 6 no-reference measures
 
     Args:

@@ -3,7 +3,6 @@
 import time
 from typing import Any
 import numpy as np
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from singular_value_decomposition import singular_value_decomposition
@@ -11,7 +10,7 @@ from singular_value_decomposition import singular_value_decomposition
 
 def _generate_data(
     num_clusters: int, dim: int, size_clusters: int
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     """generate synthetic data of gaussian clusters
 
     Args:
@@ -20,7 +19,7 @@ def _generate_data(
         size_clusters (int): number of points in each cluster
 
     Returns:
-        NDArray[np.float64]: synthetic data of n-dim gaussian clusters
+        np.ndarray[float]: synthetic data of n-dim gaussian clusters
     """
     means = np.random.uniform(0, 40, size=(num_clusters, dim))
     covs = np.zeros((num_clusters, dim, dim))
@@ -50,8 +49,8 @@ def _generate_data(
 
 
 def _get_class_means_covs(
-    X: NDArray[np.float64], y: NDArray[np.float64]
-) -> NDArray[np.float64]:
+    X: np.ndarray[float], y: np.ndarray[float]
+) -> np.ndarray[float]:
     """compute class-wise means and covariances
 
     Args:
@@ -71,8 +70,8 @@ def _get_class_means_covs(
 
 
 def _get_between_class_scatter(
-    means: NDArray[np.float64], total_mean: NDArray[np.float64]
-) -> NDArray[np.float64]:
+    means: np.ndarray[float], total_mean: np.ndarray[float]
+) -> np.ndarray[float]:
     """_summary_
 
     Args:

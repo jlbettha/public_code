@@ -4,19 +4,17 @@ import time
 import numpy as np
 from sklearn.datasets import load_iris, make_moons
 from sklearn.model_selection import train_test_split
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
 from typing import Callable
 from sklearn.metrics import accuracy_score
 from numba import njit
-from copy import deepcopy
 
 
 @njit
 def radial_basis_func(
-    a: float | NDArray[np.float64], b: float | NDArray[np.float64], gamma: float = 1.0
-) -> float | NDArray[np.float64]:
+    a: float | np.ndarray[float], b: float | np.ndarray[float], gamma: float = 1.0
+) -> float | np.ndarray[float]:
     """RBF: radial basis function
 
     Args:
@@ -33,8 +31,8 @@ def radial_basis_func(
 
 @njit
 def d_rbf_dx(
-    a: float | NDArray[np.float64], b: float | NDArray[np.float64], gamma: float = 1.0
-) -> float | NDArray[np.float64]:
+    a: float | np.ndarray[float], b: float | np.ndarray[float], gamma: float = 1.0
+) -> float | np.ndarray[float]:
     """_summary_
 
     Args:
@@ -51,7 +49,10 @@ def d_rbf_dx(
     return -2 * gamma * dist * np.exp(-gamma * ssd)
 
 
-def compute_kernel_matrix(X, kernel_function: Callable, gamma=1.0):
+@njit
+def compute_kernel_matrix(
+    X: np.ndarray[float], kernel_function: Callable, gamma: float = 1.0
+) -> np.ndarray[float]:
     """
     Compute the kernel matrix for a dataset X using a given kernel function.
 
@@ -73,15 +74,41 @@ def compute_kernel_matrix(X, kernel_function: Callable, gamma=1.0):
     return kernel_matrix
 
 
-def encode_one_hot(y, num_classes):
+@njit
+def encode_one_hot(y: np.ndarray[int]) -> np.ndarray[int]:
+    """_summary_
+
+    Args:
+        y (np.ndarray[int]): _description_
+
+    Returns:
+        np.ndarray[int]: _description_
+    """
+    num_classes = len(np.unique(y))
     y_one_hot = np.zeros((y.shape[0], num_classes))
     for n in range(y.shape[0]):
         y_one_hot[n, y[n]] = 1
-    return np.vstack(y_one_hot)
+    return y_one_hot
 
 
 @njit
-def hinge_loss(W, X, y_one_hot, lambda1: float = 0.05):
+def hinge_loss(
+    W: np.ndarray[float],
+    X: np.ndarray[float],
+    y_one_hot: np.ndarray[int],
+    lambda1: float = 0.05,
+) -> float:
+    """_summary_
+
+    Args:
+        W (np.ndarray[float]): _description_
+        X (np.ndarray[float]): _description_
+        y_one_hot (np.ndarray[int]): _description_
+        lambda1 (float, optional): _description_. Defaults to 0.05.
+
+    Returns:
+        float: _description_
+    """
     regularize_term = 0.0
     if lambda1 > 1e-12:
         regularize_term = 0.5 * np.sum(W.T @ W)
@@ -101,20 +128,30 @@ def support_vector_machine(
     C: float = 1.0,
     tol: float = 1e-3,
 ) -> None:
+    """_summary_
+
+    Args:
+        X (NDArray[np.float64]): _description_
+        y (NDArray[np.uint8]): _description_
+        learning_rate (float, optional): _description_. Defaults to 1e-3.
+        iters (float, optional): _description_. Defaults to 1000.
+        C (float, optional): _description_. Defaults to 1.0.
+        tol (float, optional): _description_. Defaults to 1e-3.
+    """
 
     num_classes = len(np.unique(y))
     _, num_features = X.shape
 
     weights = np.random.uniform(size=(num_classes, num_features))
 
-    y_one_hot = encode_one_hot(deepcopy(y), num_classes)
+    y_one_hot = encode_one_hot(y)
     y_one_hot[y_one_hot == 0] = -1
 
     loss = hinge_loss(weights, X, y_one_hot, 0.00)
     last_loss = loss
     min_loss = loss
     min_it = 0
-    losses = []
+    # losses = []
     for it in range(iters):
         z = weights @ X.T
         t = (y_one_hot * z.T).T
@@ -139,7 +176,7 @@ def support_vector_machine(
         #     plt.pause(0.001)
 
         if np.abs(loss - last_loss) < tol or (loss - last_loss) > 0:
-            plt.close()
+            # plt.close()
             # print(f"SVM-RBF took {min_it+1} iterations.")
             return final_weights, min_it
 

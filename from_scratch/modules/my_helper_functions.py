@@ -1,14 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
-from numpy.typing import NDArray
 from typing import Any
 from numba import njit
 
 
 def plot_confusion_matrix(
-    y_true: NDArray,
-    y_pred: NDArray,
+    y_true: np.ndarray[int],
+    y_pred: np.ndarray[int],
     classes=None,
     normalize=False,
     title=None,
@@ -71,7 +70,7 @@ def plot_confusion_matrix(
 
 
 ###
-def majority_filter(seq: NDArray[np.int8], width: int) -> int:
+def majority_filter(seq: np.ndarray[int], width: int) -> int:
     """majority vote filter for temporal classification streams/sequences
         to stabilize/improve accuracy (penalty is delay), input width=1 for no filter
 
@@ -124,11 +123,11 @@ def decimal2ternary(number: int) -> int:
     return arr
 
 
-def smooth(x: NDArray[np.float64], window_len: int) -> NDArray[np.float64]:
+def smooth(x: np.ndarray[float], window_len: int) -> np.ndarray[float]:
     """generic decent smoothing procedure (appropriate smoothing will always be data dependent)
 
     Args:
-        x (NDArray[np.float64]): raw signal
+        x (np.ndarray[float]): raw signal
         window_len (int): smoothing window length
 
     Raises:
@@ -136,7 +135,7 @@ def smooth(x: NDArray[np.float64], window_len: int) -> NDArray[np.float64]:
         ValueError: _description_
 
     Returns:
-        NDArray[np.float64]: smoothed signal
+        np.ndarray[float]: smoothed signal
     """
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.")

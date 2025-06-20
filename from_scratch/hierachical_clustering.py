@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from sklearn.datasets import load_breast_cancer, load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from numpy.typing import NDArray
 from modules.my_distance_metrics import (
     jensen_shannon_dist,
     euclidean_dist,
@@ -32,11 +31,11 @@ def _flatten_lists(list_of_lists):
 
 
 def hierarchical_clustering(
-    X: NDArray[np.float64], num_groups: int = 5
-) -> NDArray[np.float64]:
+    X: np.ndarray[float], num_groups: int = 5
+) -> np.ndarray[float]:
     """hierarchical_clustering
     Args:
-        X (NDArray[np.float64]): data
+        X (np.ndarray[float]): data
         num_groups (int): number of final cluster groups/tree level
 
     Returns:

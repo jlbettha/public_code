@@ -3,7 +3,6 @@
 import time
 from typing import Any
 import numpy as np
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from numba import njit
 
@@ -12,17 +11,17 @@ from numba import njit
 
 @njit
 def _membership_prob(
-    point: NDArray[np.float64], c_mean: NDArray[np.float64], c_cov: NDArray[np.float64]
-) -> np.float64:
+    point: np.ndarray[float], c_mean: np.ndarray[float], c_cov: np.ndarray[float]
+) -> float:
     """compute probability that point to belongs to this cluster (multivariate gaussian)
 
     Args:
-        point (NDArray[np.float64]): point to check
-        c_mean (NDArray[np.float64]): mean of cluster
-        c_cov (NDArray[np.float64]): covariance of cluster
+        point (np.ndarray[float]): point to check
+        c_mean (np.ndarray[float]): mean of cluster
+        c_cov (np.ndarray[float]): covariance of cluster
 
     Returns:
-        np.float64: probability that point to belongs to this cluster
+        float: probability that point to belongs to this cluster
     """
     k = c_cov.shape[0]
     denom = np.sqrt(np.linalg.det(c_cov) * (2 * np.pi) ** k)
@@ -33,19 +32,19 @@ def _membership_prob(
 
 
 def _prob_dist_array(
-    data_pt: NDArray[np.float64],
-    k_means: NDArray[np.float64],
-    k_covs: NDArray[np.float64],
-) -> NDArray[np.float64]:
+    data_pt: np.ndarray[float],
+    k_means: np.ndarray[float],
+    k_covs: np.ndarray[float],
+) -> np.ndarray[float]:
     """_summary_
 
     Args:
-        data_pt (NDArray[np.float64]): n-dimensional point to check
-        k_means (NDArray[np.float64]): means of k-clusters, shape: k x n
-        k_covs (NDArray[np.float64]): covariance matrices of k-clusters, shape: k x n x n
+        data_pt (np.ndarray[float]): n-dimensional point to check
+        k_means (np.ndarray[float]): means of k-clusters, shape: k x n
+        k_covs (np.ndarray[float]): covariance matrices of k-clusters, shape: k x n x n
 
     Returns:
-        NDArray[np.float64]: array of probabilities that point belongs to k clusters
+        np.ndarray[float]: array of probabilities that point belongs to k clusters
     """
     mdist_arr = np.array(
         [_membership_prob(data_pt, mean, cov) for mean, cov in zip(k_means, k_covs)]
@@ -55,12 +54,12 @@ def _prob_dist_array(
 
 
 def k_gaussian_mixture_clustering(
-    data: NDArray[np.float64],
+    data: np.ndarray[float],
     k: int,
     tolerance: float = 1e-5,
     plot: bool = False,
     max_iters: int = 200,
-) -> tuple[Any]:
+) -> np.ndarray[int]:
     """Betthauser, 2018: k-gaussian mixture/EM clustering
 
     Args:
@@ -70,7 +69,7 @@ def k_gaussian_mixture_clustering(
         plot (bool): if plots should be shown during iterations, default is False
 
     Returns:
-        NDArray[np.uint8]: array of likeliest labels, num iters, cluster_means, cluster_covs, likelihoods
+        np.ndarray[int]: array of likeliest labels, num iters, cluster_means, cluster_covs, likelihoods
     """
 
     num_data_pts = data.shape[0]
@@ -175,7 +174,7 @@ def k_gaussian_mixture_clustering(
             best_covs = cluster_covs
             best_labels = current_likeliest_labels
 
-        if plot:            
+        if plot:
             plt.subplot(1, 2, 1)
             plt.cla()
             plt.scatter(data[:, 0], data[:, 1], c=current_likeliest_labels, s=3)
@@ -200,7 +199,7 @@ def k_gaussian_mixture_clustering(
 
 def _generate_data(
     num_clusters: int, dim: int, size_clusters: int
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     """generate synthetic data of gaussian clusters
 
     Args:

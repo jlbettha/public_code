@@ -5,7 +5,6 @@ import math
 from typing import Any
 from itertools import repeat
 import numpy as np
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from numba import njit
 
@@ -13,7 +12,7 @@ from numba import njit
 
 
 @njit
-def _sigmoid(x: float | NDArray[np.float64]) -> float:
+def _sigmoid(x: float | np.ndarray[float]) -> float:
     """sigmoid(x) = 1/(1+e^-x)
 
     Args:
@@ -33,8 +32,8 @@ def _d_sigmoid_dz(z):
 
 
 def logistic_regression(
-    xs: NDArray[np.float64],
-    ys: NDArray[np.float64],
+    xs: np.ndarray[float],
+    ys: np.ndarray[float],
     learning_rate: float = 0.1,
     tolerance: float = 1e-6,
     plot: bool = False,
@@ -42,8 +41,8 @@ def logistic_regression(
     """logistic_regression
 
     Args:
-        xs (NDArray[np.float64]): data points + appended bias column of 1s
-        ys (NDArray[np.float64]): labels
+        xs (np.ndarray[float]): data points + appended bias column of 1s
+        ys (np.ndarray[float]): labels
         learning_rate (float): gradient descent learning rate
         tolerance (float): convergence threshold, default is 1e-6
         plot (bool, optional): _description_. Defaults to False.

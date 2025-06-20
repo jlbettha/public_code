@@ -2,7 +2,6 @@
 
 import time
 import numpy as np
-from numpy.typing import NDArray
 from numba import njit, vectorize
 
 
@@ -30,14 +29,14 @@ def is_prime(n):
 
 
 @njit
-def n_primes_bf(n: int) -> NDArray[np.uint64]:
+def n_primes_bf(n: int) -> np.ndarray[int]:
     """brute force method to list first n primes
 
     Args:
         n (int): desired number of primes
 
     Returns:
-        list[int]: list of first n primes
+        np.ndarray[int]: list of first n primes
     """
     if n <= 1:
         return np.array([1]).astype(np.uint64)
@@ -68,7 +67,7 @@ def n_primes_bf(n: int) -> NDArray[np.uint64]:
 
 
 @njit
-def n_primes_basic(n: int) -> NDArray[np.int64]:
+def n_primes_basic(n: int) -> np.ndarray[int]:
     """basic method to list of first n primes
 
     Args:
@@ -96,7 +95,7 @@ def n_primes_basic(n: int) -> NDArray[np.int64]:
     return list_primes
 
 
-def n_primes_e_sieve(n: int) -> NDArray[np.int64]:
+def n_primes_e_sieve(n: int) -> np.ndarray[int]:
     """sieve of eratosthanes: fast method to list of first n primes
 
     Args:
@@ -117,7 +116,7 @@ def n_primes_e_sieve(n: int) -> NDArray[np.int64]:
     return NotImplementedError
 
 
-def n_primes_a_sieve(n: int) -> NDArray[np.int64]:
+def n_primes_a_sieve(n: int) -> np.ndarray[int]:
     """seive of atkins: fastest method to list of first n primes
 
     Args:
