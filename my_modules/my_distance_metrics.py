@@ -2,7 +2,6 @@
 
 import time
 import numpy as np
-from numpy.typing import NDArray
 from scipy.stats import wasserstein_distance, wasserstein_distance_nd
 import matplotlib.pyplot as plt
 from numba import njit
@@ -10,30 +9,31 @@ from numba import njit
 
 ####  Point-to-point distance functions  ##########
 @njit
-def euclidean_dist(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64:
+def euclidean_dist(a: np.ndarray[float], b: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute euclidean distance between 2 points
 
     Args:
-        a (NDArray[np.float64]): N-dimensional point A
-        b (NDArray[np.float64]): N-dimensional point B
+        a (np.ndarray[float]): N-dimensional point A
+        b (np.ndarray[float]): N-dimensional point B
 
     Returns:
-        np.float64: euclidean distance between points A and B
+        float: euclidean distance between points A and B
     """
-    c = np.sqrt(np.sum((b - a) * (b - a)))
+    diff = b - a
+    c = np.sqrt(np.sum(diff * diff))
     return c
 
 
 @njit
-def cosine_similarity(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64:
+def cosine_similarity(a: np.ndarray[float], b: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute cosine similarity between 2 vectors
 
     Args:
-        a (NDArray[np.float64]): N-dimensional vector/point A
-        b (NDArray[np.float64]): N-dimensional vector/point B
+        a (np.ndarray[float]): N-dimensional vector/point A
+        b (np.ndarray[float]): N-dimensional vector/point B
 
     Returns:
-        np.float64: euclidean distance between points A and B
+        float: euclidean distance between points A and B
     """
     magnitude_a = np.sqrt(np.sum(a * a))
     magnitude_b = np.sqrt(np.sum(b * b))
@@ -42,33 +42,32 @@ def cosine_similarity(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.floa
 
 
 @njit
-def manhattan_dist(a: NDArray[np.float64], b: NDArray[np.float64]) -> np.float64:
+def manhattan_dist(a: np.ndarray[float], b: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute manhattan distance between 2 points
 
     Args:
-        a (NDArray[np.float64]): N-dimensional point A
-        b (NDArray[np.float64]): N-dimensional point B
+        a (np.ndarray[float]): N-dimensional point A
+        b (np.ndarray[float]): N-dimensional point B
 
     Returns:
-        np.float64: manhattan distance between points A and B
+        float: manhattan distance between points A and B
     """
     mand = np.sum(np.abs(b - a))
     return mand
 
 
 @njit
-def minkowski_dist(
-    a: NDArray[np.float64], b: NDArray[np.float64], p: float = 1.0
-) -> np.float64:
+def minkowski_dist(a: np.ndarray[float], b: np.ndarray[float], p: float = 1.0) -> float:
     """Betthauser - 2018 - compute p-th root minkowski distance between 2 vectors
 
     Args:
-        a (NDArray[np.float64]): N-dimensional point A
-        b (NDArray[np.float64]): N-dimensional point A=B
+        a (np.ndarray[float]): N-dimensional point A
+        b (np.ndarray[float]): N-dimensional point A=B
         p (float, optional): pth root (default is 1, city block)
 
     Returns:
-        np.float64: p-th root minkowski distance between points A and B
+        float: p-th root minkowski distance between points A and B
+        mink = np.sum(np.abs(b - a) ** p) ** (1 / p)
     """
     mink = np.sum(np.abs(b - a) ** p) ** (1 / p)
     return mink
@@ -77,13 +76,13 @@ def minkowski_dist(
 ####  Point-to-distribution distance functions  ##########
 @njit
 def mahalinobis_dist(
-    y: NDArray[np.float64], x: NDArray[np.float64], sqrt_calc: bool = True
-) -> np.float64:
+    y: np.ndarray[float], x: np.ndarray[float], sqrt_calc: bool = True
+) -> float:
     """Betthauser - 2018 - compute  mahalinobis distance from point to point cluster
 
     Args:
-        y (NDArray[np.float64]): N-dimensional point
-        x (NDArray[np.float64]): N-dimensional target cluster of points
+        y (np.ndarray[float]): N-dimensional point
+        x (np.ndarray[float]): N-dimensional target cluster of points
 
     Returns:
         float: mahalinobis distance of point y to distribution x (exponent of multivariate gaussian)
@@ -92,14 +91,15 @@ def mahalinobis_dist(
     mu = np.array(
         [np.mean(x[:, i]) for i in range(x.shape[1])]
     )  # jit-friendly version (axis=0 is a problem)
-    dist = np.float64(((y - mu) @ np.linalg.pinv(np.cov(x.T))) @ (y - mu).T)
+    diff_y_mu = y - mu
+    dist = (diff_y_mu @ np.linalg.pinv(np.cov(x.T))) @ diff_y_mu.T
     if not sqrt_calc:
         return dist
     return np.sqrt(dist)
 
 
 @njit
-def z_score(x: np.float64, mu: np.float64, sigma: np.float64) -> np.float64:
+def z_score(x: float, mu: float, sigma: float) -> float:
     """Betthauser - 2017 - compute z_score of a data point wrt a distribution
     Args:
         x (float): data point
@@ -114,50 +114,48 @@ def z_score(x: np.float64, mu: np.float64, sigma: np.float64) -> np.float64:
 
 ####  Distribution-to-distribution distance functions  ##########
 @njit
-def pearson_correlation(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def pearson_correlation(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2018 - pearson correlation between distributions
 
     Args:
-        p (NDArray[np.float64]): array p
-        q (NDArray[np.float64]): array q
+        p (np.ndarray[float]): array p
+        q (np.ndarray[float]): array q
 
     Returns:
-        np.float64: pearson correlation between normalized p and q
+        float: pearson correlation between normalized p and q
     """
     return np.corrcoef(p / np.sum(p), q / np.sum(q))[0, 1]
 
 
 @njit
-def jensen_shannon_divergence(
-    p: NDArray[np.float64], q: NDArray[np.float64]
-) -> np.float64:
+def jensen_shannon_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2024 - jensen-shannon divergence
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
+        float: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
                     where M = 0.5(P+Q)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
     m = 0.5 * (p + q)
-    return np.float64(0.5 * (kl_divergence(p, m) + kl_divergence(q, m)))
+    return 0.5 * (kl_divergence(p, m) + kl_divergence(q, m))
 
 
 @njit
-def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def jensen_shannon_dist(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2024 - jensen-shannon distance metric
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: JS_distance = np.sqrt( JS_divergence )
+        float: JS_distance = np.sqrt( JS_divergence )
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -168,7 +166,7 @@ def jensen_shannon_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.fl
 
 
 @njit
-def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64 | None:
+def wasserstein_dist(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Wasserstein distance or Kantorovich–Rubinstein metric
 
         # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
@@ -176,12 +174,11 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
         # of earth that needs to be moved times the mean distance it has to be moved.
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: W_p(P,Q) = (1/N) * SUM_i [ ||X_i - Y_i|| ^^ p ] ^^ (1/p)
-        mink = np.sum(np.abs(b - a) ** p) ** (1 / p)
+        float: W_p(P,Q) = (1/N) * SUM_i [ ||X_i - Y_i|| ^^ p ] ^^ (1/p)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -195,11 +192,11 @@ def wasserstein_dist(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float
 
 @njit
 def wasserstein_dist_gaussian1d(
-    mu1: NDArray[np.float64],
-    cov1: NDArray[np.float64],
-    mu2: NDArray[np.float64],
-    cov2: NDArray[np.float64],
-) -> np.float64:
+    mu1: np.ndarray[float],
+    cov1: np.ndarray[float],
+    mu2: np.ndarray[float],
+    cov2: np.ndarray[float],
+) -> float:
     # Wasserstein distance of 2 gaussians ~N(mu1, C1) and ~N(mu2, C2)
     # From wikipedia.org: Intuitively, if each distribution is viewed as a unit amount of earth (soil) piled on
     # M, the metric is the minimum "cost" of turning one pile into the other, which is assumed to be the amount
@@ -212,15 +209,15 @@ def wasserstein_dist_gaussian1d(
 
 
 @njit
-def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def kl_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute KL divergence between two PMFs
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64:  KL divergence KL(p||q)
+        float:  KL divergence KL(p||q)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -229,25 +226,27 @@ def kl_divergence(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
 
 
 @njit
-def kl_div_bidirectional(p: NDArray[np.float64], q: NDArray[np.float64]) -> np.float64:
+def kl_div_bidirectional(p: np.ndarray[float], q: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
 
     Args:
-        p (NDArray[np.float64]): PMF of distribution p
-        q (NDArray[np.float64]): PMF of distribution q
+        p (np.ndarray[float]): PMF of distribution p
+        q (np.ndarray[float]): PMF of distribution q
 
     Returns:
-        np.float64: Jeffreys bi-directional KL divergence KL(p||q) + KL(q||p)
+        float: Jeffreys bi-directional KL divergence KL(p||q) + KL(q||p)
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
-    jeffreys = np.sum(p * (np.log(p) - np.log(q)) + q * (np.log(q) - np.log(p)))
+    log_p = np.log(p)
+    log_q = np.log(q)
+    jeffreys = np.sum(p * (log_p - log_q) + q * (log_q - log_p))
     return jeffreys
 
 
 @njit
-def kl_div_gaussian1d(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
+def kl_div_gaussian1d(mu1: float, v1: float, mu2: float, v2: float) -> float:
     """Betthauser - 2018 - compute KL divergence between two normal distributions
 
     Args:
@@ -259,13 +258,14 @@ def kl_div_gaussian1d(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.f
     Returns:
         float: _description_
     """
-    return np.log(v2 / v1) + ((v1 + (mu1 - mu2) * (mu1 - mu2)) / (2 * v2)) - 0.5
+    diff_mu = mu1 - mu2
+    return np.log(v2 / v1) + ((v1 + diff_mu * diff_mu) / (2 * v2)) - 0.5
 
 
 @njit
 def kl_div_gaussian1d_bidirectional(
-    mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64
-) -> np.float64:
+    mu1: float, v1: float, mu2: float, v2: float
+) -> float:
     """Betthauser - 2018 - compute KL divergence between two normal distributions
 
     Args:
@@ -284,7 +284,7 @@ def kl_div_gaussian1d_bidirectional(
 
 
 @njit
-def bhattacharyya_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
+def bhattacharyya_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
     """Betthauser - 2021 - compute Bhattacharyya distance between two normal distributions
     Args:
         mu1 (float): mean of distribution 1
@@ -296,12 +296,13 @@ def bhattacharyya_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.
         float: Bhattacharyya distance
     """
     part1 = 0.25 * np.log(0.25 * (v1 / v2 + v2 / v1 + 2))
-    part2 = 0.25 * (((mu1 - mu2) * (mu1 - mu2)) / (v1 + v2))
+    diff_mu = mu1 - mu2
+    part2 = 0.25 * ((diff_mu * diff_mu) / (v1 + v2))
     return part1 + part2
 
 
 @njit
-def fisher_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64) -> np.float64:
+def fisher_dist(mu1: float, v1: float, mu2: float, v2: float) -> float:
     """Betthauser - 2019 - compute Fisher distance between two normal distributions
         Note: Be aware that fisher_dist always = 0 if means are same,
         whereas bhat_dist only = 0 when means and vaiances are same.
@@ -316,19 +317,20 @@ def fisher_dist(mu1: np.float64, v1: np.float64, mu2: np.float64, v2: np.float64
         float: Fisher distance
 
     """
-    fish = ((mu1 - mu2) * (mu1 - mu2)) / (v1 + v2)
+    diff_mu = mu1 - mu2
+    fish = (diff_mu * diff_mu) / (v1 + v2)
     return fish
 
 
 @njit
-def entropy(hist1: NDArray[np.float64]) -> np.float64:
+def entropy(hist1: np.ndarray[float]) -> float:
     """Betthauser 2016 -- Calculate joint entropy of an N-d distribution
 
     Args:
-        hist1 (NDArray[np.float64]): an N-D histogram or PMF
+        hist1 (np.ndarray[float]): an N-D histogram or PMF
 
     Returns:
-        np.float64: entropy of the ditribution
+        float: entropy of the ditribution
     """
     hist1 = hist1 / np.sum(hist1)
     nz_probs = np.array([-p * np.log(p) for p in hist1 if p > 1e-12])
@@ -337,38 +339,37 @@ def entropy(hist1: NDArray[np.float64]) -> np.float64:
 
 
 @njit
-def minmax_scaling(
-    data: NDArray[np.float64], max_val: float = 255
-) -> NDArray[np.float64]:
+def minmax_scaling(data: np.ndarray[float], max_val: float = 255) -> np.ndarray[float]:
     """Betthauser - 2018 - min-max scaling of data
 
     Args:
-        data (NDArray[np.float64]): N-D data
+        data (np.ndarray[float]): N-D data
         max_val (float, optional): max desired output value. Defaults to 255.
 
     Returns:
-        NDArray[np.float64]: data min-max scaled in range [0, max_val]
+        np.ndarray[float]: data min-max scaled in range [0, max_val]
     """
-    return max_val * (data - data.min()) / (data.max() - data.min())
+    d_min = data.min()
+    return max_val * (data - d_min) / (data.max() - d_min)
 
 
 # returns joint histogram of 2 image sections
 @njit
 def joint_histogram_2d(
-    patch1: NDArray[np.float64], patch2: NDArray[np.float64], bins: int = 255
-) -> NDArray[np.float64]:
+    patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0
+) -> np.ndarray[float]:
     """Computes joint histogram of 2 image sections/patches
     Args:
-        img1 (NDArray[np.float64]): image patch 1
-        img2 (NDArray[np.float64]): image patch 2
+        img1 (np.ndarray[float]): image patch 1
+        img2 (np.ndarray[float]): image patch 2
         bins (float): number of bins
     Returns:
-        NDArray[np.float64]: joint_histogram
+        np.ndarray[float]: joint_histogram
     """
-    patch1 = minmax_scaling(patch1, max_val=bins).astype(int)
-    patch2 = minmax_scaling(patch2, max_val=bins).astype(int)
+    patch1 = minmax_scaling(patch1, max_val=bins).astype(np.uint8)
+    patch2 = minmax_scaling(patch2, max_val=bins).astype(np.uint8)
 
-    joint_histogram = np.zeros((bins, bins)).astype(int)
+    joint_histogram = np.zeros(bins, bins)
     for i in range(patch1.shape[0]):
         for j in range(patch1.shape[1]):
             joint_histogram[patch2[i, j], patch1[i, j]] += 1
@@ -376,11 +377,11 @@ def joint_histogram_2d(
 
 
 @njit
-def mutual_info(image1: NDArray[np.float64], image2: NDArray[np.float64]) -> float:
+def mutual_info(image1: np.ndarray[float], image2: np.ndarray[float]) -> float:
     """Betthauser - 2018 - compute mutual information between 2 images/patches
     Args:
-        image1 (NDArray[np.float64]): image/patch
-        image2 (NDArray[np.float64]): another image/patch for comparison
+        image1 (np.ndarray[float]): image/patch
+        image2 (np.ndarray[float]): another image/patch for comparison
 
     Returns:
         float: mutual information between the two images/patches
@@ -443,7 +444,7 @@ def main() -> None:
     # plt.figure()
     # plt.scatter(cluster1[:, 0], cluster1[:, 1])
     # plt.scatter(cluster2[:, 0], cluster2[:, 1])
-    plt.show()
+    # plt.show()
 
 
 if __name__ == "__main__":

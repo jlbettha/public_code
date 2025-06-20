@@ -7,7 +7,6 @@ Created on Thu Feb 18 20:08:25 2021
 import numpy as np
 import keras.backend as K
 import tensorflow as tf
-from numpy.typing import NDArray
 
 
 def mean_squared_error(ytrue, ypred):
@@ -138,11 +137,11 @@ def categorical_focal_loss(alpha: float = 0.25, gamma: float = 2.0) -> float:
     return loss
 
 
-def weighted_categorical_crossentropy(weights: NDArray[np.float64]) -> float:
+def weighted_categorical_crossentropy(weights: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        weights (NDArray[np.float64]): _description_
+        weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
@@ -159,11 +158,11 @@ def weighted_categorical_crossentropy(weights: NDArray[np.float64]) -> float:
     return loss
 
 
-def weighted_categorical_crossentropy2(weights: NDArray[np.float64]) -> float:
+def weighted_categorical_crossentropy2(weights: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        weights (NDArray[np.float64]): _description_
+        weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
@@ -181,11 +180,11 @@ def weighted_categorical_crossentropy2(weights: NDArray[np.float64]) -> float:
     return loss
 
 
-def weighted_pixelwise_crossentropy(class_weights: NDArray[np.float64]) -> float:
+def weighted_pixelwise_crossentropy(class_weights: np.ndarray[float]) -> float:
     """_summary_
 
     Args:
-        class_weights (NDArray[np.float64]): _description_
+        class_weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
@@ -216,7 +215,7 @@ def dice_loss() -> float:
     return loss
 
 
-def dice_loss2(smooth: float = 1) -> float:
+def dice_loss2(smooth: float = 1.0) -> float:
     """_summary_
 
     Args:

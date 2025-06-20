@@ -9,11 +9,12 @@ import numpy as np
 import mouse
 import keyboard
 import matplotlib.pyplot as plt
-from numpy.typing import NDArray
+from numba import njit
+import tkinter as tk
 
 
 # my type
-ArrayTuple = Tuple[NDArray[np.float64]]
+ArrayTuple = Tuple[np.ndarray[float]]
 
 
 def kalman_init(dt_: float) -> ArrayTuple:
@@ -46,21 +47,22 @@ def kalman_init(dt_: float) -> ArrayTuple:
     return A_, B_, H_, Q_, R_, c_, x_, P_
 
 
+@njit
 def kalman_correction(
-    H_: NDArray[np.float64],
-    R_: NDArray[np.float64],
-    x_: NDArray[np.float64],
-    z_: NDArray[np.float64],
-    P_: NDArray[np.float64],
+    H_: np.ndarray[float],
+    R_: np.ndarray[float],
+    x_: np.ndarray[float],
+    z_: np.ndarray[float],
+    P_: np.ndarray[float],
 ) -> ArrayTuple:
     """_summary_
 
     Args:
-        H (NDArray[np.float]): _description_
-        R (NDArray[np.float]): _description_
-        x (NDArray[np.float]): _description_
-        z (NDArray[np.float]): _description_
-        P (NDArray[np.float]): _description_
+        H (np.ndarray[float]): _description_
+        R (np.ndarray[float]): _description_
+        x (np.ndarray[float]): _description_
+        z (np.ndarray[float]): _description_
+        P (np.ndarray[float]): _description_
 
     Returns:
         ArrayTuple: _description_
@@ -73,23 +75,24 @@ def kalman_correction(
     return x_, P_
 
 
+@njit
 def kalman_predict(
-    A_: NDArray[np.float64],
-    B_: NDArray[np.float64],
-    Q_: NDArray[np.float64],
-    c_: NDArray[np.float64],
-    x_: NDArray[np.float64],
-    P_: NDArray[np.float64],
+    A_: np.ndarray[float],
+    B_: np.ndarray[float],
+    Q_: np.ndarray[float],
+    c_: np.ndarray[float],
+    x_: np.ndarray[float],
+    P_: np.ndarray[float],
 ) -> ArrayTuple:
     """_summary_
 
     Args:
-        A (NDArray[np.float]): _description_
-        B (NDArray[np.float]): _description_
-        Q (NDArray[np.float]): _description_
-        c (NDArray[np.float]): _description_
-        x (NDArray[np.float]): _description_
-        P (NDArray[np.float]): _description_
+        A (np.ndarray[float]): _description_
+        B (np.ndarray[float]): _description_
+        Q (np.ndarray[float]): _description_
+        c (np.ndarray[float]): _description_
+        x (np.ndarray[float]): _description_
+        P (np.ndarray[float]): _description_
 
     Returns:
         ArrayTuple: _description_
@@ -99,27 +102,31 @@ def kalman_predict(
     return x_, P_
 
 
-if __name__ == "__main__":
+def main() -> None:
+    # root = tk.Tk()
+
+    screen_width = 2400 #root.winfo_screenwidth()
+    screen_height = 1600 #root.winfo_screenheight()
 
     plt.ion()  # interactive plots on
 
     ## init vars
     measureNoise = 1
-    dt = 0.15
-    dim_fix = 767
+    dt = 0.25
+    dim_fix = screen_height
     num_poses = 20  # vars track last N values for green trace
-    ramp = np.linspace(0, 1, num_poses)
+    # ramp = np.linspace(0, 1, num_poses)
     last_poses = np.nan * np.zeros((2, num_poses))
 
     ## init kalman filter params
     [A, B, H, Q, R, c, x, P] = kalman_init(dt)
 
     ## Make program respond to mouse movements
-    print('Press "ESC" key to quit')
+
     dist2target = 20
 
-    fig, ax = plt.subplots()
-    fig.canvas.manager.full_screen_toggle()
+    fig, ax = plt.subplots(figsize=(15, 9))
+    # fig.canvas.manager.full_screen_toggle()
     measurement_scatter = ax.scatter(0, 0, c="r", marker="o", s=20, label="measurement")
     trace_plot = ax.plot(
         last_poses[0, :],
@@ -129,14 +136,17 @@ if __name__ == "__main__":
         label="kalman tracker",
     )[0]
     cursor_scatter = ax.scatter(0, 0, c="k", marker="+", s=50, label="true cursor loc.")
-    plt.axis([0, 1365, 0, 767])
-    plt.xlabel("x-pos.")
-    plt.ylabel("y-pos.")
-    plt.title("Kalman Filter Mouse Tracker")
-    plt.legend()
+    ax.axis([0, screen_width, 0, screen_height])
+
+    # plt.xlabel("x-pos.")
+    # plt.ylabel("y-pos.")
+    # plt.title("Kalman Filter Mouse Tracker")
+    # plt.legend()
+
+    print('Press "ESC" key to quit')
 
     while True:
-        t0 = time.time()
+        t0 = time.perf_counter()
 
         cursor = np.array(mouse.get_position())
         cursor[1] = dim_fix - cursor[1]
@@ -182,9 +192,15 @@ if __name__ == "__main__":
             plt.close()
             break
 
-        tf = time.time() - t0
+        tf = time.perf_counter() - t0
 
         if tf > dt:
             time.sleep(0.001)
         else:
             time.sleep(dt - tf)
+
+
+if __name__ == "__main__":
+    tmain = time.perf_counter()
+    main()
+    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")

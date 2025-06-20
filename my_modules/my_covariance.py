@@ -1,15 +1,15 @@
 import time
-from numpy.typing import NDArray
 import numpy as np
+from numba import njit
 
-
-def covariance(x_mat: NDArray[np.float64]) -> NDArray[np.float64]:
+# @njit
+def covariance(x_mat: np.ndarray[float]) -> np.ndarray[float]:
     """Compute covariance of a matrix
     Args:
-        x_mat (NDArray[float]): (n x m) matrix where n is number of samples, and m is number of features
+        x_mat (np.ndarray[float]): (n x m) matrix where n is number of samples, and m is number of features
 
     Returns:
-        x_cov (NDArray[float]): (m x m) covariance matrix
+        x_cov (np.ndarray[float]): (m x m) covariance matrix
     """
     mu = np.mean(x_mat, axis=0)
     N = x_mat.shape[0]
@@ -19,6 +19,9 @@ def covariance(x_mat: NDArray[np.float64]) -> NDArray[np.float64]:
 
 
 def main() -> None:
+    # x_warmup = np.random.rand(3, 5)
+    # cov_warmup = covariance(x_warmup)
+    
     x_mat1 = np.random.rand(1000, 200)
     x_matT = x_mat1.T
 

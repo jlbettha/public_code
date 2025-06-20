@@ -1,7 +1,6 @@
 import time
 import numpy as np
 import cv2
-from numpy.typing import NDArray
 from scipy import ndimage as ndi
 from skimage import feature
 from my_distance_metrics import minmax_scaling
@@ -10,83 +9,92 @@ from my_distance_metrics import minmax_scaling
 
 
 def image_gaussian_smooth(
-    image: NDArray[np.float64], sigma: float = 1.0
-) -> NDArray[np.float64]:
+    image: np.ndarray[float], sigma: float = 1.0
+) -> np.ndarray[float]:
     """_summary_
 
     Args:
-        image (NDArray[np.float64]): _description_
+        image (np.ndarray[float]): _description_
         sigma (float, optional): _description_. Defaults to 1.0.
 
     Returns:
-        NDArray[np.float64]: _description_
+        np.ndarray[float]: _description_
     """
     image = ndi.gaussian_filter(image, sigma=sigma)
     return minmax_scaling(image, max_val=1)
 
 
 def image_edge_potential(
-    image: NDArray[np.float64], sigma: float = 1.0
-) -> NDArray[np.float64]:
+    image: np.ndarray[float], sigma: float = 1.0
+) -> np.ndarray[float]:
     """_summary_
 
     Args:
-        image (NDArray[np.float64]): _description_
+        image (np.ndarray[float]): _description_
         sigma (float, optional): _description_. Defaults to 1.0.
 
     Returns:
-        NDArray[np.float64]: _description_
+        np.ndarray[float]: _description_
     """
     edge_pot = ndi.gaussian_gradient_magnitude(image, sigma=1.0)  # gradient
     edge_pot = 1 / np.abs(1 + edge_pot)  # P = 1/ |1+ grad(I)|
     return 1 - edge_pot
 
 
-def canny_edge_mask(image, sigma=1.0) -> NDArray[np.float64]:
+def canny_edge_mask(image: np.ndarray[float], sigma=1.0) -> np.ndarray[float]:
+    """_summary_
+
+    Args:
+        image (np.ndarray[float]): _description_
+        sigma (float, optional): _description_. Defaults to 1.0.
+
+    Returns:
+        np.ndarray[float]: _description_
+    """
     img_smoothed = image_gaussian_smooth(image, sigma=sigma)
     return feature.canny(img_smoothed, sigma=sigma).astype(float)
 
 
-def image_color(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def image_color(image: np.ndarray[float]) -> np.ndarray[float]:
     """Color. We use the standard RGB colorspace. Note that any improvements to color
         histograms (such as better colorspaces) can also be applied to joint histograms.
 
     Args:
-        image (NDArray[np.float64]): input image (m x n)
+        image (np.ndarray[float]): input image (m x n)
 
     Returns:
-        NDArray[np.float64]: image_color (m x n)
+        np.ndarray[float]: image_color (m x n)
     """
     num_colors = 64
     return 0.0
 
 
-def image_edge_density(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def image_edge_density(image: np.ndarray[float]) -> np.ndarray[float]:
     """Edge density. We define the edge density at pixel (j, k) to be the ratio of edges to
         pixels in a small neighborhood surrounding the pixel. The edge representation of the
         image is computed with a standard method [12].
 
     Args:
-        image (NDArray[np.float64]): input image (m x n)
+        image (np.ndarray[float]): input image (m x n)
 
     Returns:
-        NDArray[np.float64]: image_edge_density (m x n)
+        np.ndarray[float]: image_edge_density (m x n)
     """
     num_densities = 4
 
     return 0.0
 
 
-def image_texturedness(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def image_texturedness(image: np.ndarray[float]) -> np.ndarray[float]:
     """Texturedness. We define the texturedness at pixel (j, k) to be the number of neighboring
         pixels whose intensities differ by more than a fixed value. This definition is similar to
         the texturedness feature used by Engelson [3] for place recognition.
 
     Args:
-        image (NDArray[np.float64]): input image (m x n)
+        image (np.ndarray[float]): input image (m x n)
 
     Returns:
-        NDArray[np.float64]: image_texturedness (m x n)
+        np.ndarray[float]: image_texturedness (m x n)
     """
     tol = 0.1
     image = minmax_scaling(image, max_val=1)
@@ -102,32 +110,32 @@ def image_texturedness(image: NDArray[np.float64]) -> NDArray[np.float64]:
     return img_textures
 
 
-def image_gradient_magnitude(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def image_gradient_magnitude(image: np.ndarray[float]) -> np.ndarray[float]:
     """Gradient magnitude. Gradient magnitude is a measure of how rapidly intensity is
         changing in the direction of greatest change. The gradient magnitude at a pixel (j, k)
         is computed using standard methods [8]
 
     Args:
-        image (NDArray[np.float64]): input image (m x n)
+        image (np.ndarray[float]): input image (m x n)
 
     Returns:
-        NDArray[np.float64]: image_gradient_magnitude (m x n)
+        np.ndarray[float]: image_gradient_magnitude (m x n)
     """
     image = image_gaussian_smooth(image, sigma=1.0)
     img_grads = np.abs(cv2.Laplacian(image, cv2.CV_64F))
     return img_grads
 
 
-def image_rank(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def image_rank(image: np.ndarray[float]) -> np.ndarray[float]:
     """Rank. The rank of pixel (j, k) is defined as the number of pixels in the local 4c(+) neighborhood
         whose intensity is less than the intensity at (j, k). This feature can be used to compute
         optical flow.
 
     Args:
-        image (NDArray[np.float64]): input image (m x n)
+        image (np.ndarray[float]): input image (m x n)
 
     Returns:
-        NDArray[np.float64]: image_rank (m x n)
+        np.ndarray[float]: image_rank (m x n)
     """
 
     img_ranks = np.zeros((image.shape[0], image.shape[1]))
@@ -143,7 +151,7 @@ def image_rank(image: NDArray[np.float64]) -> NDArray[np.float64]:
 
 def build_jointhist_n(
     img_colors, img_edges, img_textures, img_grads, img_ranks, n=5
-) -> NDArray[np.float64]:
+) -> np.ndarray[float]:
     img_colors
     img_edges
     img_textures
@@ -153,7 +161,7 @@ def build_jointhist_n(
     return None
 
 
-def jh5_image_features(image: NDArray[np.float64]) -> NDArray[np.float64]:
+def jh5_image_features(image: np.ndarray[float]) -> np.ndarray[float]:
     """Betthauser (implementation) 2023 -- Calculate JH4 image features (for search)
         JointHistograms5: color, edge density, texturedness, gradient magnitude, rank
         G. Pass and R. Zabih, 'Comparing Images Using Joint Histograms,'
@@ -165,10 +173,10 @@ def jh5_image_features(image: NDArray[np.float64]) -> NDArray[np.float64]:
     joint histograms were compared using the L1 distance.__"
 
     Args:
-        image (NDArray[np.float64]): input image
+        image (np.ndarray[float]): input image
 
     Returns:
-        tuple[NDArray[np.float64]]: joint_hist_5 image features for comparison
+        tuple[np.ndarray[float]]: joint_hist_5 image features for comparison
     """
     num_colors = 64
     num_edges = 4
