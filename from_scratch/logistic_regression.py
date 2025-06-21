@@ -8,6 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numba import njit
 
+# from scipy.special import erf
+
 # TODO: there is a bug, also extend functionality to multiclass
 
 
@@ -23,6 +25,11 @@ def _sigmoid(x: float | np.ndarray[float]) -> float:
     """
     # sigx = (1 + np.exp(x)) ** -1
     return 1 / (1 + np.exp(-x))
+
+
+@njit
+def d_erf_dx(x):
+    return (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
 
 
 @njit
