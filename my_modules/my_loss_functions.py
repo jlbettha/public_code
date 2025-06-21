@@ -9,11 +9,14 @@ import keras.backend as K
 import tensorflow as tf
 
 
-def mean_squared_error(ytrue, ypred):
-    return (ypred - ytrue) ** 2 / np.size(ytrue)
+def mean_squared_loss() -> float:
+    def loss(ytrue, ypred):
+        return (ypred - ytrue) ** 2 / np.size(ytrue)
+
+    return loss
 
 
-def mse_derivative(ytrue, ypred):
+def mse_derivative(ytrue, ypred) -> float:
     return 2 * (ypred - ytrue) / np.size(ytrue)
 
 
@@ -29,12 +32,10 @@ def vae_loss(mean, var) -> float:
     """
 
     def kl_loss(mean, log_var):
-        loss = -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
-        return loss
+        return -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
 
     def mse_loss(y_true, y_pred):
-        loss = K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
-        return loss
+        return K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
 
     def loss(y_true, y_pred):
         log_var = K.log(var)
@@ -102,8 +103,7 @@ def binary_focal_loss(gamma: float = 2.0, alpha: float = 0.25) -> float:
         cross_entropy = -K.log(p_t)
         weight = alpha_t * K.pow((1 - p_t), gamma)
         loss = weight * cross_entropy
-        loss = K.mean(K.sum(loss, axis=1))
-        return loss
+        return K.mean(K.sum(loss, axis=1))
 
     return loss
 
@@ -152,8 +152,7 @@ def weighted_categorical_crossentropy(weights: np.ndarray[float]) -> float:
         epsilon = K.epsilon()
         y_pred = K.clip(y_pred, epsilon, 1 - epsilon)
         loss = y_true * K.log(y_pred) * K.variable(weights)
-        loss = -K.sum(loss, -1)
-        return loss
+        return -K.sum(loss, -1)
 
     return loss
 
@@ -351,8 +350,7 @@ def weighted_bce() -> float:
     def loss(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        weighted_bce = K.mean(bce * weights)
-        return weighted_bce
+        return K.mean(bce * weights)
 
     return loss
 
@@ -367,8 +365,7 @@ def unet3p_hybrid_loss() -> float:
     def weighted_bce(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        weighted_bce = K.mean(bce * weights)
-        return weighted_bce
+        return K.mean(bce * weights)
 
     def jacard_val(y_true, y_pred):
         """
