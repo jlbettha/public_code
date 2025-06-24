@@ -1,10 +1,23 @@
-"""module summary"""
+"""Betthauser - 2024 - Metrics for computing distances between points|points, points|distributions,
+and distributions|distributions."""
 
 import time
 import numpy as np
-from scipy.stats import wasserstein_distance, wasserstein_distance_nd
-import matplotlib.pyplot as plt
 from numba import njit
+
+
+@njit
+def sum_squared_error(x: np.ndarray[float], y: np.ndarray[float]) -> float:
+    """Compute the sum of squared errors between two vectors x and y."""
+    return np.sum((x - y) ** 2)
+
+
+@njit
+def compute_R2(x: np.ndarray[float], y: np.ndarray[float]) -> float:
+    """Compute R2 between two vectors x and y."""
+    ss_residual = sum_squared_error(x, y)
+    ss_total = sum_squared_error(x, np.mean(x))
+    return 1 - (ss_residual / ss_total)
 
 
 ####  Point-to-point distance functions  ##########
@@ -75,9 +88,7 @@ def minkowski_dist(a: np.ndarray[float], b: np.ndarray[float], p: float = 1.0) -
 
 ####  Point-to-distribution distance functions  ##########
 @njit
-def mahalinobis_dist(
-    y: np.ndarray[float], x: np.ndarray[float], sqrt_calc: bool = True
-) -> float:
+def mahalinobis_dist(y: np.ndarray[float], x: np.ndarray[float], sqrt_calc: bool = True) -> float:
     """Betthauser - 2018 - compute  mahalinobis distance from point to point cluster
 
     Args:
@@ -88,9 +99,7 @@ def mahalinobis_dist(
         float: mahalinobis distance of point y to distribution x (exponent of multivariate gaussian)
     """
     # mu = np.mean(x, axis=0)
-    mu = np.array(
-        [np.mean(x[:, i]) for i in range(x.shape[1])]
-    )  # jit-friendly version (axis=0 is a problem)
+    mu = np.array([np.mean(x[:, i]) for i in range(x.shape[1])])  # jit-friendly version (axis=0 is a problem)
     diff_y_mu = y - mu
     dist = (diff_y_mu @ np.linalg.pinv(np.cov(x.T))) @ diff_y_mu.T
     if not sqrt_calc:
@@ -263,9 +272,7 @@ def kl_div_gaussian1d(mu1: float, v1: float, mu2: float, v2: float) -> float:
 
 
 @njit
-def kl_div_gaussian1d_bidirectional(
-    mu1: float, v1: float, mu2: float, v2: float
-) -> float:
+def kl_div_gaussian1d_bidirectional(mu1: float, v1: float, mu2: float, v2: float) -> float:
     """Betthauser - 2018 - compute KL divergence between two normal distributions
 
     Args:
@@ -277,9 +284,7 @@ def kl_div_gaussian1d_bidirectional(
     Returns:
         float: _description_
     """
-    jeffreys = kl_div_gaussian1d(mu1=mu1, v1=v1, mu2=mu2, v2=v2) + kl_div_gaussian1d(
-        mu1=mu2, v1=v2, mu2=mu1, v2=v1
-    )
+    jeffreys = kl_div_gaussian1d(mu1=mu1, v1=v1, mu2=mu2, v2=v2) + kl_div_gaussian1d(mu1=mu2, v1=v2, mu2=mu1, v2=v1)
     return jeffreys
 
 
@@ -355,9 +360,7 @@ def minmax_scaling(data: np.ndarray[float], max_val: float = 255) -> np.ndarray[
 
 # returns joint histogram of 2 image sections
 @njit
-def joint_histogram_2d(
-    patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0
-) -> np.ndarray[float]:
+def joint_histogram_2d(patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0) -> np.ndarray[float]:
     """Computes joint histogram of 2 image sections/patches
     Args:
         img1 (np.ndarray[float]): image patch 1
@@ -374,6 +377,27 @@ def joint_histogram_2d(
         for j in range(patch1.shape[1]):
             joint_histogram[patch2[i, j], patch1[i, j]] += 1
     return joint_histogram
+
+
+@njit
+def hist1d(
+    vals: np.ndarray[float], bins: int, val_range: tuple[float, float], norm: bool = False
+) -> np.ndarray[np.int64]:
+    """JIT compute 1D histogram of values (fastest current method)
+
+    Args:
+        vals (np.ndarray[float]): _description_
+        bins (int): _description_
+        val_range (tuple[float, float]): _description_
+        norm (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        np.ndarray[np.int64]: _description_
+    """
+    hist = np.histogram(vals, bins, val_range)[0]
+    if norm:
+        hist = (hist / np.sum(hist)).astype(np.int64)
+    return hist
 
 
 @njit
@@ -419,23 +443,24 @@ def main() -> None:
     mu_b = np.mean(c2_1d)
     var_b = np.var(c2_1d)
 
-    dists, _, _ = plt.hist([c1_1d, c2_1d], bins=62)
-    # plt.show()
+    range_min = np.min([c1_1d, c2_1d])
+    range_max = np.max([c1_1d, c2_1d])
 
-    distr_a = dists[0] / np.sum(dists[0])
-    distr_b = dists[1] / np.sum(dists[1])
+    distr_a = hist1d(vals=c1_1d, bins=64, val_range=(range_min, range_max), norm=True)
+    distr_b = hist1d(vals=c2_1d, bins=64, val_range=(range_min, range_max), norm=True)
 
-    print("  Point to point distances:")
+    print(" ** Point to point distances:")
     print(f"{cosine_similarity(point1, point2) = :.7f}")
     print(f"{manhattan_dist(point1, point2) = :.7f}")
     print(f"{euclidean_dist(point1, point2) = :.7f}")
     print(f"{minkowski_dist(point1, point2, 7) = :.7f}\n")
 
-    print("  Point to cluster distances:")
+    print(" ** Point to distribution distances:")
     print(f"{mahalinobis_dist(point1, cluster1, sqrt_calc=False) = :.7f}")
     print(f"{mahalinobis_dist(point1, cluster1, sqrt_calc=True) = :.7f}\n")
 
-    print("  Cluster to cluster distances:")
+    print(" **  Distribution to distribution distances:")
+    print(f"{compute_R2(c1_1d, c2_1d) = :.7f}")
     print(f"{fisher_dist(mu_a, var_a, mu_b, var_b) = :.7f}")
     print(f"{bhattacharyya_dist(mu_a, var_a, mu_b, var_b) = :.3f}")
     print(f"{kl_div_bidirectional(distr_a, distr_b) = :.3f}")

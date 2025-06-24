@@ -9,14 +9,11 @@ import keras.backend as K
 import tensorflow as tf
 
 
-def mean_squared_loss() -> float:
-    def loss(ytrue, ypred):
-        return (ypred - ytrue) ** 2 / np.size(ytrue)
-
-    return loss
+def mean_squared_error(ytrue, ypred):
+    return (ypred - ytrue) ** 2 / np.size(ytrue)
 
 
-def mse_derivative(ytrue, ypred) -> float:
+def mse_derivative(ytrue, ypred):
     return 2 * (ypred - ytrue) / np.size(ytrue)
 
 
@@ -32,10 +29,12 @@ def vae_loss(mean, var) -> float:
     """
 
     def kl_loss(mean, log_var):
-        return -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
+        loss = -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
+        return loss
 
     def mse_loss(y_true, y_pred):
-        return K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
+        loss = K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
+        return loss
 
     def loss(y_true, y_pred):
         log_var = K.log(var)
@@ -103,7 +102,8 @@ def binary_focal_loss(gamma: float = 2.0, alpha: float = 0.25) -> float:
         cross_entropy = -K.log(p_t)
         weight = alpha_t * K.pow((1 - p_t), gamma)
         loss = weight * cross_entropy
-        return K.mean(K.sum(loss, axis=1))
+        loss = K.mean(K.sum(loss, axis=1))
+        return loss
 
     return loss
 
@@ -152,7 +152,8 @@ def weighted_categorical_crossentropy(weights: np.ndarray[float]) -> float:
         epsilon = K.epsilon()
         y_pred = K.clip(y_pred, epsilon, 1 - epsilon)
         loss = y_true * K.log(y_pred) * K.variable(weights)
-        return -K.sum(loss, -1)
+        loss = -K.sum(loss, -1)
+        return loss
 
     return loss
 
@@ -172,9 +173,7 @@ def weighted_categorical_crossentropy2(weights: np.ndarray[float]) -> float:
         if not tf.is_tensor(y_pred):
             y_pred = K.constant(y_pred)
         y_true = K.cast(y_true, y_pred.dtype)
-        return K.categorical_crossentropy(y_true, y_pred) * K.sum(
-            y_true * Kweights, axis=-1
-        )
+        return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * Kweights, axis=-1)
 
     return loss
 
@@ -228,9 +227,7 @@ def dice_loss2(smooth: float = 1.0) -> float:
         y_true_f = K.flatten(y_true)
         y_pred_f = K.flatten(y_pred)
         intersection = K.sum(y_true_f * y_pred_f)
-        return 1 - (2.0 * intersection + smooth) / (
-            K.sum(y_true_f) + K.sum(y_pred_f) + smooth
-        )
+        return 1 - (2.0 * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
     return loss
 
@@ -252,16 +249,12 @@ def tversky_loss(smooth: float = 1, alpha: float = 0.7) -> float:
         true_pos = K.sum(y_true_pos * y_pred_pos)
         false_neg = K.sum(y_true_pos * (1 - y_pred_pos))
         false_pos = K.sum((1 - y_true_pos) * y_pred_pos)
-        return 1 - (true_pos + smooth) / (
-            true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth
-        )
+        return 1 - (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
 
     return loss
 
 
-def focal_tversky_loss(
-    gamma: float = 2.0, smooth: float = 1.0, alpha: float = 0.7
-) -> float:
+def focal_tversky_loss(gamma: float = 2.0, smooth: float = 1.0, alpha: float = 0.7) -> float:
     """_summary_
 
     Args:
@@ -279,9 +272,7 @@ def focal_tversky_loss(
         true_pos = K.sum(y_true_pos * y_pred_pos)
         false_neg = K.sum(y_true_pos * (1 - y_pred_pos))
         false_pos = K.sum((1 - y_true_pos) * y_pred_pos)
-        tv = (true_pos + smooth) / (
-            true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth
-        )
+        tv = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
         return K.pow((1 - tv), gamma)
 
     return loss
@@ -330,11 +321,7 @@ def log_loss() -> float:
 
     def loss(y_true, y_pred):
         y_pred = tf.clip_by_value(y_pred, 1e-12, 1 - 1e-12)
-        error = (
-            y_true
-            * tf.math.log(y_pred + 1e-12)(1 - y_true)
-            * tf.math.log(1 - y_pred + 1e-12)
-        )
+        error = y_true * tf.math.log(y_pred + 1e-12)(1 - y_true) * tf.math.log(1 - y_pred + 1e-12)
         return -error
 
     return loss
@@ -350,7 +337,8 @@ def weighted_bce() -> float:
     def loss(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        return K.mean(bce * weights)
+        weighted_bce = K.mean(bce * weights)
+        return weighted_bce
 
     return loss
 
@@ -365,7 +353,8 @@ def unet3p_hybrid_loss() -> float:
     def weighted_bce(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        return K.mean(bce * weights)
+        weighted_bce = K.mean(bce * weights)
+        return weighted_bce
 
     def jacard_val(y_true, y_pred):
         """
@@ -385,9 +374,7 @@ def unet3p_hybrid_loss() -> float:
         true_pos = K.sum(y_true_pos * y_pred_pos)
         false_neg = K.sum(y_true_pos * (1 - y_pred_pos))
         false_pos = K.sum((1 - y_true_pos) * y_pred_pos)
-        tv = (true_pos + smooth) / (
-            true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth
-        )
+        tv = (true_pos + smooth) / (true_pos + alpha * false_neg + (1 - alpha) * false_pos + smooth)
         return K.pow((1 - tv), gamma)
 
     def ssim_val(y_true, y_pred):

@@ -1,0 +1,111 @@
+{
+    "GeneralizedDiceLoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "w_type": "square",
+        "reduction": "mean",
+        "smooth_nr": 1e-05,
+        "smooth_dr": 1e-05,
+        "batch": false
+    },
+    "DiceCELoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "squared_pred": false,
+        "jaccard": false,
+        "reduction": "mean",
+        "smooth_nr": 1e-05,
+        "smooth_dr": 1e-05,
+        "batch": false,
+        "weight": "None",
+        "lambda_dice": 1.0,
+        "lambda_ce": 1.0,
+        "label_smoothing": 0.0
+    },
+    "DiceFocalLoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "squared_pred": false,
+        "jaccard": false,
+        "reduction": "mean",
+        "smooth_nr": 1e-05,
+        "smooth_dr": 1e-05,
+        "batch": false,
+        "gamma": 2.0,
+        "weight": "None",
+        "lambda_dice": 1.0,
+        "lambda_focal": 1.0,
+        "alpha": "None"
+    },
+    "GeneralizedDiceFocalLoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "w_type": "square",
+        "reduction": "mean",
+        "smooth_nr": 1e-05,
+        "smooth_dr": 1e-05,
+        "batch": false,
+        "gamma": 2.0,
+        "weight": "None",
+        "lambda_gdl": 1.0,
+        "lambda_focal": 1.0
+    },
+    "unified_focal_loss.AsymmetricFocalTverskyLoss": {
+        "to_onehot_y": false,
+        "delta": 0.7,
+        "gamma": 0.75,
+        "epsilon": 1e-07,
+        "reduction": "mean"
+    },
+    "FocalLoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "gamma": 2.0,
+        "alpha": "None",
+        "weight": "None",
+        "reduction": "mean",
+        "use_softmax": false
+    },
+    "TverskyLoss": {
+        "include_background": true,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "alpha": 0.5,
+        "beta": 0.5,
+        "reduction": "mean",
+        "smooth_nr": 1e-05,
+        "smooth_dr": 1e-05,
+        "batch": false
+    },
+    "BarlowTwinsLoss": {
+        "lambd": 0.005
+    },
+    "ContrastiveLoss": {
+        "temperature": 0.5,
+        "batch_size": -1
+    },
+    "HausdorffDTLoss": {
+        "alpha": 2.0,
+        "include_background": false,
+        "to_onehot_y": false,
+        "sigmoid": false,
+        "softmax": false,
+        "other_act": "None",
+        "reduction": "mean",
+        "batch": false
+    }
+}
