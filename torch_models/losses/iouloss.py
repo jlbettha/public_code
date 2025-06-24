@@ -15,7 +15,7 @@ class IoULoss(nn.Module):
     multi-classes iou loss
     """
 
-    def __init__(self, process_input=True) -> None:
+    def __init__(self, process_input=False) -> None:
         super().__init__()
         self.process_input = process_input
 

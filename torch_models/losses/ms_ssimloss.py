@@ -133,7 +133,7 @@ class SSIMLoss(nn.Module):
         - Target (Tensor): :math:`(B, H, W)`, range from 0 to num_classes - 1
     """
 
-    def __init__(self, win_size: int = 11, nonnegative: bool = True, process_input: bool = True):
+    def __init__(self, win_size: int = 11, nonnegative: bool = True, process_input: bool = False):
 
         super(SSIMLoss, self).__init__()
         self.kernel = gaussian_kernel2d(win_size, 1)
@@ -166,7 +166,7 @@ class MS_SSIMLoss(nn.Module):
         win_size: int = 11,
         weights: Tensor = torch.tensor([0.0448, 0.2856, 0.3001, 0.2363, 0.1333]),
         nonnegative: bool = True,
-        process_input: bool = True,
+        process_input: bool = False,
     ):
 
         super(MS_SSIMLoss, self).__init__()
