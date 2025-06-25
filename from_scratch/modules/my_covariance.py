@@ -1,7 +1,9 @@
 import time
 import numpy as np
+from numba import njit
 
 
+# @njit
 def covariance(x_mat: np.ndarray[float]) -> np.ndarray[float]:
     """Compute covariance of a matrix
     Args:
@@ -18,6 +20,9 @@ def covariance(x_mat: np.ndarray[float]) -> np.ndarray[float]:
 
 
 def main() -> None:
+    # x_warmup = np.random.rand(3, 5)
+    # cov_warmup = covariance(x_warmup)
+
     x_mat1 = np.random.rand(1000, 200)
     x_matT = x_mat1.T
 

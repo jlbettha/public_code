@@ -1,6 +1,6 @@
+import math
 import numpy as np
 from numba import njit
-from scipy.special import erf
 
 
 ### relu applied to z
@@ -48,7 +48,7 @@ def softmax(z):
 
 @njit
 def d_softmax_dz(z):
-    return NotImplemented
+    raise NotImplementedError
 
 
 @njit
@@ -68,7 +68,7 @@ def gelu_approx(z):
 
 
 @njit
-def erf_prime(x):
+def d_erf_dz(x):
     return (2 / np.sqrt(np.pi)) * np.exp(-(x**2))
 
 
@@ -76,20 +76,20 @@ def erf_prime(x):
 def d_gelu_approx_dz(z):
     s = z / np.sqrt(2)
     approx = np.tanh(np.sqrt(2 / np.pi) * (z + 0.044715 * z**3))
-    return 0.5 + 0.5 * approx + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
+    return 0.5 + 0.5 * approx + ((0.5 * z * d_erf_dz(s)) / np.sqrt(2))
 
 
 ### gaussian error linear unit (gelu) activation applied to z
-# @njit
+@njit
 def gelu(z):
     s = z / np.sqrt(2)
-    return z * 0.5 * (1.0 + erf(s))
+    return z * 0.5 * (1.0 + math.erf(s))
 
 
-# @njit
+@njit
 def d_gelu_dz(z):
     s = z / np.sqrt(2)
-    return 0.5 + 0.5 * erf(s) + ((0.5 * z * erf_prime(s)) / np.sqrt(2))
+    return 0.5 + 0.5 * math.erf(s) + ((0.5 * z * d_erf_dz(s)) / np.sqrt(2))
 
 
 ### swish activation applied to z, equals silu when beta = 1

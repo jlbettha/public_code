@@ -18,12 +18,12 @@ def radial_basis_func(
     """RBF: radial basis function
 
     Args:
-        a (float | NDArray[np.float64]): input vector/scalar
-        b (float | NDArray[np.float64]): input vector/scalar to compare with 'a'
+        a (float | np.ndarray[float]): input vector/scalar
+        b (float | np.ndarray[float]): input vector/scalar to compare with 'a'
         gamma (float, optional): gamma hyperparameter, usually tuned via validation. Defaults to 1.0.
 
     Returns:
-        float | NDArray[np.float64]: weight(s)
+        float |np.ndarray[float]: weight(s)
     """
     vec = a - b
     return np.exp(-gamma * np.sum(vec * vec))
@@ -36,12 +36,12 @@ def d_rbf_dx(
     """_summary_
 
     Args:
-        a (float | NDArray[np.float64]): _description_
-        b (float | NDArray[np.float64]): _description_
+        a (float | np.ndarray[float]): _description_
+        b (float | np.ndarray[float]): _description_
         gamma (float, optional): _description_. Defaults to 1.0.
 
     Returns:
-        float | NDArray[np.float64]: _description_
+        float | np.ndarray[float]: _description_
     """
     vec = a - b
     ssd = np.sum(vec * vec)
@@ -50,9 +50,7 @@ def d_rbf_dx(
 
 
 @njit
-def compute_kernel_matrix(
-    X: np.ndarray[float], kernel_function: Callable, gamma: float = 1.0
-) -> np.ndarray[float]:
+def compute_kernel_matrix(X: np.ndarray[float], kernel_function: Callable, gamma: float = 1.0) -> np.ndarray[float]:
     """
     Compute the kernel matrix for a dataset X using a given kernel function.
 
@@ -121,8 +119,8 @@ def hinge_loss(
 
 
 def support_vector_machine(
-    X: NDArray[np.float64],
-    y: NDArray[np.uint8],
+    X: np.ndarray[float],
+    y: np.ndarray[int],
     learning_rate: float = 1e-3,
     iters: float = 1000,
     C: float = 1.0,
@@ -131,8 +129,8 @@ def support_vector_machine(
     """_summary_
 
     Args:
-        X (NDArray[np.float64]): _description_
-        y (NDArray[np.uint8]): _description_
+        X (np.ndarray[float]): _description_
+        y (np.ndarray[int]): _description_
         learning_rate (float, optional): _description_. Defaults to 1e-3.
         iters (float, optional): _description_. Defaults to 1000.
         C (float, optional): _description_. Defaults to 1.0.
@@ -211,9 +209,7 @@ def main() -> None:
     X_train_rbf = np.c_[X_train_rbf, np.ones(X_train_rbf.shape[0])]
 
     t0 = time.perf_counter()
-    weights, its = support_vector_machine(
-        X_train_rbf, y_train, learning_rate=learning_rate, iters=iters, C=c, tol=tol
-    )
+    weights, its = support_vector_machine(X_train_rbf, y_train, learning_rate=learning_rate, iters=iters, C=c, tol=tol)
     print(f"train time: {time.perf_counter()-t0:.3f} seconds in {its+1} iterations")
 
     y_pred = []
@@ -222,21 +218,14 @@ def main() -> None:
     t0 = time.perf_counter()
     for i in range(len(y_test)):
         test_pt = X_test[i, :]
-        test_pt_rbf = np.array(
-            [
-                radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
-                for j in range(len(y_train))
-            ]
-        )
+        test_pt_rbf = np.array([radial_basis_func(test_pt, X_train[j, :], gamma=gamma) for j in range(len(y_train))])
         test_pt_rbf = np.append(test_pt_rbf, 1.0)
         one_hot_test = weights @ test_pt_rbf
         y_pred.append(np.argmax(one_hot_test))
         # print(np.argmax(one_hot_test), y_test[i])
 
     print(f"avg predict time: {(time.perf_counter()-t0)/len(y_test):.3f} seconds")
-    print(
-        f"predict time for {len(y_test)} examples: {(time.perf_counter()-t0):.3f} seconds"
-    )
+    print(f"predict time for {len(y_test)} examples: {(time.perf_counter()-t0):.3f} seconds")
     print(f"test accuracy: {accuracy_score(np.array(y_pred), y_test):.4f}")
 
     # Create a grid to plot the decision boundary
@@ -250,20 +239,13 @@ def main() -> None:
     for i in range(len(xx_long)):
 
         test_pt = np.c_[xx_long[i], yy_long[i]]
-        test_pt_rbf = np.array(
-            [
-                radial_basis_func(test_pt, X_train[j, :], gamma=gamma)
-                for j in range(len(y_train))
-            ]
-        )
+        test_pt_rbf = np.array([radial_basis_func(test_pt, X_train[j, :], gamma=gamma) for j in range(len(y_train))])
         test_pt_rbf = np.append(test_pt_rbf, 1.0)
         one_hot_test = weights @ test_pt_rbf
         Z.append(np.argmax(one_hot_test))
 
     print(f"avg predict time: {(time.perf_counter()-t0)/len(xx_long):.3f} seconds")
-    print(
-        f"predict time for {len(xx_long)} examples: {(time.perf_counter()-t0):.3f} seconds"
-    )
+    print(f"predict time for {len(xx_long)} examples: {(time.perf_counter()-t0):.3f} seconds")
 
     Z = np.array(Z).reshape(xx.shape)
 

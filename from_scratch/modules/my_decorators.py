@@ -1,24 +1,34 @@
+"""Betthauser, J. 2025 - This module contains various decorators that can be used to enhance the functionality of functions.
+These decorators include rate limiting, debugging, type enforcement, retrying on failure, and recording execution time.
+
+Note: by design, this program will crash at the end to demonstrate the rate_limit() decorator.
+"""
+
 import time
 import random
 from functools import wraps
+from typing import Callable
 
 
 ## decorator
-def rate_limit(calls, period):
-    def decorator(func):
+def rate_limit(num_allowed_calls: int = 2, period_seconds: float = 5) -> Callable:
+    """decorator function that limits the number of calls to a function
+
+    Args:
+        num_allowed_calls (int, optional): _description_. Defaults to 2.
+        period_seconds (float, optional): _description_. Defaults to 5.
+    """
+
+    def decorator(func: Callable) -> Callable:
         last_calls = []
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             nonlocal last_calls
             now = time.time()
-            last_calls = [
-                call_time for call_time in last_calls if now - call_time < period
-            ]
-            if len(last_calls) > calls:
-                raise RuntimeError(
-                    f"Rate limit for function '{func.__name__}()' exceeded."
-                )
+            last_calls = [call_time for call_time in last_calls if now - call_time < period_seconds]
+            if len(last_calls) > num_allowed_calls:
+                raise RuntimeError(f"Rate limit for function '{func.__name__}()' exceeded.")
             last_calls.append(now)
             return func(*args, **kwargs)
 
@@ -28,12 +38,12 @@ def rate_limit(calls, period):
 
 
 ## decorator
-def debug(func):
+def debug(func: Callable) -> Callable:
+    """decorator function that prints the function name, args, kwargs, and result"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
-        print(
-            f"Calling function '{func.__name__}()'"
-        )  # args:{args}, kwargs:{kwargs})'")
+        print(f"Calling function '{func.__name__}()'")  # args:{args}, kwargs:{kwargs})'")
         result = func(*args, **kwargs)
         print(f"Result: {result}")
 
@@ -41,8 +51,10 @@ def debug(func):
 
 
 ## decorator
-def type_enforce(*expected_types):
-    def decorator(func):
+def type_enforce(*expected_types: tuple) -> Callable:
+    """decorator function that enforces the types of the arguments passed to a function"""
+
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             for arg, exp_type in zip(args, expected_types):
@@ -56,8 +68,10 @@ def type_enforce(*expected_types):
 
 
 ## decorator
-def retry(retries=3, exception=Exception, delay=1):
-    def decorator(func):
+def retry(retries: int = 3, exception: Exception = Exception, delay: float = 1) -> Callable:
+    """decorator function that retries a function if it raises an exception"""
+
+    def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             attempts = 0
@@ -78,7 +92,9 @@ def retry(retries=3, exception=Exception, delay=1):
 
 
 ## decorator
-def record_time(func):
+def record_time(func: Callable) -> Callable:
+    """decorator function that records the time taken by a function to execute"""
+
     @wraps(func)
     def wrapper(*args, **kwargs):
         tstart = time.perf_counter()
@@ -95,7 +111,7 @@ def record_time(func):
 ###############################################################
 
 
-@rate_limit(calls=2, period=5)
+@rate_limit(num_allowed_calls=2, period_seconds=5)
 def _fetch_data():
     print("fetching remote data....")
     print("using lots of resources...")
