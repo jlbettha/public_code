@@ -11,7 +11,9 @@ def rand_xy():
     """_summary_"""
     x = npru(low=0.0, high=1.0)
     y = npru(low=0.0, high=1.0)
-    return x * x + y * y
+    if x**2 + y**2 <= 1:
+        return True
+    return False
 
 
 def main() -> None:
@@ -22,7 +24,7 @@ def main() -> None:
 
     for i in range(num_iters):
         total_ct += 1
-        if rand_xy() <= 1:
+        if rand_xy():
             lt_one_ct += 1
 
         # if i % 1_000_000 == 0:
@@ -32,9 +34,7 @@ def main() -> None:
         #     flush=True,
         # )
     pi_est = 4 * (lt_one_ct / total_ct)
-    print(
-        f"Final Pi estimate: {pi_est:.8f}, Error: {np.pi-pi_est:.8f}, Iters.: {num_iters:_}"
-    )
+    print(f"Final Pi estimate: {pi_est:.8f}, Error: {np.pi-pi_est:.8f}, Iters.: {num_iters:_}")
 
 
 if __name__ == "__main__":

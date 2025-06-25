@@ -11,7 +11,8 @@ from datetime import datetime
 # GPU information
 import GPUtil
 from tabulate import tabulate
-from tensorflow import keras
+
+# from tensorflow import keras
 
 
 def get_size(bytes, suffix="B"):
@@ -28,15 +29,15 @@ def get_size(bytes, suffix="B"):
         bytes /= factor
 
 
-import tensorflow as tf
+# import tensorflow as tf
 
-print(tf.__version__)
+# print(tf.__version__)
 
-if tf.test.gpu_device_name():
-    print("Default GPU Device: {}".format(tf.test.gpu_device_name()))
+# if tf.test.gpu_device_name():
+#     print("Default GPU Device: {}".format(tf.test.gpu_device_name()))
 
-else:
-    print("Please install GPU version of TF")
+# else:
+#     print("Please install GPU version of TF")
 
 print("=" * 40, "System Information", "=" * 40)
 uname = platform.uname()
