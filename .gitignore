@@ -29,6 +29,16 @@ Thumbs.db
 *.gz
 *.tex
 *.interactive
+# *.png
+# *.jpg
+# *.jpeg
+.gitignore
+.vscode
+*.xlsx
+*.odt
+*.h5
+*.pth
+*.pt
 
 # Unfinished folders
 
@@ -60,6 +70,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+.python-version
+uv.lock
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
