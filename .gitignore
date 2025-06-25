@@ -29,9 +29,13 @@ Thumbs.db
 *.gz
 *.tex
 *.interactive
+
+
 # *.png
 # *.jpg
 # *.jpeg
+
+
 .gitignore
 .vscode
 *.xlsx
@@ -39,6 +43,9 @@ Thumbs.db
 *.h5
 *.pth
 *.pt
+.json
+*.json
+
 
 # Unfinished folders
 
@@ -97,6 +104,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 cover/
+config/
 
 # Translations
 *.mo
