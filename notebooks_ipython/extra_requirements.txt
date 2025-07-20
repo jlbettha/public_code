@@ -1,3 +1,0 @@
-latexify-py
-drawdata
-tensorflow-datasets
