@@ -1,8 +1,9 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
 from typing import Any
+
+import matplotlib.pyplot as plt
+import numpy as np
 from numba import njit
+from sklearn.metrics import confusion_matrix
 
 
 def plot_confusion_matrix(
@@ -14,14 +15,11 @@ def plot_confusion_matrix(
     cmap=plt.cm.Blues,
 ):
     """
-    This function prints and plots the confusion matrix.
+    Prints and plots the confusion matrix.
     Normalization can be applied by setting `normalize=True`.
     """
     if not title:
-        if normalize:
-            title = "Normalized confusion matrix"
-        else:
-            title = "Confusion matrix, without normalization"
+        title = "Normalized confusion matrix" if normalize else "Confusion matrix, without normalization"
 
     # compute confusion matrix
     cm = confusion_matrix(y_true, y_pred)
@@ -71,7 +69,8 @@ def plot_confusion_matrix(
 
 ###
 def majority_filter(seq: np.ndarray[int], width: int) -> int:
-    """majority vote filter for temporal classification streams/sequences
+    """
+    Majority vote filter for temporal classification streams/sequences
         to stabilize/improve accuracy (penalty is delay), input width=1 for no filter
 
     Args:
@@ -80,6 +79,7 @@ def majority_filter(seq: np.ndarray[int], width: int) -> int:
 
     Returns:
         int: majority vote
+
     """
     offset = width // 2
     seq = [0] * offset + seq
@@ -91,7 +91,8 @@ def majority_filter(seq: np.ndarray[int], width: int) -> int:
 
 
 def anybase2decimal(number: int, other_base: int) -> int:
-    """convert any base number to decimal
+    """
+    Convert any base number to decimal
 
     Args:
         number (int): _description_
@@ -99,21 +100,22 @@ def anybase2decimal(number: int, other_base: int) -> int:
 
     Returns:
         int: _description_
+
     """
-    return np.sum(
-        [(int(v) * other_base**i) for i, v in enumerate(list(str(number))[::-1])]
-    )
+    return np.sum([(int(v) * other_base**i) for i, v in enumerate(list(str(number))[::-1])])
 
 
 @njit
 def decimal2ternary(number: int) -> int:
-    """convert decimal to ternary
+    """
+    Convert decimal to ternary
 
     Args:
         number (int): _description_
 
     Returns:
         int: _description_
+
     """
     arr = np.zeros(2)
     i = 2
@@ -124,7 +126,8 @@ def decimal2ternary(number: int) -> int:
 
 
 def smooth(x: np.ndarray[float], window_len: int) -> np.ndarray[float]:
-    """generic decent smoothing procedure (appropriate smoothing will always be data dependent)
+    """
+    Generic decent smoothing procedure (appropriate smoothing will always be data dependent)
 
     Args:
         x (np.ndarray[float]): raw signal
@@ -136,33 +139,37 @@ def smooth(x: np.ndarray[float], window_len: int) -> np.ndarray[float]:
 
     Returns:
         np.ndarray[float]: smoothed signal
+
     """
     if x.ndim != 1:
-        raise ValueError("smooth only accepts 1 dimension arrays.")
+        msg = "smooth only accepts 1 dimension arrays."
+        raise ValueError(msg)
     if x.size < window_len:
-        raise ValueError("Input vector needs to be bigger than window size.")
-    if window_len < 3:
+        msg = "Input vector needs to be bigger than window size."
+        raise ValueError(msg)
+    if window_len < 3:  # noqa: PLR2004
         return x
     s = np.r_[x[window_len - 1 : 0 : -1], x, x[-2 : -window_len - 1 : -1]]
     w = np.hanning(window_len)
-    y = np.convolve(w / w.sum(), s, mode="valid")
-    return y
+    return np.convolve(w / w.sum(), s, mode="valid")
 
 
 def flatten_lists(list_of_lists: list[Any]) -> list[Any]:
-    """Betthauser 2025 - recursively flatten/unravel any depth of lists within lists
+    """
+    Betthauser 2025 - recursively flatten/unravel any depth of lists within lists
 
     Args:
         list_of_lists (Any list[list[list[...]]]): any depth lists within lists
 
     Returns:
         list[Any]: flattened list
+
     """
     if isinstance(list_of_lists, int):
         return list_of_lists
     try:
         flat_list = list(np.ravel(list_of_lists))
-    except:
+    except RuntimeError:
         flat_list = []
         for i in list_of_lists:
             flat_list.extend(flatten_lists(i))

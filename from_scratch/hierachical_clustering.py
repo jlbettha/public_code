@@ -1,21 +1,18 @@
 # pylint: disable=C0103
-"""Betthauser, 2022 - Hierarchical clustering from scratch
+"""
+Betthauser, 2022 - Hierarchical clustering from scratch
 Currently, "load_breast_cancer" dataset.
 """
 
 import time
-import numpy as np
 
 import matplotlib.pyplot as plt
-from sklearn.datasets import load_breast_cancer, load_iris
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import MinMaxScaler
+import numpy as np
 from modules.my_distance_metrics import (
-    jensen_shannon_dist,
     euclidean_dist,
-    minkowski_dist,
-    cosine_similarity,
 )
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
 
 
 def _flatten_lists(list_of_lists):
@@ -23,7 +20,7 @@ def _flatten_lists(list_of_lists):
         return list_of_lists
     try:
         flatter_list = list(np.ravel(list_of_lists))
-    except:
+    except ValueError:
         flatter_list = []
         for i in list_of_lists:
             flatter_list.extend(_flatten_lists(i))
@@ -31,17 +28,19 @@ def _flatten_lists(list_of_lists):
 
 
 def hierarchical_clustering(
-    X: np.ndarray[float], num_groups: int = 5
+    x: np.ndarray[float], num_groups: int = 5
 ) -> np.ndarray[float]:
-    """hierarchical_clustering
+    """
+    hierarchical_clustering
     Args:
-        X (np.ndarray[float]): data
+        x (np.ndarray[float]): data
         num_groups (int): number of final cluster groups/tree level
 
     Returns:
         _type_: data sorted by features
+
     """
-    N, num_features = X.shape
+    n, num_features = x.shape
 
     clusters = [[n] for n in range(num_features)]
 
@@ -49,16 +48,16 @@ def hierarchical_clustering(
         c_dist_matrix = np.zeros((len(clusters), len(clusters)))
         for i, clus1 in enumerate(clusters):
             c1 = _flatten_lists(clus1)
-            Xc1 = np.reshape(X[:, c1], (N, -1))
-            sum_feats1 = np.mean(Xc1, axis=1)
+            xc1 = np.reshape(x[:, c1], (n, -1))
+            sum_feats1 = np.mean(xc1, axis=1)
             pmf1 = sum_feats1 / np.sum(sum_feats1)
 
             for j, clus2 in enumerate(clusters):
                 if j <= i:
                     continue
                 c2 = _flatten_lists(clus2)
-                Xc2 = np.reshape(X[:, c2], (N, -1))
-                sum_feats2 = np.mean(Xc2, axis=1)
+                xc2 = np.reshape(x[:, c2], (n, -1))
+                sum_feats2 = np.mean(xc2, axis=1)
                 pmf2 = sum_feats2 / np.sum(sum_feats2)
                 c_dist_matrix[i, j] = euclidean_dist(pmf1, pmf2)
 
@@ -74,28 +73,28 @@ def hierarchical_clustering(
         # print(c)
         new_order.extend(c)
 
-    X_clustered = X[:, new_order]
+    x_clustered = x[:, new_order]
 
-    return X_clustered, clusters, new_order
+    return x_clustered, clusters, new_order
 
 
 def main() -> None:
-    """hierarchical clustering"""
-
-    X, y = load_iris(return_X_y=True)
-    # X, y = load_breast_cancer(return_X_y=True)
-    num_classes = len(np.unique(y))
+    """Hierarchical clustering"""
+    x, y = load_iris(return_X_y=True)
+    # x, y = load_breast_cancer(return_X_y=True)
+    # num_classes = len(np.unique(y))
 
     # scaler = MinMaxScaler()
-    # X = scaler.fit_transform(X)
+    # x = scaler.fit_transform(x)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.01)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.01)
 
-    tiny_noise = 1e-11 * np.random.uniform(size=(X_train.shape[0], X_train.shape[1]))
-    X_train = X_train + tiny_noise
+    rng = np.random.default_rng()
+    tiny_noise = 1e-11 * rng.uniform(size=(x_train.shape[0], x_train.shape[1]))
+    x_train = x_train + tiny_noise
 
-    X_train_clustered, clusters, new_order = hierarchical_clustering(
-        X_train.T, num_groups=1
+    x_train_clustered, clusters, new_order = hierarchical_clustering(
+        x_train.T, num_groups=1
     )
 
     clean_clusters = [_flatten_lists(c) for c in clusters]
@@ -103,7 +102,7 @@ def main() -> None:
 
     plt.figure(figsize=(6, 6))
     plt.subplot(2, 1, 1)
-    plt.imshow(X_train_clustered, aspect="auto")
+    plt.imshow(x_train_clustered, aspect="auto")
     plt.xlabel(f"{len(clean_clusters)} hierarchical cluster(s)")
     plt.subplot(2, 1, 2)
     plt.imshow(np.atleast_2d(y_train[new_order]), aspect="auto")

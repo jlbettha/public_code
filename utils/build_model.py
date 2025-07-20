@@ -1,63 +1,67 @@
 """Revvity (2025) Utility functions for loading and managing MONAI models, loss functions, and optimizers."""
 
-import os
-import json
-from types import NoneType
-import torch
-import numpy as np
 import importlib
 import inspect
-from utils.configure import convert_json_to_yaml
+import json
+import os
+from types import NoneType
+
+import numpy as np
+import torch
+from convert_yaml_json import convert_json_to_yaml
+from torchsummary import summary
 
 
 def build_monai_model(model_name: str = "DynUNet", print_summary: bool = False) -> torch.nn.Module:
-    """_summary_
+    """
+    Build a MONAI model.
 
     Args:
-        model_name (str, optional): _description_. Defaults to "DynUNet".
+        model_name (str, optional): Name of the model to build. Defaults to "DynUNet".
+        print_summary (bool, optional): Whether to print a summary of the model. Defaults to False.
 
     Returns:
-        torch.nn.Module: _description_
+        torch.nn.Module: The constructed MONAI model.
+
     """
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    MonaiModel = load_module_class("monai.networks.nets." + model_name)
+    monai_model = load_module_class("monai.networks.nets." + model_name)
     my_params = _load_model_params(model_name=model_name)
-    model = MonaiModel(**my_params).to(device)
+    model = monai_model(**my_params).to(device)
 
     if print_summary:
-        from torchsummary import summary
-
         summary(model, input_size=(1, 32, 256, 128), device=device.type)
 
     return model
 
 
-def set_optimizer(optimizer_name: str = "AdamW", opt_params: dict = None) -> torch.optim.Optimizer:
+def set_optimizer(optimizer_name: str = "AdamW", opt_params: dict | None = None) -> torch.optim.Optimizer:
     optimizer_params = _load_optimizer_params(optimizer_name=optimizer_name)
-    Optimizer = load_module_class("torch.optim." + optimizer_name)
-    optimizer = Optimizer(params=opt_params, **optimizer_params)
-    return optimizer
+    opt = load_module_class("torch.optim." + optimizer_name)
+    return opt(params=opt_params, **optimizer_params)
 
 
-def set_loss_function(loss_name: str = "GeneralizedDiceLoss", loss_params: dict = None) -> torch.nn.modules.loss._Loss:
-    """Set the loss function for the model.
+def set_loss_function(
+    loss_name: str = "GeneralizedDiceLoss", loss_params: dict | None = None
+) -> torch.nn.modules.loss._Loss:
+    """
+    Set the loss function for the model.
 
     Args:
-        loss_name (str, optional): _description_. Defaults to "GeneralizedDiceLoss".
-        loss_kwargs (dict, optional): _description_. Defaults to None.
+        loss_name (str, optional): Name of the loss function to use. Defaults to "GeneralizedDiceLoss".
+        loss_params (dict, optional): Parameters to pass to the loss function. If None, default parameters are loaded.
+
     """
     loss_params = _load_loss_params(loss_name=loss_name) if loss_params is None else loss_params
-    LossFunction = load_module_class("monai.losses." + loss_name)
-    loss_function = LossFunction(**loss_params)
-    return loss_function
+    loss_function = load_module_class("monai.losses." + loss_name)
+    return loss_function(**loss_params)
 
 
 def load_module_class(full_class_string: str):
     """
-    dynamically load a class from a string
+    Dynamically load a class from a string
     """
-
     class_data = full_class_string.split(".")
     module_path = ".".join(class_data[:-1])
     class_str = class_data[-1]
@@ -91,28 +95,27 @@ def save_model_checkpoint(
         np.save(os.path.splitext(savepath)[0] + ".testidx.npy", test_split)
 
 
-def _create_model_param_config(
-    model_names: list[str] = ["DynUNet", "UNETR", "VNet", "SegResNet", "SwinUNETR"], my_params: dict = None, **kwargs
-) -> None:
-    """Create a JSON (and YAML) file with the default parameters for MONAI models.
+def _create_model_param_config(model_names: list[str] | None = None, my_params: dict | None = None, **kwargs) -> None:
+    """
+    Create a JSON (and YAML) file with the default parameters for MONAI models.
 
     Args:
         model_names (list[str], optional): _description_.
                 Defaults to ["DynUNet", "UNETR", "VNet", "SegResNet", "SwinUNETR"].
         my_params (dict, optional): _description_. Defaults to None.
+        **kwargs: Additional keyword arguments to override default model parameters.
+
     """
+    model_names = ["DynUNet", "UNETR", "VNet", "SegResNet", "SwinUNETR"]
     json_types = [int, float, str, bool, list, tuple, dict, NoneType()]
 
     model_dict = {}
     for model_name in model_names:
-        MonaiModel = load_module_class("monai.networks.nets." + model_name)
+        monai_model = load_module_class("monai.networks.nets." + model_name)
         param_dict = {}
 
-        for param in inspect.signature(MonaiModel).parameters.values():
-            if type(param.default) not in json_types:
-                param_val = str(param.default)
-            else:
-                param_val = param.default
+        for param in inspect.signature(monai_model).parameters.values():
+            param_val = str(param.default) if type(param.default) not in json_types else param.default
 
             if my_params and param.name in my_params:
                 param_val = my_params[param.name]
@@ -134,30 +137,30 @@ def _create_model_param_config(
 
 
 def _create_optimizer_params_config(
-    optimizer_names: list[str] = ["Adam", "AdamW", "SGD"], my_params: dict = None, **kwargs
+    optimizer_names: list[str] | None = None, my_params: dict | None = None, **kwargs
 ) -> None:
-    """Create a JSON (and YAML) file with the default parameters for optimizers.
+    """
+    Create a JSON (and YAML) file with the default parameters for optimizers.
 
     Args:
-        model_names (list[str], optional): _description_.
-                Defaults to ["Adam", "AdamW", "SGD"].
-        my_params (dict, optional): _description_. Defaults to None.
+        optimizer_names (list[str], optional): List of optimizer names to include. Defaults to ["Adam", "AdamW", "SGD"].
+        my_params (dict, optional): Dictionary of parameter overrides. Defaults to None.
+        **kwargs: Additional keyword arguments to override default optimizer parameters.
+
     """
+    optimizer_names = ["Adam", "AdamW", "SGD"]
     json_types = [int, float, str, bool, list, tuple, dict, NoneType()]
 
     optimizer_dict = {}
     for optimizer_name in optimizer_names:
-        Optimizer = load_module_class("torch.optim." + optimizer_name)
+        optimizer = load_module_class("torch.optim." + optimizer_name)
         param_dict = {}
 
-        for param in inspect.signature(Optimizer).parameters.values():
+        for param in inspect.signature(optimizer).parameters.values():
             if param.name == "params":
                 continue
 
-            if type(param.default) not in json_types:
-                param_val = str(param.default)
-            else:
-                param_val = param.default
+            param_val = str(param.default) if type(param.default) not in json_types else param.default
 
             if my_params and param.name in my_params:
                 param_val = my_params[param.name]
@@ -179,7 +182,20 @@ def _create_optimizer_params_config(
 
 
 def _create_loss_params_config(
-    loss_names: list[str] = [
+    loss_names: list[str] | None = None,
+    my_params: dict | None = None,
+    **kwargs,
+) -> None:
+    """
+    Create a JSON (and YAML) file with the default parameters for loss functions.
+
+    Args:
+        loss_names (list[str], optional): _description_.
+        my_params (dict, optional): _description_. Defaults to None.
+        **kwargs: Additional keyword arguments to override default loss function parameters.
+
+    """
+    loss_names = [
         "GeneralizedDiceLoss",
         "DiceCELoss",
         "DiceFocalLoss",
@@ -190,28 +206,15 @@ def _create_loss_params_config(
         "BarlowTwinsLoss",
         "ContrastiveLoss",
         "HausdorffDTLoss",
-    ],
-    my_params: dict = None,
-    **kwargs,
-) -> None:
-    """Create a JSON (and YAML) file with the default parameters for loss functions.
-
-    Args:
-        loss_names (list[str], optional): _description_.
-        my_params (dict, optional): _description_. Defaults to None.
-    """
+    ]
     json_types = [int, float, str, bool, list, tuple, dict, NoneType()]
 
     loss_dict = {}
     for loss_name in loss_names:
-
-        LossFunction = load_module_class("monai.losses." + loss_name)
+        loss_function = load_module_class("monai.losses." + loss_name)
         param_dict = {}
-        for param in inspect.signature(LossFunction).parameters.values():
-            if type(param.default) not in json_types:
-                param_val = str(param.default)
-            else:
-                param_val = param.default
+        for param in inspect.signature(loss_function).parameters.values():
+            param_val = str(param.default) if type(param.default) not in json_types else param.default
 
             if my_params and param.name in my_params:
                 param_val = my_params[param.name]
@@ -234,27 +237,26 @@ def _create_loss_params_config(
 
 def _create_transform_params_config(
     transform_names: list[str],
-    my_params: dict = None,
+    my_params: dict|None = None,
     **kwargs,
 ) -> None:
-    """Create a JSON (and YAML) file with the default parameters for transforms.
+    """
+    Create a JSON (and YAML) file with the default parameters for transforms.
 
     Args:
-        loss_names (list[str]): _description_.
-        my_params (dict, optional): _description_. Defaults to None.
+        transform_names (list[str]): List of transform names to include.
+        my_params (dict, optional): Dictionary of parameter overrides. Defaults to None.
+        **kwargs: Additional keyword arguments to override default transform parameters.
+
     """
     json_types = [int, float, str, bool, list, tuple, dict, NoneType()]
 
     transform_dict = {}
     for transform_name in transform_names:
-
-        TransformFunction = load_module_class("monai.transforms." + transform_name)
+        transform_function = load_module_class("monai.transforms." + transform_name)
         param_dict = {}
-        for param in inspect.signature(TransformFunction).parameters.values():
-            if type(param.default) not in json_types:
-                param_val = str(param.default)
-            else:
-                param_val = param.default
+        for param in inspect.signature(transform_function).parameters.values():
+            param_val = str(param.default) if type(param.default) not in json_types else param.default
 
             if my_params and param.name in my_params:
                 param_val = my_params[param.name]
@@ -276,7 +278,8 @@ def _create_transform_params_config(
 
 
 def _load_model_params(model_name: str = "DynUNet", json_path: str = "../../config/monai_model_params.json") -> dict:
-    """Load model parameters from a JSON file.
+    """
+    Load model parameters from a JSON file.
 
     Args:
         model_name (str, optional): _description_. Defaults to "DynUNet".
@@ -287,11 +290,13 @@ def _load_model_params(model_name: str = "DynUNet", json_path: str = "../../conf
 
     Returns:
         dict: _description_
+
     """
     if not os.path.exists(json_path):
-        raise FileNotFoundError(f"JSON file not found at {json_path}")
+        msg = f"JSON file not found at {json_path}"
+        raise FileNotFoundError(msg)
 
-    with open(json_path, "r") as f:
+    with open(json_path) as f:
         all_params = json.load(f)
 
     for k, v in all_params.items():
@@ -307,7 +312,8 @@ def _load_model_params(model_name: str = "DynUNet", json_path: str = "../../conf
 def _load_optimizer_params(
     optimizer_name: str = "AdamW", json_path: str = "../../config/optimizer_params.json"
 ) -> dict:
-    """Load optimizer parameters from a JSON file.
+    """
+    Load optimizer parameters from a JSON file.
 
     Args:
         optimizer_name (str, optional): _description_. Defaults to "AdamW".
@@ -318,11 +324,13 @@ def _load_optimizer_params(
 
     Returns:
         dict: _description_
+
     """
     if not os.path.exists(json_path):
-        raise FileNotFoundError(f"JSON file not found at {json_path}")
+        msg = f"JSON file not found at {json_path}"
+        raise FileNotFoundError(msg)
 
-    with open(json_path, "r") as f:
+    with open(json_path) as f:
         all_params = json.load(f)
 
     for k, v in all_params.items():
@@ -335,10 +343,9 @@ def _load_optimizer_params(
     return optimizer_params
 
 
-def _load_loss_params(
-    loss_name: str = "GeneralizedDiceLoss", json_path: str = "../../config/loss_params.json"
-) -> dict:
-    """Load loss parameters from a JSON file.
+def _load_loss_params(loss_name: str = "GeneralizedDiceLoss", json_path: str = "../../config/loss_params.json") -> dict:
+    """
+    Load loss parameters from a JSON file.
 
     Args:
         loss_name (str, optional): _description_. Defaults to "GeneralizedDiceLoss".
@@ -349,11 +356,13 @@ def _load_loss_params(
 
     Returns:
         dict: _description_
+
     """
     if not os.path.exists(json_path):
-        raise FileNotFoundError(f"JSON file not found at {json_path}")
+        msg = f"JSON file not found at {json_path}"
+        raise FileNotFoundError(msg)
 
-    with open(json_path, "r") as f:
+    with open(json_path) as f:
         all_params = json.load(f)
 
     for k, v in all_params.items():
@@ -367,7 +376,6 @@ def _load_loss_params(
 
 
 def main():
-
     # transform_params = {
     #     "keys": ["image", "label"],
     #     "spatial_size": [32, 256, 128],

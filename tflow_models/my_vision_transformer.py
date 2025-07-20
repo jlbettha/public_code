@@ -3,15 +3,15 @@
 import tensorflow as tf
 from keras import Model
 from keras.layers import (
-    Input,
-    Dense,
+    Add,
     Conv2D,
-    Reshape,
+    Dense,
     Embedding,
+    Flatten,
+    Input,
     LayerNormalization,
     MultiHeadAttention,
-    Add,
-    Flatten,
+    Reshape,
 )
 
 
@@ -22,8 +22,8 @@ def my_vision_transformer(
     num_patches=196,
     projection_dim=64,
     num_heads=4,
-    transformer_units=[128, 64],
-    mlp_head_units=[2048, 1024],
+    transformer_units=(128, 64),
+    mlp_head_units=(2048, 1024),
 ):
     inputs = Input(shape=input_shape)
 
@@ -38,9 +38,7 @@ def my_vision_transformer(
 
     # Add positional encoding
     positions = tf.range(start=0, limit=num_patches, delta=1)
-    positional_embedding = Embedding(input_dim=num_patches, output_dim=projection_dim)(
-        positions
-    )
+    positional_embedding = Embedding(input_dim=num_patches, output_dim=projection_dim)(positions)
     encoded_patches = patches + positional_embedding
 
     # Transformer blocks
@@ -48,9 +46,7 @@ def my_vision_transformer(
         # Layer normalization 1
         x1 = LayerNormalization(epsilon=1e-6)(encoded_patches)
         # Multi-head attention
-        attention_output = MultiHeadAttention(
-            num_heads=num_heads, key_dim=projection_dim
-        )(x1, x1)
+        attention_output = MultiHeadAttention(num_heads=num_heads, key_dim=projection_dim)(x1, x1)
         # Skip connection 1
         x2 = Add()([attention_output, encoded_patches])
         # Layer normalization 2
@@ -71,8 +67,7 @@ def my_vision_transformer(
     logits = Dense(num_classes)(representation)
 
     # Create the Keras model
-    model = Model(inputs=inputs, outputs=logits)
-    return model
+    return Model(inputs=inputs, outputs=logits)
 
 
 if __name__ == "__main__":
@@ -85,7 +80,7 @@ if __name__ == "__main__":
         num_patches=196,
         projection_dim=64,
         num_heads=4,
-        transformer_units=[128, 64],
-        mlp_head_units=[2048, 1024],
+        transformer_units=(128, 64),
+        mlp_head_units=(2048, 1024),
     )
     model.summary()

@@ -1,19 +1,16 @@
 """Betthauser 2024 - prime generators from brute force to sieve of eratosthenes"""
 
 import time
+
 import numpy as np
-from numba import njit, vectorize
+from numba import njit
 
 
 @njit
 def is_prime(n):
-    if n == 2 or n == 3:
+    if n in {2, 3} or n < 9:  # noqa: PLR2004
         return True
-    if n < 2 or n % 2 == 0:
-        return False
-    if n < 9:
-        return True
-    if n % 3 == 0:
+    if n < 2 or n % 2 == 0 or n % 3 == 0:  # noqa: PLR2004
         return False
     r = int(n**0.5)
 
@@ -30,21 +27,23 @@ def is_prime(n):
 
 @njit
 def n_primes_bf(n: int) -> np.ndarray[int]:
-    """brute force method to list first n primes
+    """
+    Brute force method to list first n primes
 
     Args:
         n (int): desired number of primes
 
     Returns:
         np.ndarray[int]: list of first n primes
+
     """
     if n <= 1:
         return np.array([1]).astype(np.uint64)
 
     list_primes = np.ones(n).astype(np.uint64)
-    if n >= 2:
+    if n >= 2:  # noqa: PLR2004
         list_primes[1] = 2
-    if n == 2:
+    if n == 2:  # noqa: PLR2004
         return list_primes
 
     for idx in range(2, n):
@@ -68,21 +67,23 @@ def n_primes_bf(n: int) -> np.ndarray[int]:
 
 @njit
 def n_primes_basic(n: int) -> np.ndarray[int]:
-    """basic method to list of first n primes
+    """
+    Basic method to list of first n primes
 
     Args:
         n (int): desired number of primes
 
     Returns:
         list[int]: list of first n primes
+
     """
     if n <= 1:
         return np.array([1]).astype(np.uint64)
 
     list_primes = np.ones(n).astype(np.uint64)
-    if n >= 2:
+    if n >= 2:  # noqa: PLR2004
         list_primes[1] = 2
-    if n == 2:
+    if n == 2:  # noqa: PLR2004
         return list_primes
 
     for idx in range(2, n):
@@ -96,44 +97,48 @@ def n_primes_basic(n: int) -> np.ndarray[int]:
 
 
 def n_primes_e_sieve(n: int) -> np.ndarray[int]:
-    """sieve of eratosthanes: fast method to list of first n primes
+    """
+    Sieve of eratosthanes: fast method to list of first n primes
 
     Args:
         n (int): desired number of primes
 
     Returns:
         list[int]: list of first n primes
+
     """
     if n <= 1:
         return np.array([1]).astype(np.uint64)
 
     list_primes = np.ones(n).astype(np.uint64)
-    if n >= 2:
+    if n >= 2:  # noqa: PLR2004
         list_primes[1] = 2
-    if n == 2:
+    if n == 2:  # noqa: PLR2004
         return list_primes
-    # TODO
+    # TODO: implement sieve of eratosthenes
     return NotImplementedError
 
 
 def n_primes_a_sieve(n: int) -> np.ndarray[int]:
-    """seive of atkins: fastest method to list of first n primes
+    """
+    Seive of atkins: fastest method to list of first n primes
 
     Args:
         n (int): desired number of primes
 
     Returns:
         list[int]: list of first n primes
+
     """
     if n <= 1:
         return np.array([1]).astype(np.uint64)
 
     list_primes = np.ones(n).astype(np.uint64)
-    if n >= 2:
+    if n >= 2:  # noqa: PLR2004
         list_primes[1] = 2
-    if n == 2:
+    if n == 2:  # noqa: PLR2004
         return list_primes
-    # TODO
+    # TODO: implement sieve of eratosthenes
     return NotImplementedError
 
 
@@ -151,9 +156,8 @@ def main() -> None:
     _ = n_primes_basic(n)
     tlast = time.perf_counter() - t0
     print(f"Basic method took {tlast:.3f} seconds.")
-    print(f"jit speed-up: {tfirst/tlast:.3f}x")
+    print(f"jit speed-up: {tfirst / tlast:.3f}x")
 
 
 if __name__ == "__main__":
-
     main()

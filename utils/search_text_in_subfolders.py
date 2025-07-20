@@ -1,20 +1,20 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 
 def main() -> None:
     search_target = "edge pot".lower()
 
-    p = Path(".")
+    p = Path()
     desired_file_extensions = [".txt", ".md", ".py"]
 
-    for root, dir_names, file_names in os.walk(p):
+    for root, _, file_names in os.walk(p):
         for f in file_names:
             match_file_name = ""
             found = False
             file_ext = os.path.splitext(f)[-1].lower()
             if file_ext in desired_file_extensions:
-                with open(os.path.join(root, f), mode="r") as text_file:
+                with open(os.path.join(root, f)) as text_file:
                     for line in text_file:
                         if search_target in line.lower():
                             found = True

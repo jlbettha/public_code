@@ -1,16 +1,17 @@
-"""Betthauser, J. 2023 - personal manual object oriented implementation for building
+"""
+Betthauser, J. 2023 - personal manual object oriented implementation for building
 layer-wise prediction models.
 """
 
-import numpy as np
 import time
 
+import numpy as np
+from modules.my_loss_functions import mean_squared_error, mse_derivative
+from sklearn.datasets import load_digits
+
+# from sklearn.metrics import *
 # import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import *
-from sklearn.datasets import load_iris, load_digits
-from numba import njit
-from modules.my_loss_functions import mean_squared_error, mse_derivative
 
 
 class GenericLayer:
@@ -18,7 +19,7 @@ class GenericLayer:
         self.input = None
         self.output = None
 
-    def feedforward(self, input):
+    def feedforward(self, input):  # noqa: A002
         pass
 
     def backprop(self, output_gradient, learning_rate):
@@ -26,15 +27,16 @@ class GenericLayer:
 
 
 class FullyConnectedLayer(GenericLayer):
-    def __init__(self, input_dim, output_dim):
-        self.weights = np.random.uniform(-1, 1, size=(output_dim, input_dim))
-        self.biases = np.random.uniform(-1, 1, size=(output_dim, 1))
+    rng = np.random.default_rng()  # Use a class-level generator
 
-    def feedforward(self, input):
-        self.input = input
+    def __init__(self, input_dim, output_dim):
+        self.weights = self.rng.uniform(-1, 1, size=(output_dim, input_dim))
+        self.biases = self.rng.uniform(-1, 1, size=(output_dim, 1))
+
+    def feedforward(self, inputx):
+        self.input = inputx
         return np.dot(self.weights, self.input) + self.biases
 
-    @njit
     def backprop(self, gradient_outputs, learning_rate):
         gradient_weights = np.dot(gradient_outputs, self.input.T)
         gradient_inputs = np.dot(self.weights.T, gradient_outputs)
@@ -48,20 +50,22 @@ class ActivationLayer(GenericLayer):
         self.activation_func = activation_func
         self.derivative_activation_func = derivative_activation_func
 
-    def feedforward(self, input):
-        self.input = input
+    def feedforward(self, inputx):
+        self.input = inputx
         return self.activation_func(self.input)
 
-    def backprop(self, gradient_outputs, learning_rate):
-        return np.multiply(
-            gradient_outputs, self.derivative_activation_func(self.input)
-        )
+    def backprop(self, gradient_outputs, learning_rate):  # noqa: ARG002
+        return np.multiply(gradient_outputs, self.derivative_activation_func(self.input))
 
 
 class Tanh(ActivationLayer):
     def __init__(self):
-        tanh = lambda x: np.tanh(x)
-        derivative_tanh = lambda x: 1 - np.tanh(x) ** 2
+        def tanh(x):
+            return np.tanh(x)
+
+        def derivative_tanh(x):
+            return 1 - np.tanh(x) ** 2
+
         super().__init__(tanh, derivative_tanh)
 
 
@@ -79,18 +83,22 @@ class Sigmoid(ActivationLayer):
 
 class Relu(ActivationLayer):
     def __init__(self):
-        relu = lambda x: np.maximum(x, 0)
-        derivative_relu = lambda x: (x > 0).astype(float)
+        def relu(x):
+            return np.maximum(x, 0)
+
+        def derivative_relu(x):
+            return (x > 0).astype(float)
+
         super().__init__(relu, derivative_relu)
 
 
 class Softmax(GenericLayer):
-    def forward(self, input):
-        exp_all = np.exp(input)
+    def forward(self, inputx):
+        exp_all = np.exp(inputx)
         self.output = exp_all / np.sum(exp_all)
         return self.output
 
-    def backward(self, output_gradient, learning_rate):
+    def backward(self, output_gradient, learning_rate):  # noqa: ARG002
         n = np.size(self.output)
         return np.dot((np.identity(n) - self.output.T) * self.output, output_gradient)
 
@@ -106,15 +114,15 @@ def main() -> None:
     # X = np.reshape([[0, 0], [0, 1], [1, 0], [1, 1]], (4, 2, 1))
     # Y = np.reshape([[0], [1], [1], [0]], (4, 1, 1))
 
-    X, Y = load_digits(return_X_y=True)
-    num_classes = len(np.unique(Y))
-    num_features = X.shape[1]
+    x, y = load_digits(return_X_y=True)
+    num_classes = len(np.unique(y))
+    num_features = x.shape[1]
 
     scaler = MinMaxScaler()
-    X = scaler.fit_transform(X)
+    x = scaler.fit_transform(x)
 
-    X = np.reshape(X, (X.shape[0], num_features, 1))
-    Y = np.expand_dims(encode_one_hot(Y, num_classes), 2)
+    x = np.reshape(x, (x.shape[0], num_features, 1))
+    y = np.expand_dims(encode_one_hot(y, num_classes), 2)
 
     mlp_neural_network = [
         FullyConnectedLayer(num_features, 6),
@@ -128,18 +136,17 @@ def main() -> None:
 
     for ep in range(num_epochs):
         error = 0
-        for x, y in zip(X, Y):
-
+        for xx, yy in zip(x, y, strict=False):
             ## feed forward
-            output = x
+            output = xx
             for layer in mlp_neural_network:
                 output = layer.feedforward(output)
 
             ## accumulate error
-            error = error + np.sum(mean_squared_error(y, output))
+            error = error + np.sum(mean_squared_error(yy, output))
 
             ## back propagation for gradient descent
-            gradient = mse_derivative(y, output)
+            gradient = mse_derivative(yy, output)
             for layer in reversed(mlp_neural_network):
                 gradient = layer.backprop(gradient, learning_rate)
 
@@ -151,4 +158,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")

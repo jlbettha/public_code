@@ -1,31 +1,34 @@
 """summary"""
 
-import numpy as np
 from numba import njit
 
 
 @njit
 def prob2odds(prob: float) -> float:
-    """convert probability to odds
+    """
+    Convert probability to odds
 
     Args:
         prob (float): probability
 
     Returns:
         float: odds
+
     """
     return prob / (1 - prob)
 
 
 @njit
 def odds2prob(odds: float) -> float:
-    """convert odds to probability
+    """
+    Convert odds to probability
 
     Args:
         odds (float): odds
 
     Returns:
         float: probability
+
     """
     return odds / (1 + odds)
 

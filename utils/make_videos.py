@@ -1,6 +1,6 @@
-import cv2
 import os
 
+import cv2
 
 image_folder = "./plots/"  # Replace with the path to your images
 

@@ -1,4 +1,5 @@
-"""Breadth First Search - uses "Queue" data structure for
+"""
+Breadth First Search - uses "Queue" data structure for
 finding the shortest path. BFS is a traversal approach
 in which we first walk through all nodes on the same
 level before moving on to the next level.
@@ -17,8 +18,6 @@ Space Complexity: O(V)
 """
 
 import time
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def breadth_first_search() -> None:

@@ -1,13 +1,15 @@
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_regression
+import numpy as np
 from numba import njit
+from sklearn.datasets import make_regression
 
 
 @njit
 def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
-    """SSD: sum of squared differences between two arrays
+    """
+    SSD: sum of squared differences between two arrays
 
     Args:
         arr1 (np.ndarray[float]): an array
@@ -15,25 +17,24 @@ def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
 
     Returns:
         float: sum of squared differences
+
     """
     return np.sum((arr1 - arr2) * (arr1 - arr2))
 
 
 @njit
 def gradient_d_ssd_dw(x, y, w):
-    dW = -2 * x.T @ (y - x @ w)
-    return dW
+    return -2 * x.T @ (y - x @ w)
 
 
 def main() -> None:
     """_summary_"""
-    N = 200
+    n = 200
     mini_batch_size = 20
     noise_level = 15
     num_features = 1
-    xs, ys_noisy = make_regression(
-        n_samples=N, n_features=num_features, noise=noise_level
-    )
+    rng = np.random.default_rng()
+    xs, ys_noisy = make_regression(n_samples=n, n_features=num_features, noise=noise_level)
     x_mat = np.c_[xs, np.ones(xs.shape[0])]
 
     ### ordinary least squares est.
@@ -47,9 +48,11 @@ def main() -> None:
 
     ### gradient descent
     learning_rate = 0.01
-    mini_idx = np.random.randint(0, N, size=mini_batch_size)
-    w_est = np.random.randn(2)
-    sse = ssd(x_mat @ w_est, ys_noisy) / N
+    tol=1e-4
+    mini_idx = rng.integers(0, n, size=mini_batch_size)
+    mini_idx = rng.integers(0, n, size=mini_batch_size)
+    w_est = rng.normal(size=2)
+    sse = ssd(x_mat @ w_est, ys_noisy) / n
     last_sse = sse
     k = 0
     while True:
@@ -57,13 +60,13 @@ def main() -> None:
         dw = gradient_d_ssd_dw(x_mat[mini_idx, :], ys_noisy[mini_idx], w_est)
         w_est = w_est - learning_rate * dw / mini_batch_size  # * (0.99999**k)
 
-        sse = ssd(x_mat @ w_est, ys_noisy) / N
+        sse = ssd(x_mat @ w_est, ys_noisy) / n
 
-        mini_idx = np.random.randint(0, N, size=mini_batch_size)
+        mini_idx = rng.integers(0, n, size=mini_batch_size)
 
         sse_diff = np.abs(last_sse - sse)
 
-        if sse_diff < 1e-4 or np.isnan(sse) or np.isinf(sse):
+        if sse_diff < tol or np.isnan(sse) or np.isinf(sse):
             break
 
         last_sse = sse
@@ -93,9 +96,7 @@ def main() -> None:
 
     plt.figure()
     plt.scatter(xs, ys_noisy)
-    plt.plot(
-        xs, ys_linalg, c="k", label=f"Least squares: y={w_vec[0]:.2f}x+{w_vec[1]:.2f}"
-    )
+    plt.plot(xs, ys_linalg, c="k", label=f"Least squares: y={w_vec[0]:.2f}x+{w_vec[1]:.2f}")
     plt.plot(
         xs,
         y_est,
@@ -111,4 +112,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")

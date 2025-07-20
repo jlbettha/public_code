@@ -1,13 +1,15 @@
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_regression
+import numpy as np
 from numba import njit
+from sklearn.datasets import make_regression
 
 
 @njit
 def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
-    """SSD: sum of squared differences between two arrays
+    """
+    SSD: sum of squared differences between two arrays
 
     Args:
         arr1 (np.ndarray[float]): an array
@@ -15,23 +17,23 @@ def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
 
     Returns:
         float: sum of squared differences
+
     """
     return np.sum((arr1 - arr2) * (arr1 - arr2))
 
 
 @njit
 def gradient_d_ssd_dw(x, y, w):
-    dW = -2 * x.T @ (y - x @ w)
-    return dW
+    return -2 * x.T @ (y - x @ w)
 
 
 def main() -> None:
     """_summary_"""
-    N = 200
+    n = 200
     noise_level = 15
     num_features = 1
     xs, ys_noisy = make_regression(
-        n_samples=N, n_features=num_features, noise=noise_level
+        n_samples=n, n_features=num_features, noise=noise_level
     )
     x_mat = np.c_[xs, np.ones(xs.shape[0])]
 
@@ -46,21 +48,23 @@ def main() -> None:
 
     ### gradient descent
     learning_rate = 0.02
-    w_est = np.random.randn(2)
-    sse = ssd(x_mat @ w_est, ys_noisy) / N
+    rng = np.random.default_rng()
+    w_est = rng.normal(size=2)
+    sse = ssd(x_mat @ w_est, ys_noisy) / n
     last_sse = sse
     k = 0
+    tol = 1e-5
     while True:
         k += 1
         # dw = gradient_d_ssd_dw(x_mat, ys_noisy, w_est)
         dw = -2 * x_mat.T @ (ys_noisy - x_mat @ w_est)
-        w_est = w_est - learning_rate * dw / N  # w
-        sse = ssd(x_mat @ w_est, ys_noisy) / N
+        w_est = w_est - learning_rate * dw / n  # w
+        sse = ssd(x_mat @ w_est, ys_noisy) / n
         # print(sse)
 
         sse_diff = np.abs(last_sse - sse)
 
-        if sse_diff < 1e-5 or np.isnan(sse) or np.isinf(sse):
+        if sse_diff < tol or np.isnan(sse) or np.isinf(sse):
             break
 
         last_sse = sse

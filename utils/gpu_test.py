@@ -4,29 +4,30 @@ Created on Fri Nov 13 15:04:09 2020
 @author: jlb235
 """
 
-import psutil
 import platform
 from datetime import datetime
 
 # GPU information
 import GPUtil
+import psutil
 from tabulate import tabulate
 
 # from tensorflow import keras
 
 
-def get_size(bytes, suffix="B"):
+def get_size(bytess, suffix="B"):
     """
-    Scale bytes to its proper format
+    Scale bytes(s) to its proper format
     e.g:
         1253656 => '1.20MB'
         1253656678 => '1.17GB'
     """
     factor = 1024
     for unit in ["", "K", "M", "G", "T", "P"]:
-        if bytes < factor:
-            return f"{bytes:.2f}{unit}{suffix}"
-        bytes /= factor
+        if bytess < factor:
+            return f"{bytess:.2f}{unit}{suffix}"
+        bytess /= factor
+    return None
 
 
 # import tensorflow as tf
@@ -51,8 +52,8 @@ print(f"Processor: {uname.processor}")
 # Boot Time
 print("=" * 40, "Boot Time", "=" * 40)
 boot_time_timestamp = psutil.boot_time()
-bt = datetime.fromtimestamp(boot_time_timestamp)
-print(f"Boot Time: {bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second}")
+bt = datetime.fromtimestamp(boot_time_timestamp, tz=datetime.timezone.utc)
+print(f"Boot Time: {bt.year}/{bt.month}/{bt.day} {bt.hour}:{bt.minute}:{bt.second} UTC")
 
 
 # let's print CPU information

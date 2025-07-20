@@ -1,12 +1,13 @@
 """Betthauser, J. - 2018 - "Horn-Schunck Optical Flow Algorithm"""
 
 import time
+
 import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pydicom
-import matplotlib.pyplot as plt
-from scipy import ndimage as ndi
 from numpy.typing import NDArray
+from scipy import ndimage as ndi
 
 matplotlib.rcParams["image.cmap"] = "gray"
 
@@ -14,7 +15,8 @@ matplotlib.rcParams["image.cmap"] = "gray"
 def horn_schunck(
     img1: NDArray[np.float64], img2: NDArray[np.float64], alpha: float, iterations: int
 ) -> tuple[NDArray[np.float64]]:
-    """_summary_
+    """
+    _summary_
 
     Args:
         img1 (NDArray[np.float64]): _description_
@@ -24,15 +26,15 @@ def horn_schunck(
 
     Returns:
         tuple[NDArray[np.float64]]: _description_
-    """
 
+    """
     # set up initial velocities
     u_init = np.zeros([img1.shape[0], img1.shape[1]])
     v_init = np.zeros([img1.shape[0], img1.shape[1]])
 
     # Set initial value for the flow vectors
-    U = u_init
-    V = v_init
+    u = u_init
+    v = v_init
 
     # Estimate derivatives
     [fx, fy, ft] = spatiotemporal_image_derivatives(img1, img2)
@@ -46,24 +48,25 @@ def horn_schunck(
     # Iteration to reduce error
     for _ in range(iterations):
         # Compute local averages of the flow vectors
-        u_avg = ndi.convolve(U, kernel)
-        v_avg = ndi.convolve(V, kernel)
+        u_avg = ndi.convolve(u, kernel)
+        v_avg = ndi.convolve(v, kernel)
 
         # common part of update step
         der = (fx * u_avg + fy * v_avg + ft) / (alpha**2 + fx**2 + fy**2)
 
         # iterative step
-        U = u_avg - fx * der
-        V = v_avg - fy * der
+        u = u_avg - fx * der
+        v = v_avg - fy * der
 
-    return -U, -V
+    return -u, -v
 
 
 def spatiotemporal_image_derivatives(
     img1: NDArray[np.float64],
     img2: NDArray[np.float64],
 ) -> tuple[NDArray[np.float64]]:
-    """_summary_
+    """
+    _summary_
 
     Args:
         img1 (NDArray[np.float64]): _description_
@@ -71,30 +74,32 @@ def spatiotemporal_image_derivatives(
 
     Returns:
         tuple[NDArray[np.float64]]: _description_
+
     """
-
     # build kernels for calculating derivatives
-    kerneldX = np.array([[-1, 1], [-1, 1]]) * 0.25  # kernel for computing d/dx
-    kerneldY = np.array([[-1, -1], [1, 1]]) * 0.25  # kernel for computing d/dy
-    kerneldT = np.ones((2, 2)) * 0.25
+    kernel_dx = np.array([[-1, 1], [-1, 1]]) * 0.25  # kernel for computing d/dx
+    kernel_dy = np.array([[-1, -1], [1, 1]]) * 0.25  # kernel for computing d/dy
+    kernel_dt = np.ones((2, 2)) * 0.25
 
-    fx = ndi.convolve(img1, kerneldX) + ndi.convolve(img2, kerneldX)
-    fy = ndi.convolve(img1, kerneldY) + ndi.convolve(img2, kerneldY)
+    fx = ndi.convolve(img1, kernel_dx) + ndi.convolve(img2, kernel_dx)
+    fy = ndi.convolve(img1, kernel_dy) + ndi.convolve(img2, kernel_dy)
 
     # ft = im2 - im1
-    ft = ndi.convolve(img1, kerneldT) + ndi.convolve(img2, -kerneldT)
+    ft = ndi.convolve(img1, kernel_dt) + ndi.convolve(img2, -kernel_dt)
 
     return fx, fy, ft
 
 
 def image_norm(img: NDArray[np.float64]) -> NDArray[np.float64]:
-    """_summary_
+    """
+    _summary_
 
     Args:
         img (NDArray[np.float64]): image
 
     Returns:
         NDArray[np.float64]: min-max normalized image in [0,1]
+
     """
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
@@ -112,31 +117,30 @@ def main() -> None:
     dicom_data = pydicom.dcmread(dicom_file)
     print(dicom_data.pixel_array.shape)
     zoom_factor = dim / dicom_data.pixel_array.shape[1]  ## Scale image to 512x512
-    N = dicom_data.pixel_array.shape[0]
+    n = dicom_data.pixel_array.shape[0]
 
-    vol = np.zeros((N, dim, dim))
-    for i in range(N):
+    vol = np.zeros((n, dim, dim))
+    for i in range(n):
         vol[i, :, :] = ndi.zoom(dicom_data.pixel_array[i, :, :], zoom=zoom_factor)
 
     vol = image_norm(vol)
     for _ in range(5):
-
         for i in range(35, vol.shape[0] - 10, 1):
-            Iold = vol[i, :, :]
-            Inew = vol[i + 1, :, :]
+            img_old = vol[i, :, :]
+            img_new = vol[i + 1, :, :]
 
-            Iold = ndi.gaussian_filter(Iold, filter_size)
-            Inew = ndi.gaussian_filter(Inew, filter_size)
+            img_old = ndi.gaussian_filter(img_old, filter_size)
+            img_new = ndi.gaussian_filter(img_new, filter_size)
 
-            U, V = horn_schunck(Iold, Inew, alpha=1, iterations=20)
+            u, v = horn_schunck(img_old, img_new, alpha=1, iterations=20)
 
             # plt.subplot(1, 3, 1)
             plt.cla()
-            plt.imshow(Iold, cmap="gray")
-            Y, X = np.mgrid[0:dim:arrow_spacing, 0:dim:arrow_spacing]
-            U_small = U[Y, X]
-            V_small = V[Y, X]
-            plt.quiver(X, Y, U_small, V_small, color="r", scale=scale)
+            plt.imshow(img_old, cmap="gray")
+            y, x = np.mgrid[0:dim:arrow_spacing, 0:dim:arrow_spacing]
+            u_small = u[y, x]
+            v_small = v[y, x]
+            plt.quiver(x, y, u_small, v_small, color="r", scale=scale)
 
             # plt.subplot(1, 3, 2)
             # plt.cla()

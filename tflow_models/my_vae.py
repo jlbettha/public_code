@@ -1,25 +1,24 @@
 """_summary_"""
 
 import tensorflow as tf
-from keras.layers import (
-    Conv2D,
-    LeakyReLU,
-    BatchNormalization,
-    MaxPooling2D,
-    Dropout,
-    Flatten,
-    Dense,
-    Input,
-    Reshape,
-    Conv2DTranspose,
-    UpSampling2D,
-    AveragePooling2D,
-    Layer,
-)
-
-from keras.models import Model
 from keras import backend as K
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+from keras.layers import (
+    AveragePooling2D,
+    BatchNormalization,
+    Conv2D,
+    Conv2DTranspose,
+    Dense,
+    Dropout,
+    Flatten,
+    Input,
+    Layer,
+    LeakyReLU,
+    MaxPooling2D,
+    Reshape,
+    UpSampling2D,
+)
+from keras.models import Model
 
 
 class Sampling(Layer):
@@ -40,14 +39,10 @@ def total_loss_func(encoder_mu, encoder_log_variance):
         return reconstruction_loss_factor * reconstruction_loss
 
     def vae_kl_loss(encoder_mu, encoder_log_variance):
-        kl_loss = -0.5 * K.sum(
-            1.0
-            + encoder_log_variance
-            - K.square(encoder_mu)
-            - K.exp(encoder_log_variance),
+        return -0.5 * K.sum(
+            1.0 + encoder_log_variance - K.square(encoder_mu) - K.exp(encoder_log_variance),
             axis=1,
         )
-        return kl_loss
 
     def vae_loss(y_true, y_predict):
         reconstruction_loss = vae_reconstruction_loss(y_true, y_predict)
@@ -65,43 +60,27 @@ def my_vae_encoder(
     layer_multipliers=[1, 2, 2],
     n_filters=16,
     avg_pool=False,
-    image_dim=128,
     latent_dim=32,
 ):
-    conv1 = Conv2D(
-        n_filters * layer_multipliers[0], (3, 3), activation="linear", padding="same"
-    )(input_tensor)
+    conv1 = Conv2D(n_filters * layer_multipliers[0], (3, 3), activation="linear", padding="same")(input_tensor)
     conv1 = LeakyReLU(alpha=0.1)(conv1)
     if batchnorm:
         conv1 = BatchNormalization()(conv1)
-    if avg_pool:
-        pool1 = AveragePooling2D(pool_size=(2, 2))(conv1)  #
-    else:
-        pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
+    pool1 = AveragePooling2D(pool_size=(2, 2))(conv1) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv1)
     pool1 = Dropout(dropout)(pool1)
 
-    conv2 = Conv2D(
-        n_filters * layer_multipliers[1], (3, 3), activation="linear", padding="same"
-    )(pool1)
+    conv2 = Conv2D(n_filters * layer_multipliers[1], (3, 3), activation="linear", padding="same")(pool1)
     conv2 = LeakyReLU(alpha=0.1)(conv2)
     if batchnorm:
         conv2 = BatchNormalization()(conv2)
-    if avg_pool:
-        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)  #
-    else:
-        pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
+    pool2 = AveragePooling2D(pool_size=(2, 2))(conv2) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv2)
     pool2 = Dropout(dropout)(pool2)
 
-    conv3 = Conv2D(
-        n_filters * layer_multipliers[2], (3, 3), activation="linear", padding="same"
-    )(pool2)
+    conv3 = Conv2D(n_filters * layer_multipliers[2], (3, 3), activation="linear", padding="same")(pool2)
     conv3 = LeakyReLU(alpha=0.1)(conv3)
     if batchnorm:
         conv3 = BatchNormalization()(conv3)
-    if avg_pool:
-        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)  #
-    else:
-        pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
+    pool3 = AveragePooling2D(pool_size=(2, 2))(conv3) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv3)
     pool3 = Dropout(dropout)(pool3)
 
     flatten = Flatten()(pool3)
@@ -117,9 +96,7 @@ def my_vae_encoder(
 
     z = Sampling(name="encoder_output")([z_mean, z_log_var])
 
-    encoder = Model(
-        inputs=[input_tensor], outputs=[z, z_mean, z_log_var], name="encoder_model"
-    )
+    encoder = Model(inputs=[input_tensor], outputs=[z, z_mean, z_log_var], name="encoder_model")
 
     return encoder, z_mean, z_log_var, pool3.shape
 
@@ -133,25 +110,19 @@ def my_vae_decoder(
     image_dim=128,
     reshape_param=(None, 16, 16, 32),
 ):
-    z_resp = Dense(
-        image_dim**2 * layer_multipliers[2] * n_filters // 64, activation="relu"
-    )(input_tensor)
+    z_resp = Dense(image_dim**2 * layer_multipliers[2] * n_filters // 64, activation="relu")(input_tensor)
     z_resp = LeakyReLU(alpha=0.1)(z_resp)
-    z_resp = Reshape((reshape_param[1:]))(z_resp)
+    z_resp = Reshape(reshape_param[1:])(z_resp)
 
     # ### Decoder
     up0 = UpSampling2D((2, 2), interpolation="bicubic")(z_resp)
-    conv4 = Conv2DTranspose(
-        n_filters * layer_multipliers[2], (3, 3), activation="relu", padding="same"
-    )(up0)
+    conv4 = Conv2DTranspose(n_filters * layer_multipliers[2], (3, 3), activation="relu", padding="same")(up0)
     conv4 = LeakyReLU(alpha=0.1)(conv4)
     if batchnorm:
         conv4 = BatchNormalization()(conv4)
     up1 = UpSampling2D((2, 2), interpolation="bicubic")(conv4)
 
-    conv5 = Conv2DTranspose(
-        n_filters * layer_multipliers[1], (3, 3), activation="relu", padding="same"
-    )(up1)
+    conv5 = Conv2DTranspose(n_filters * layer_multipliers[1], (3, 3), activation="relu", padding="same")(up1)
     conv5 = LeakyReLU(alpha=0.1)(conv5)
     if batchnorm:
         conv5 = BatchNormalization()(conv5)
@@ -230,7 +201,7 @@ if __name__ == "__main__":
     try:
         model.load_weights(model_save_str)
         print("LOADED PRETRAINED MODEL")
-    except:
+    except Exception:
         print("BUILDING NEW MODEL")
 
     # 6. model batch training

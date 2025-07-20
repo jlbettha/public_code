@@ -4,10 +4,9 @@ Created on Sun Dec  5 12:31:08 2021
 @author: jlb235
 """
 
-import torch
-from torchvision import datasets
-from torchvision import transforms
 import matplotlib.pyplot as plt
+import torch
+from torchvision import datasets, transforms
 
 
 # PyTorch Auto-Encoder class

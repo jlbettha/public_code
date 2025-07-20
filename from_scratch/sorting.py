@@ -1,22 +1,25 @@
 import time
-import numpy as np
-from numba import njit
-from modules.my_decorators import record_time
 
-NumArray = np.ndarray[float]  # type alias
+import numpy as np
+from modules.my_decorators import record_time
+from numba import njit
+
+NumArray = np.ndarray  # type alias
 
 
 @record_time
 @njit
 def counting_sort(arr: NumArray) -> NumArray:
-    """Counting sort algorithm
+    """
+    Counting sort algorithm
         time complexity: O(?), space: O(?)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     size = len(arr)
     output = np.zeros(size)
@@ -47,14 +50,16 @@ def counting_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def bubble_sort(arr: NumArray) -> NumArray:
-    """Bubble sort algorithm
+    """
+    Bubble sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     n = len(arr)
     for i in range(n - 1):
@@ -66,23 +71,25 @@ def bubble_sort(arr: NumArray) -> NumArray:
 
 # @record_time
 # @njit
-def merge_sort(arr: NumArray) -> NumArray:
-    """Merge sort algorithm
+def merge_sort(arr: NumArray) -> NumArray:  # noqa: ARG001
+    """
+    Merge sort algorithm
         time complexity: O(n log n), space: O(n)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
-    """
 
+    """
     return NotImplementedError
 
 
 # @njit
-def _partition(arr: NumArray, start: int, end: int) -> int:
-    """Choose pivot index
+def _partition(arr: NumArray, start: int, end: int) -> int:  # noqa: ARG001
+    """
+    Choose pivot index
     Args:
         arr (NumArray): unsorted array of numbers
         start (int): starting index segment
@@ -90,6 +97,7 @@ def _partition(arr: NumArray, start: int, end: int) -> int:
 
     Returns:
         int: pivot index
+
     """
     # pivot = arr[start]
     # low = start + 1
@@ -114,8 +122,9 @@ def _partition(arr: NumArray, start: int, end: int) -> int:
 
 # @record_time
 # @njit
-def quick_sort(arr: NumArray, start: int, end: int) -> NumArray:
-    """Quick sort: recursive
+def quick_sort(arr: NumArray, start: int, end: int) -> NumArray:  # noqa: ARG001
+    """
+    Quick sort: recursive
         time complexity: O(n log n to n**2), space: O(n)
 
     Args:
@@ -125,6 +134,7 @@ def quick_sort(arr: NumArray, start: int, end: int) -> NumArray:
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     # if start >= end:
     #     return
@@ -139,32 +149,32 @@ def quick_sort(arr: NumArray, start: int, end: int) -> NumArray:
 @record_time
 @njit
 def tim_sort(arr: NumArray) -> NumArray:
-    """Timsort algorithm
+    """
+    Timsort algorithm
         time complexity: O(n log n), space: O(n)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     # TODO: implement my own version
-    return np.sort(
-        arr
-    )  # python default is timsort, but not sure about numpy/option-select
+    return np.sort(arr)  # python default is timsort, but not sure about numpy/option-select
 
 
 @njit
 def _heapify(arr, n, i):
     largest = i
-    l = 2 * i + 1
-    r = 2 * i + 2
+    left = 2 * i + 1
+    right = 2 * i + 2
 
-    if l < n and arr[i] < arr[l]:
-        largest = l
+    if left < n and arr[i] < arr[left]:
+        largest = left
 
-    if r < n and arr[largest] < arr[r]:
-        largest = r
+    if right < n and arr[largest] < arr[right]:
+        largest = right
 
     if largest != i:
         arr[i], arr[largest] = arr[largest], arr[i]
@@ -175,14 +185,16 @@ def _heapify(arr, n, i):
 @record_time
 @njit
 def heap_sort(arr: NumArray) -> NumArray:
-    """Heap sort algorithm
+    """
+    Heap sort algorithm
         time complexity: O(n log n), space: O(1)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     n = len(arr)
 
@@ -200,14 +212,16 @@ def heap_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def selection_sort(arr: NumArray) -> NumArray:
-    """Selection sort algorithm
+    """
+    Selection sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     for i in range(len(arr)):
         min_idx = i
@@ -221,14 +235,16 @@ def selection_sort(arr: NumArray) -> NumArray:
 @record_time
 @njit
 def insertion_sort(arr: NumArray) -> NumArray:
-    """Insertion sort algorithm
+    """
+    Insertion sort algorithm
         time complexity: O(n**2), space: O(1)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     for i in range(1, len(arr)):
         key = arr[i]
@@ -258,8 +274,8 @@ def _counting_sort_radix(arr: NumArray, lsd: int) -> NumArray:
         current_idx = arr[i]
         lsd_idx = int((arr[i] // lsd) % 10)
         count_arr[lsd_idx] -= 1
-        newPosition = count_arr[lsd_idx]
-        output_arr[newPosition] = current_idx
+        new_position = count_arr[lsd_idx]
+        output_arr[new_position] = current_idx
         i -= 1
 
     return output_arr
@@ -268,14 +284,16 @@ def _counting_sort_radix(arr: NumArray, lsd: int) -> NumArray:
 @record_time
 @njit
 def radix_sort(arr: NumArray) -> NumArray:
-    """Radix sort algorithm (base-10)
+    """
+    Radix sort algorithm (base-10)
         time complexity: O(?), space: O(?)
 
     Args:
-        nums (NumArray): unsorted array of numbers
+        arr (NumArray): unsorted array of numbers
 
     Returns:
         NumArray: sorted array of numbers
+
     """
     max_val = max(arr)
 
@@ -315,10 +333,9 @@ def main() -> None:
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     minval, maxval, count = 1, 1_000_000, 50_000
-    real_array = np.random.randint(minval, maxval, size=count).astype(np.uint64)
-    print(
-        f"Sorting array length {count:,}, uniformly chosen from Z in [{minval}, {maxval:,}]."
-    )
+    rng = np.random.default_rng()
+    real_array = rng.integers(minval, maxval, size=count, dtype=np.uint64)
+    print(f"Sorting array length {count:,}, uniformly chosen from Z in [{minval}, {maxval:,}].")
     insertion_sort(real_array.copy())
     selection_sort(real_array.copy())
     heap_sort(real_array.copy())
@@ -336,4 +353,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")

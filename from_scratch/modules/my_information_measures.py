@@ -1,31 +1,33 @@
 """_summary_"""
 
 import numpy as np
-from numba import njit
 from my_distance_metrics import minmax_scaling
+from numba import njit
+
+EPS = 1e-12
 
 
 @njit
 def entropy(hist1: np.ndarray[float]) -> float:
-    """Betthauser 2016 -- Calculate entropy of an 1-d distribution
+    """
+    Betthauser 2016 -- Calculate entropy of an 1-d distribution
 
     Args:
         hist1 (np.ndarray[float]): an N-D histogram or PMF
 
     Returns:
         float: entropy of the ditribution
+
     """
     hist1 = hist1 / np.sum(hist1)
-    nz_probs = np.array([-p * np.log(p) for p in hist1 if p > 1e-12])
-    entrp = np.sum(nz_probs)
-    return entrp
+    nz_probs = np.array([-p * np.log(p) for p in hist1 if p > EPS])
+    return np.sum(nz_probs)
 
 
 @njit
-def information_gain(
-    y: np.ndarray[float], x_1feature: np.ndarray[float], threshold: float
-) -> float:
-    """Information gain = entropy(parent) - weighted avg of entropy(children)
+def information_gain(y: np.ndarray[float], x_1feature: np.ndarray[float], threshold: float) -> float:
+    """
+    Information gain = entropy(parent) - weighted avg of entropy(children)
 
     Args:
         y (np.ndarray[float]): _description_
@@ -34,6 +36,7 @@ def information_gain(
 
     Returns:
         float: Information gain
+
     """
     hist_parent = np.bincount(y)
     entropy_parent = entropy(hist_parent)
@@ -48,15 +51,14 @@ def information_gain(
     right_hist = np.bincount(right_children)
     entropy_left = entropy(left_hist)
     entropy_right = entropy(right_hist)
-    entropy_children = (
-        len(left_children) * entropy_left + len(right_children) * entropy_right
-    ) / len(y)
+    entropy_children = (len(left_children) * entropy_left + len(right_children) * entropy_right) / len(y)
     return entropy_parent - entropy_children
 
 
 @njit
 def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
-    """Betthauser - 2024 - Get gini index, a measure of inequality (e.g., 0.0 means equal ditribution)
+    """
+    Betthauser - 2024 - Get gini index, a measure of inequality (e.g., 0.0 means equal ditribution)
 
     Args:
         x (np.ndarray[float]): _description_
@@ -64,6 +66,7 @@ def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
 
     Returns:
         float: gini index/coefficient
+
     """
     if w is not None:
         w = np.asarray(w)
@@ -72,9 +75,7 @@ def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
         sorted_w = w[sorted_indices]
         cumw = np.cumsum(sorted_w, dtype=np.float64)
         cumxw = np.cumsum(sorted_x * sorted_w, dtype=np.float64)
-        return np.sum(cumxw[1:] * cumw[:-1] - cumxw[:-1] * cumw[1:]) / (
-            cumxw[-1] * cumw[-1]
-        )
+        return np.sum(cumxw[1:] * cumw[:-1] - cumxw[:-1] * cumw[1:]) / (cumxw[-1] * cumw[-1])
 
     sorted_x = np.sort(x)
     n = len(x)
@@ -84,10 +85,9 @@ def gini_index(x: np.ndarray[float], w: np.ndarray[float] = None) -> float:
 
 # returns joint histogram of 2 image sections
 @njit
-def joint_histogram_2d(
-    patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0
-) -> np.ndarray[float]:
-    """Betthauser - 2018 - Computes joint histogram of 2 image sections/patches
+def joint_histogram_2d(patch1: np.ndarray[float], patch2: np.ndarray[float], bins: float = 255.0) -> np.ndarray[float]:
+    """
+    Betthauser - 2018 - Computes joint histogram of 2 image sections/patches
     Args:
         img1 (np.ndarray[float]): image patch 1
         img2 (np.ndarray[float]): image patch 2
@@ -107,13 +107,15 @@ def joint_histogram_2d(
 
 @njit
 def mutual_info(image1: np.ndarray[float], image2: np.ndarray[float]) -> float:
-    """Betthauser - 2018 - compute mutual information between 2 images/patches
+    """
+    Betthauser - 2018 - compute mutual information between 2 images/patches
     Args:
         image1 (np.ndarray[float]): image/patch
         image2 (np.ndarray[float]): another image/patch for comparison
 
     Returns:
         float: mutual information between the two images/patches
+
     """
     joint_hist = joint_histogram_2d(image1, image2)
     joint_entropy = entropy(joint_hist)
@@ -121,13 +123,13 @@ def mutual_info(image1: np.ndarray[float], image2: np.ndarray[float]) -> float:
     hist2 = np.sum(joint_hist, axis=1)
     entropy1 = entropy(hist1)
     entropy2 = entropy(hist2)
-    mut_info = entropy1 + entropy2 - joint_entropy
-    return mut_info
+    return entropy1 + entropy2 - joint_entropy
 
 
 @njit
 def kl_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
-    """Betthauser - 2018 - compute KL divergence between two PMFs
+    """
+    Betthauser - 2018 - compute KL divergence between two PMFs
 
     Args:
         p (np.ndarray[float]): PMF of distribution p
@@ -135,6 +137,7 @@ def kl_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
 
     Returns:
         float:  KL divergence KL(p||q)
+
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -144,7 +147,8 @@ def kl_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
 
 @njit
 def kl_div_bidirectional(p: np.ndarray[float], q: np.ndarray[float]) -> float:
-    """Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
+    """
+    Betthauser - 2018 - compute Jeffreys/2-way KL divergence between two PMFs
 
     Args:
         p (np.ndarray[float]): PMF of distribution p
@@ -152,17 +156,18 @@ def kl_div_bidirectional(p: np.ndarray[float], q: np.ndarray[float]) -> float:
 
     Returns:
         float: Jeffreys bi-directional KL divergence KL(p||q) + KL(q||p)
+
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
     q = np.abs(q) + epsilon
-    jeffreys = np.sum(p * (np.log(p) - np.log(q)) + q * (np.log(q) - np.log(p)))
-    return jeffreys
+    return np.sum(p * (np.log(p) - np.log(q)) + q * (np.log(q) - np.log(p)))
 
 
 @njit
 def jensen_shannon_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> float:
-    """Betthauser - 2024 - jensen-shannon divergence
+    """
+    Betthauser - 2024 - jensen-shannon divergence
 
     Args:
         p (np.ndarray[float]): PMF of distribution p
@@ -171,6 +176,7 @@ def jensen_shannon_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> flo
     Returns:
         float: JS_divergence(P || Q) = 0.5[ D_kl(P || M ) + D_kl( Q || M ) ]
                     where M = 0.5(P+Q)
+
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon
@@ -181,7 +187,8 @@ def jensen_shannon_divergence(p: np.ndarray[float], q: np.ndarray[float]) -> flo
 
 @njit
 def jensen_shannon_dist(p: np.ndarray[float], q: np.ndarray[float]) -> float:
-    """Betthauser - 2024 - jensen-shannon distance metric
+    """
+    Betthauser - 2024 - jensen-shannon distance metric
 
     Args:
         p (np.ndarray[float]): PMF of distribution p
@@ -189,6 +196,7 @@ def jensen_shannon_dist(p: np.ndarray[float], q: np.ndarray[float]) -> float:
 
     Returns:
         float: JS_distance = np.sqrt( JS_divergence )
+
     """
     epsilon = 1e-12
     p = np.abs(p) + epsilon

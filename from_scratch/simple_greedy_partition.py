@@ -1,14 +1,15 @@
 """Simple greedy partitioner of array s into k approx equal sum groups"""
 
 import time
+
 import numpy as np
-import matplotlib.pyplot as plt
 from numba import njit
 
 
 @njit
 def simple_greedy_partition(s: np.ndarray[float], k: int = 2) -> list[list[float]]:
-    """Partition array s into k approx equal sum groups
+    """
+    Partition array s into k approx equal sum groups
 
     Args:
         s (np.ndarray): array of numbers
@@ -19,11 +20,13 @@ def simple_greedy_partition(s: np.ndarray[float], k: int = 2) -> list[list[float
 
     Returns:
         list[list[float]]: list of k partition subsets
+
     """
     n = len(s)
     if n < k:
+        msg = f"To partition into {k} groups, the number array must have at least {k} values."
         raise ValueError(
-            f"To partition into {k} groups, the number array must have at least {k} values."
+            msg
         )
 
     s[::-1].sort()
@@ -40,7 +43,8 @@ def simple_greedy_partition(s: np.ndarray[float], k: int = 2) -> list[list[float
 
 def main() -> None:
     num_partitions = 3
-    number_arr = 12.77 * np.random.rand(700)
+    rng = np.random.default_rng()
+    number_arr = 12.77 * rng.random(700)
     expected_group_sum = np.sum(number_arr) / num_partitions
 
     print(f"{number_arr.shape=}, {np.sum(number_arr)=:.3f}")

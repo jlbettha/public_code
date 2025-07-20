@@ -1,21 +1,22 @@
-""" _unet_
+"""
+_unet_
 Created on Fri Jul 17 17:32:34 2020
 @author: jlbettha
 """
 
 from keras.layers import (
-    Conv2D,
-    MaxPooling2D,
     BatchNormalization,
-    LeakyReLU,
-    Dropout,
-    Conv2DTranspose,
     Concatenate,
+    Conv2D,
+    Conv2DTranspose,
+    Dropout,
+    LeakyReLU,
+    MaxPooling2D,
 )
 from keras.models import Model
 
 
-def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
+def conv2d_block(input_tensor, n_filters, *, kernel_size=3, batchnorm=True):
     """Function to add 2 convolutional layers with the parameters passed to it"""
     # first layer
     x = Conv2D(
@@ -44,13 +45,10 @@ def conv2d_block(input_tensor, n_filters, kernel_size=3, batchnorm=True):
     return x
 
 
-def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
+def my_unet(input_tensor, *, n_filters=16, dropout=0.1, batchnorm=True):
     """UNET"""
-
     ### Contracting Path
-    c1 = conv2d_block(
-        input_tensor, n_filters=n_filters * 1, kernel_size=3, batchnorm=batchnorm
-    )
+    c1 = conv2d_block(input_tensor, n_filters=n_filters * 1, kernel_size=3, batchnorm=batchnorm)
     p1 = MaxPooling2D((2, 2))(c1)
     p1 = Dropout(dropout)(p1)
 
@@ -69,9 +67,7 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     c5 = conv2d_block(p4, n_filters=n_filters * 16, kernel_size=3, batchnorm=batchnorm)
 
     # Expansive Path
-    u6 = Conv2DTranspose(
-        n_filters * 8, (3, 3), activation="linear", strides=(2, 2), padding="same"
-    )(c5)
+    u6 = Conv2DTranspose(n_filters * 8, (3, 3), activation="linear", strides=(2, 2), padding="same")(c5)
     u6 = LeakyReLU(alpha=0.1)(u6)
     if batchnorm:
         u6 = BatchNormalization()(u6)
@@ -79,9 +75,7 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     # u6 = Dropout(dropout)(u6)
     c6 = conv2d_block(u6, n_filters * 8, kernel_size=3, batchnorm=batchnorm)
 
-    u7 = Conv2DTranspose(
-        n_filters * 4, (3, 3), activation="linear", strides=(2, 2), padding="same"
-    )(c6)
+    u7 = Conv2DTranspose(n_filters * 4, (3, 3), activation="linear", strides=(2, 2), padding="same")(c6)
     u7 = LeakyReLU(alpha=0.1)(u7)
     if batchnorm:
         u7 = BatchNormalization()(u7)
@@ -89,9 +83,7 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     # u7 = Dropout(dropout)(u7)
     c7 = conv2d_block(u7, n_filters * 4, kernel_size=3, batchnorm=batchnorm)
 
-    u8 = Conv2DTranspose(
-        n_filters * 2, (3, 3), activation="linear", strides=(2, 2), padding="same"
-    )(c7)
+    u8 = Conv2DTranspose(n_filters * 2, (3, 3), activation="linear", strides=(2, 2), padding="same")(c7)
     u8 = LeakyReLU(alpha=0.1)(u8)
     if batchnorm:
         u8 = BatchNormalization()(u8)
@@ -99,9 +91,7 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     # u8 = Dropout(dropout)(u8)
     c8 = conv2d_block(u8, n_filters * 2, kernel_size=3, batchnorm=batchnorm)
 
-    u9 = Conv2DTranspose(
-        n_filters * 1, (3, 3), activation="linear", strides=(2, 2), padding="same"
-    )(c8)
+    u9 = Conv2DTranspose(n_filters * 1, (3, 3), activation="linear", strides=(2, 2), padding="same")(c8)
     u9 = LeakyReLU(alpha=0.1)(u9)
     if batchnorm:
         u9 = BatchNormalization()(u9)
@@ -110,5 +100,5 @@ def my_unet(input_tensor, n_filters=16, dropout=0.1, batchnorm=True):
     c9 = conv2d_block(u9, n_filters * 1, kernel_size=3, batchnorm=batchnorm)
 
     outputs = Conv2D(1, (1, 1), activation="linear")(c9)
-	
+
     return Model(inputs=[input_tensor], outputs=[outputs])

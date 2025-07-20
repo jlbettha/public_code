@@ -1,6 +1,6 @@
 import numpy as np
-from scipy import signal
 from my_model_builder import GenericLayer
+from scipy import signal
 
 
 class Convolutional(GenericLayer):

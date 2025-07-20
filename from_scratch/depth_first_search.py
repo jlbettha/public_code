@@ -1,4 +1,5 @@
-"""Depth First Search - uses "Stack" data structure.
+"""
+Depth First Search - uses "Stack" data structure.
 DFS is a tree traversal approach in which the traverse begins at
 the root node and proceeds through the nodes as far as possible
 until we reach the node with no unvisited nearby nodes.
@@ -18,8 +19,6 @@ Space complexity: O(V + E)
 """
 
 import time
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def depth_first_search():

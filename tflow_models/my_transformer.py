@@ -1,11 +1,11 @@
 """_summary_"""
 
 from keras.layers import (
-    Input,
     Dense,
-    LayerNormalization,
     Dropout,
     GlobalAveragePooling1D,
+    Input,
+    LayerNormalization,
     MultiHeadAttention,
 )
 from keras.models import Model

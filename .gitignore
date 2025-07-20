@@ -48,7 +48,13 @@ Thumbs.db
 
 
 # Unfinished folders
-
+tflow_models/
+torch_models/
+image_segmentation/
+image_classification/
+utils/
+config/
+.ruff_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

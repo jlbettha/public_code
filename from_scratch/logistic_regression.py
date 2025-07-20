@@ -1,11 +1,12 @@
 """Betthauser, 2020: logistic regresssion"""
 
-import time
 import math
-from typing import Any
+import time
 from itertools import repeat
-import numpy as np
+from typing import Any
+
 import matplotlib.pyplot as plt
+import numpy as np
 from numba import njit
 
 # from scipy.special import erf
@@ -15,13 +16,15 @@ from numba import njit
 
 @njit
 def _sigmoid(x: float | np.ndarray[float]) -> float:
-    """sigmoid(x) = 1/(1+e^-x)
+    """
+    sigmoid(x) = 1/(1+e^-x)
 
     Args:
         x (float | NDArray[floats]): input to sigmoid, input is wx+b for logistic regression
 
     Returns:
         float: sigmoid(x)
+
     """
     # sigx = (1 + np.exp(x)) ** -1
     return 1 / (1 + np.exp(-x))
@@ -45,7 +48,8 @@ def logistic_regression(
     tolerance: float = 1e-6,
     plot: bool = False,
 ) -> Any:
-    """logistic_regression
+    """
+    logistic_regression
 
     Args:
         xs (np.ndarray[float]): data points + appended bias column of 1s
@@ -56,12 +60,14 @@ def logistic_regression(
 
     Returns:
         Any: _description_
+
     """
     num_pts = xs.shape[0]
     dim = xs.shape[1]
 
     # init conditions
-    wts = np.random.randn(dim)
+    rng = np.random.default_rng()
+    wts = rng.standard_normal(dim)
     wx_b = np.dot(xs, wts)
     sigmoid_all_wx_b = _sigmoid(wx_b)
 
@@ -116,29 +122,31 @@ def logistic_regression(
 
 
 @njit
-def normal_cdf_at_x(x: float | int, mean: float, variance: float) -> float:
-    """Normal distr. integral, cdf at x | mean, variance
+def normal_cdf_at_x(x: float, mean: float, variance: float) -> float:
+    """
+    Normal distr. integral, cdf at x | mean, variance
 
     Args:
+        x (float): value at which to evaluate the CDF
         mean (float): sample mean
         variance (float): sample variance
 
     Returns:
         float: cdf at x | mean, variance
+
     """
-    cdf_x = (1 + math.erf((x - mean) / np.sqrt(2 * variance))) / 2
-    return cdf_x
+    return (1 + math.erf((x - mean) / np.sqrt(2 * variance))) / 2
 
 
 def main() -> None:
     """_summary_"""
-
     # generate data
     num_points = 100
     xrange = [5, 80]
     mid_range = (xrange[0] + xrange[1]) / 2
-    mean = np.random.uniform(0.75 * mid_range, 1.25 * mid_range)
-    variance = np.random.uniform(0.1 * (2 * mid_range), 0.30 * (2 * mid_range))
+    rng = np.random.default_rng()
+    mean = rng.uniform(0.75 * mid_range, 1.25 * mid_range)
+    variance = rng.uniform(0.1 * (2 * mid_range), 0.30 * (2 * mid_range))
     xs = np.linspace(xrange[0], xrange[1], num_points)
 
     ## ground truth CDF(xs)
@@ -146,14 +154,14 @@ def main() -> None:
 
     ## generate labels from noise + probabilities
     err = 0.00005
-    random_prob_error = err * np.random.normal(size=num_points)
+    random_prob_error = err * rng.normal(size=num_points)
     prob_xs_plus_err = np.array(prob_xs_equal_1) + random_prob_error
     prob_xs_plus_err[prob_xs_plus_err > 1] = 1.0
     prob_xs_plus_err[prob_xs_plus_err < 0] = 0.0
 
     labels = np.array(
         [
-            np.random.choice(
+            rng.choice(
                 [0, 1], p=[1 - prob_xs_plus_err[idx], prob_xs_plus_err[idx]]
             )
             for idx in range(num_points)

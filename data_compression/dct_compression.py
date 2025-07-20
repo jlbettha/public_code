@@ -1,20 +1,20 @@
-"""Betthauser, 2018: Discrete cosine transform compression
+"""
+Betthauser, 2018: Discrete cosine transform compression
 >> Use when number of features (datapoint dimensions) is large.
 """
 
 import time
-import numpy as np
-import PIL.Image as Image
-from typing import Tuple
-from numpy.typing import NDArray
-import matplotlib.pyplot as plt
-from scipy.fftpack import dct, idct
 
-ArrayTuple = Tuple[NDArray[np.float64]]
+import numpy as np
+from numpy.typing import NDArray
+from scipy.fftpack import dct
+
+ArrayTuple = tuple[NDArray[np.float64]]
 
 
 def dct_compression(data: NDArray[np.float64], factor: float = 0.2) -> ArrayTuple:
-    """Betthauser, 2018: dct_compression
+    """
+    Betthauser, 2018: dct_compression
         Projection reduces feature dimensionality
 
     Args:
@@ -22,6 +22,7 @@ def dct_compression(data: NDArray[np.float64], factor: float = 0.2) -> ArrayTupl
         factor (float): factor to reduce dimensionality
     Returns:
         Tuple[NDArray[np.uint8]]: dct matrix, idct matrix, transformed data
+
     """
     new_dim = int(data.shape[1] * factor)
     dct_matrix = dct(np.eye(data.shape[1]), axis=0)
@@ -32,12 +33,14 @@ def dct_compression(data: NDArray[np.float64], factor: float = 0.2) -> ArrayTupl
 
 
 def normalize_image(img: NDArray[np.float64]) -> NDArray[np.uint8]:
-    """Min-max scale image to range [0,255] as uint8
+    """
+    Min-max scale image to range [0,255] as uint8
     Args:
         img (NDArray[np.float64]): input image
 
     Returns:
         NDArray[np.uint8]: scaled image
+
     """
     return ((img - img.min()) / (img.max() - img.min()) * 255).astype(np.uint8)
 
@@ -47,7 +50,8 @@ def main() -> None:
     num_pts = 2000
     num_dims = 200
     factor = 0.05
-    data = np.random.uniform(10, size=(num_pts, num_dims))
+    rng = np.random.default_rng()
+    data = rng.uniform(0, 10, size=(num_pts, num_dims))
 
     dct_matrix, idct_matrix, proj_data = dct_compression(data, factor=factor)
     print(f"DCT matrix shape: {dct_matrix.shape}")
@@ -76,4 +80,4 @@ def main() -> None:
 if __name__ == "__main__":
     t0 = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-t0:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - t0:.3f} seconds.")

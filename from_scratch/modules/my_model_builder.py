@@ -1,16 +1,17 @@
-"""Betthauser, J. 2023 - personal manual object oriented implementation for building
+"""
+Betthauser, J. 2023 - personal manual object oriented implementation for building
 layer-wise prediction models.
 """
 
-import numpy as np
 import time
+
+import numpy as np
+from my_loss_functions import mse_derivative, mse_loss
+from sklearn.datasets import load_digits
+from sklearn.metrics import *
 
 # import matplotlib.pyplot as plt
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.metrics import *
-from sklearn.datasets import load_iris, load_digits
-
-from my_loss_functions import mse_loss, mse_derivative
 
 
 class GenericLayer:
@@ -127,7 +128,7 @@ def main() -> None:
 
     for ep in range(num_epochs):
         error = 0
-        for x, y in zip(X, Y):
+        for x, y in zip(X, Y, strict=False):
 
             ## feed forward
             output = x

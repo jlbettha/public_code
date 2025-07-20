@@ -1,14 +1,14 @@
 """_summary_"""
 
 import tensorflow as tf
-from keras.models import Model
 from keras.layers import (
-    LeakyReLU,
     BatchNormalization,
     Dense,
     Input,
+    LeakyReLU,
     Reshape,
 )
+from keras.models import Model
 
 # TODO: make convolutional like unet or similar
 

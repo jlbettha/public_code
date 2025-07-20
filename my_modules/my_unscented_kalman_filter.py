@@ -4,25 +4,27 @@
 #     Description:  Unscented Kalman Filter (pos, vel, accel)
 # /////////////////////////////////////////////////////////////////////////
 import time
-from typing import Tuple
-import numpy as np
-import mouse
+
 import keyboard
 import matplotlib.pyplot as plt
+import mouse
+import numpy as np
 from numba import njit
 
 # my type
-ArrayTuple = Tuple[np.ndarray[float]]
+ArrayTuple = tuple[np.ndarray[float]]
 
 
 def ukf_init(dt_: float) -> ArrayTuple:
-    """_summary_
+    """
+    _summary_
 
     Args:
         dt (float): _description_
 
     Returns:
         ArrayTuple: init of A, B, H, Q, R, c, x, P
+
     """
     A_ = np.array(
         [
@@ -55,7 +57,8 @@ def ukf_correction(
     z_: np.ndarray[float],
     P_: np.ndarray[float],
 ) -> ArrayTuple:
-    """_summary_
+    """
+    _summary_
 
     Args:
         H (np.ndarray[float]): _description_
@@ -66,6 +69,7 @@ def ukf_correction(
 
     Returns:
         ArrayTuple: _description_
+
     """
     S_ = H_ @ P_ @ H_.T + R_
     K_ = P_ @ H_.T @ np.linalg.pinv(S_)
@@ -84,7 +88,8 @@ def ukf_predict(
     x_: np.ndarray[float],
     P_: np.ndarray[float],
 ) -> ArrayTuple:
-    """_summary_
+    """
+    _summary_
 
     Args:
         A (np.ndarray[float]): _description_
@@ -96,6 +101,7 @@ def ukf_predict(
 
     Returns:
         ArrayTuple: _description_
+
     """
     x_ = A_ @ x_ + B_ @ c_
     P_ = A_ @ P_ @ A_.T + Q_

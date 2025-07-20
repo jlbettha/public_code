@@ -1,14 +1,14 @@
 """_summary_"""
 
 from keras.layers import (
-    Conv2D,
-    MaxPooling2D,
     AveragePooling2D,
     BatchNormalization,
-    LeakyReLU,
+    Conv2D,
+    Dense,
     Dropout,
     Flatten,
-    Dense,
+    LeakyReLU,
+    MaxPooling2D,
 )
 from keras.models import Model
 
@@ -17,11 +17,13 @@ def my_cnn(
     input_tensor,
     num_classes,
     dropout=0.2,
+    *,
     batchnorm=True,
     n_filters=16,
     avg_pool=False,
 ):
-    """_summary_
+    """
+    _summary_
 
     Args:
         input_tensor (_type_): _description_
@@ -35,40 +37,29 @@ def my_cnn(
 
     Returns:
         _type_: _description_
-    """
 
+    """
     #### Encoder
-    conv1 = Conv2D(n_filters * 2, (3, 3), activation="linear", padding="same")(
-        input_tensor
-    )
+    conv1 = Conv2D(n_filters * 2, (3, 3), activation="linear", padding="same")(input_tensor)
     conv1 = LeakyReLU(alpha=0.1)(conv1)
     if batchnorm:
         conv1 = BatchNormalization()(conv1)
 
-    if avg_pool:
-        pool1 = AveragePooling2D(pool_size=(2, 2))(conv1)  #
-    else:
-        pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
+    pool1 = AveragePooling2D(pool_size=(2, 2))(conv1) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv1)
     pool1 = Dropout(dropout)(pool1)
 
     conv2 = Conv2D(n_filters * 4, (3, 3), activation="linear", padding="same")(pool1)
     conv2 = LeakyReLU(alpha=0.1)(conv2)
     if batchnorm:
         conv2 = BatchNormalization()(conv2)
-    if avg_pool:
-        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)
-    else:
-        pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
+    pool2 = AveragePooling2D(pool_size=(2, 2))(conv2) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv2)
     pool2 = Dropout(dropout)(pool2)
 
     conv3 = Conv2D(n_filters * 8, (3, 3), activation="linear", padding="same")(pool2)
     conv3 = LeakyReLU(alpha=0.1)(conv3)
     if batchnorm:
         conv3 = BatchNormalization()(conv3)
-    if avg_pool:
-        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)  #
-    else:
-        pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
+    pool3 = AveragePooling2D(pool_size=(2, 2))(conv3) if avg_pool else MaxPooling2D(pool_size=(2, 2))(conv3)
     pool3 = Dropout(dropout)(pool3)
     encoder_out = Flatten()(pool3)
 

@@ -1,27 +1,28 @@
 """Betthauser, 2018: k-means clustering"""
 
 import time
-import numpy as np
 from typing import Any
+
 import matplotlib.pyplot as plt
+import numpy as np
 from scipy.spatial.distance import cdist
 
 
-def k_means_clustering(
-    data: np.ndarray[float], k: int, plot: bool = False
-) -> tuple[Any]:
-    """Betthauser, 2018: k-means clustering
+def k_means_clustering(data: np.ndarray[float], k: int, plot: bool = False) -> tuple[Any]:
+    """
+    Betthauser, 2018: k-means clustering
 
     Args:
         data (NDArray[np.float64]): unlabeled N x D, N samples of D-dim data
         k (int): number of clusters
+        plot (bool): whether to plot the clustering process
 
     Returns:
         NDArray[np.uint8]: array of new labels
+
     """
-    k_means = data[
-        np.random.permutation(data.shape[0])[:k], :
-    ]  # init with k datapoints
+    rng = np.random.default_rng()
+    k_means = data[rng.permutation(data.shape[0])[:k], :]  # init with k datapoints
 
     k_last = k_means
     iters = 0
@@ -29,15 +30,10 @@ def k_means_clustering(
         iters = iters + 1
 
         labels = np.array(
-            [
-                np.argmin(cdist(np.reshape(data[idx, :], (1, -1)), k_means))
-                for idx in range(data.shape[0])
-            ]
+            [np.argmin(cdist(np.reshape(data[idx, :], (1, -1)), k_means)) for idx in range(data.shape[0])]
         )
 
-        k_means = np.squeeze(
-            [np.mean(data[labels == lbl, :], axis=0) for lbl in range(k)]
-        )
+        k_means = np.squeeze([np.mean(data[labels == lbl, :], axis=0) for lbl in range(k)])
 
         if plot:
             plt.cla()
@@ -51,10 +47,9 @@ def k_means_clustering(
         k_last = k_means
 
 
-def _generate_data(
-    num_clusters: int, dim: int, size_clusters: int
-) -> np.ndarray[float]:
-    """generate synthetic data of gaussian clusters
+def _generate_data(num_clusters: int, dim: int, size_clusters: int) -> np.ndarray[float]:
+    """
+    Generate synthetic data of gaussian clusters
 
     Args:
         num_clusters (int): true number of clusters to generate
@@ -63,29 +58,27 @@ def _generate_data(
 
     Returns:
         np.ndarray[float]: synthetic data of n-dim gaussian clusters
+
     """
-    means = np.random.uniform(0, 40, size=(num_clusters, dim))
+    rng = np.random.default_rng()
+    means = rng.uniform(0, 40, size=(num_clusters, dim))
     covs = np.zeros((num_clusters, dim, dim))
 
     for c in range(num_clusters):
-        amat = np.random.randn(dim, dim)
+        amat = rng.standard_normal((dim, dim))
         amat = amat / amat.max()
         covs[c, :, :] = amat @ amat.T
 
-    rand_factor = np.random.uniform(0, 3, size=num_clusters)
+    rand_factor = rng.uniform(0, 3, size=num_clusters)
 
     data = [
-        np.random.multivariate_normal(
-            means[c, :], covs[c, :, :] * rand_factor[c], size=(size_clusters)
-        )
+        rng.multivariate_normal(means[c, :], covs[c, :, :] * rand_factor[c], size=(size_clusters))
         for c in range(num_clusters)
     ]
 
     data = np.vstack(data)
-    rand_idx = np.random.permutation(data.shape[0])
-    data = data[rand_idx, :]
-
-    return data
+    rand_idx = rng.permutation(data.shape[0])
+    return data[rand_idx, :]
 
 
 def main() -> None:
@@ -99,9 +92,7 @@ def main() -> None:
     labels, iters, k_means = k_means_clustering(data, k, plot=False)
 
     plt.scatter(data[:, 0], data[:, 1], c=labels, s=3)
-    plt.scatter(
-        k_means[:, 0], k_means[:, 1], c="r", s=20, marker="x", label="Cluster means"
-    )
+    plt.scatter(k_means[:, 0], k_means[:, 1], c="r", s=20, marker="x", label="Cluster means")
     plt.title(f"k-means clustering, converged in {iters} iterations.")
     plt.legend()
     plt.show()
@@ -110,4 +101,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")

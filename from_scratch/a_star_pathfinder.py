@@ -1,6 +1,4 @@
 import time
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 def a_star() -> None:

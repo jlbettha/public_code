@@ -4,8 +4,8 @@ Created on Thu Feb 18 20:08:25 2021
 @author: jlb235
 """
 
-import numpy as np
 import keras.backend as K
+import numpy as np
 import tensorflow as tf
 
 
@@ -18,7 +18,8 @@ def mse_derivative(ytrue, ypred):
 
 
 def vae_loss(mean, var) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         mean (_type_): _description_
@@ -26,15 +27,14 @@ def vae_loss(mean, var) -> float:
 
     Returns:
         float: _description_
+
     """
 
     def kl_loss(mean, log_var):
-        loss = -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
-        return loss
+        return -0.5 * K.sum(1 + log_var - K.square(mean) - K.exp(log_var), axis=1)
 
     def mse_loss(y_true, y_pred):
-        loss = K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
-        return loss
+        return K.mean(K.square(y_true - y_pred), axis=[1, 2, 3])
 
     def loss(y_true, y_pred):
         log_var = K.log(var)
@@ -46,24 +46,16 @@ def vae_loss(mean, var) -> float:
 
 
 def focal_loss(gamma: float = 2.0, alpha: float = 4.0) -> float:
-    """Focal loss for multi-classification
-    FL(p_t)=-alpha(1-p_t)^{gamma}ln(p_t)
-    Notice: y_pred is probability after softmax
-    gradient is d(Fl)/d(p_t) not d(Fl)/d(x) as described in paper
-    d(Fl)/d(p_t) * [p_t(1-p_t)] = d(Fl)/d(x)
-    Focal Loss for Dense Object Detection
-    https://arxiv.org/abs/1708.02002
+    """
+    Focal Loss
 
-    Arguments:
-        y_true {tensor} -- ground truth labels, shape of [batch_size, num_cls]
-        y_pred {tensor} -- model's output, shape of [batch_size, num_cls]
-
-    Keyword Arguments:
-        gamma {float} -- (default: {2.0})
-        alpha {float} -- (default: {4.0})
+    Args:
+        gamma (float, optional): _description_. Defaults to 2.0.
+        alpha (float, optional): _description_. Defaults to 4.0.
 
     Returns:
-        [tensor] -- loss.
+        float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -88,8 +80,10 @@ def binary_focal_loss(gamma: float = 2.0, alpha: float = 0.25) -> float:
     Binary form of focal loss.
     FL(p_t) = -alpha * (1 - p_t)**gamma * log(p_t)
     where p = sigmoid(x), p_t = p or 1 - p depending on if the label is 1 or 0, respectively.
+
     References:
         https://arxiv.org/pdf/1708.02002.pdf
+
     """
 
     def loss(y_true, y_pred):
@@ -102,8 +96,7 @@ def binary_focal_loss(gamma: float = 2.0, alpha: float = 0.25) -> float:
         cross_entropy = -K.log(p_t)
         weight = alpha_t * K.pow((1 - p_t), gamma)
         loss = weight * cross_entropy
-        loss = K.mean(K.sum(loss, axis=1))
-        return loss
+        return K.mean(K.sum(loss, axis=1))
 
     return loss
 
@@ -138,13 +131,15 @@ def categorical_focal_loss(alpha: float = 0.25, gamma: float = 2.0) -> float:
 
 
 def weighted_categorical_crossentropy(weights: np.ndarray[float]) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -152,40 +147,43 @@ def weighted_categorical_crossentropy(weights: np.ndarray[float]) -> float:
         epsilon = K.epsilon()
         y_pred = K.clip(y_pred, epsilon, 1 - epsilon)
         loss = y_true * K.log(y_pred) * K.variable(weights)
-        loss = -K.sum(loss, -1)
-        return loss
+        return -K.sum(loss, -1)
 
     return loss
 
 
 def weighted_categorical_crossentropy2(weights: np.ndarray[float]) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
-        Kweights = K.constant(weights)
+        k_weights = K.constant(weights)
         if not tf.is_tensor(y_pred):
             y_pred = K.constant(y_pred)
         y_true = K.cast(y_true, y_pred.dtype)
-        return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * Kweights, axis=-1)
+        return K.categorical_crossentropy(y_true, y_pred) * K.sum(y_true * k_weights, axis=-1)
 
     return loss
 
 
 def weighted_pixelwise_crossentropy(class_weights: np.ndarray[float]) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         class_weights (np.ndarray[float]): _description_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -197,10 +195,12 @@ def weighted_pixelwise_crossentropy(class_weights: np.ndarray[float]) -> float:
 
 
 def dice_loss() -> float:
-    """_summary_
+    """
+    _summary_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -214,13 +214,15 @@ def dice_loss() -> float:
 
 
 def dice_loss2(smooth: float = 1.0) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         smooth (float, optional): _description_. Defaults to 1.
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -233,7 +235,8 @@ def dice_loss2(smooth: float = 1.0) -> float:
 
 
 def tversky_loss(smooth: float = 1, alpha: float = 0.7) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         smooth (float, optional): _description_. Defaults to 1.
@@ -241,6 +244,7 @@ def tversky_loss(smooth: float = 1, alpha: float = 0.7) -> float:
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -255,7 +259,8 @@ def tversky_loss(smooth: float = 1, alpha: float = 0.7) -> float:
 
 
 def focal_tversky_loss(gamma: float = 2.0, smooth: float = 1.0, alpha: float = 0.7) -> float:
-    """_summary_
+    """
+    _summary_
 
     Args:
         gamma (float, optional): _description_. Defaults to 2.0.
@@ -264,6 +269,7 @@ def focal_tversky_loss(gamma: float = 2.0, smooth: float = 1.0, alpha: float = 0
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -279,10 +285,12 @@ def focal_tversky_loss(gamma: float = 2.0, smooth: float = 1.0, alpha: float = 0
 
 
 def ssim_loss() -> float:
-    """_summary_
+    """
+    _summary_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -295,10 +303,12 @@ def ssim_loss() -> float:
 
 
 def jacard_loss() -> float:
-    """Intersection-Over-Union (IoU), also known as the Jaccard loss
+    """
+    Intersection-Over-Union (IoU), also known as the Jaccard loss
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -313,10 +323,12 @@ def jacard_loss() -> float:
 
 
 def log_loss() -> float:
-    """_summary_
+    """
+    _summary_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
@@ -328,17 +340,18 @@ def log_loss() -> float:
 
 
 def weighted_bce() -> float:
-    """_summary_
+    """
+    _summary_
 
     Returns:
         float: _description_
+
     """
 
     def loss(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        weighted_bce = K.mean(bce * weights)
-        return weighted_bce
+        return K.mean(bce * weights)
 
     return loss
 
@@ -353,8 +366,7 @@ def unet3p_hybrid_loss() -> float:
     def weighted_bce(y_true, y_pred):
         weights = (y_true * 50.0) + 1.0
         bce = K.binary_crossentropy(y_true, y_pred)
-        weighted_bce = K.mean(bce * weights)
-        return weighted_bce
+        return K.mean(bce * weights)
 
     def jacard_val(y_true, y_pred):
         """
@@ -386,11 +398,11 @@ def unet3p_hybrid_loss() -> float:
         )
 
     def loss(y_true, y_pred):
-        WCE = weighted_bce(y_true, y_pred)
-        FTV = ftv_val(y_true, y_pred)
-        SSIM = ssim_val(y_true, y_pred)
-        JAC = jacard_val(y_true, y_pred)
-        return 0.6 * FTV + 0.1 * SSIM + 0.1 * JAC + 0.2 * WCE
+        wce = weighted_bce(y_true, y_pred)
+        ftv = ftv_val(y_true, y_pred)
+        ssim = ssim_val(y_true, y_pred)
+        jac = jacard_val(y_true, y_pred)
+        return 0.6 * ftv + 0.1 * ssim + 0.1 * jac + 0.2 * wce
 
     return loss
 

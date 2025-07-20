@@ -4,7 +4,9 @@ Created on Wed Dec  1 14:07:16 2021
 @author: jlb235
 """
 
-import os, time
+import os
+import time
+
 import cv2
 import numpy as np
 import pytesseract
@@ -15,7 +17,6 @@ def image_to_textfile(image_path: str, output_textfile_path: str) -> None:
     imgf = image_path.split("/")[-1]
 
     with Image.open(image_path) as image:
-
         img = np.array(image)
 
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
@@ -35,7 +36,7 @@ def image_to_textfile(image_path: str, output_textfile_path: str) -> None:
 
         # ensure white background
         fraction_white_pixels = np.count_nonzero(img) / np.prod(img.shape)
-        if fraction_white_pixels < 0.5:
+        if fraction_white_pixels < 0.5:  # noqa: PLR2004
             img = 255 - img
 
         # img = cv2.medianBlur(img, kernel_size)
@@ -46,8 +47,6 @@ def image_to_textfile(image_path: str, output_textfile_path: str) -> None:
 
     with open(os.path.join(output_textfile_path, txtf), "w") as txt_file:
         txt_file.write(text)
-
-    return None
 
 
 def image_directory_to_textfiles(image_path: str, output_textfile_path: str) -> None:
@@ -63,11 +62,8 @@ def image_directory_to_textfiles(image_path: str, output_textfile_path: str) -> 
     for imgf in image_files:
         image_to_textfile(os.path.join(image_path, imgf), output_textfile_path)
 
-    return None
-
 
 def main() -> None:
-
     ### Set folders and paths
     image_path = "C:/Users/jlbetthauser/OneDrive/Images/"
     text_path = "C:/Users/jlbetthauser/Documents/Code/Python/temp_code_playground/image2text_outputs/"
@@ -77,7 +73,7 @@ def main() -> None:
 
     image_directory_to_textfiles(image_path, text_path)
 
-    print("Image conversion took {:.6f} seconds".format(time.perf_counter() - t0))
+    print(f"Image conversion took {time.perf_counter() - t0:.6f} seconds")
 
 
 if __name__ == "__main__":

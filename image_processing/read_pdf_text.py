@@ -4,7 +4,9 @@ Created on Wed Dec  1 14:07:16 2021
 @author: jlb235
 """
 
-import os, time
+import os
+import time
+
 from pypdf import PdfReader
 
 
@@ -18,7 +20,7 @@ def main() -> None:
     pdf_files = [
         f
         for f in os.listdir(input_root)
-        if os.path.isfile(input_root + f) and (f.endswith(".pdf") or f.endswith(".PDF"))
+        if os.path.isfile(input_root + f) and (f.endswith((".pdf", ".PDF")))
     ]
     print(pdf_files)
 
@@ -37,7 +39,7 @@ def main() -> None:
         print(text)
 
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("PDF Read took {:.6f} seconds".format(time.perf_counter() - t0))
+    print(f"PDF Read took {time.perf_counter() - t0:.6f} seconds")
 
 
 if __name__ == "__main__":

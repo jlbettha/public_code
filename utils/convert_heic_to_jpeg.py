@@ -1,6 +1,7 @@
-from PIL import Image
-import pillow_heif
 import os
+
+import pillow_heif
+from PIL import Image
 
 src_dir = "c:\\dir1\\"
 dest_dir = "c:\\dir2\\"

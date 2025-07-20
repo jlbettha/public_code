@@ -5,39 +5,37 @@ Created on Mon Aug  7 17:07:57 2017
 """
 
 # LSTM for international airline passengers problem with regression framing
-import numpy as np
-import matplotlib.pyplot as plt
-from pandas import read_csv
 import math
+
+import matplotlib.pyplot as plt
+import numpy as np
+from keras.layers import LSTM, Dense
 from keras.models import Sequential
-from keras.layers import Dense
-from keras.layers import LSTM
-from sklearn.preprocessing import MinMaxScaler
+from pandas import read_csv
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
 
 
 # convert an array of values into a dataset matrix
 def create_dataset(dataset, look_back):
-    dataX, dataY = [], []
+    datax, datay = [], []
     for i in range(len(dataset) - look_back - 1):
         a = dataset[i : (i + look_back), 0]
-        dataX.append(a)
-        dataY.append(dataset[i + look_back, 0])
-    return np.array(dataX), np.array(dataY)
+        datax.append(a)
+        datay.append(dataset[i + look_back, 0])
+    return np.array(datax), np.array(datay)
 
 
 def main() -> None:
-    # fix random seed for reproducibility
-    np.random.seed(7)
 
     # load the dataset
     dataframe = read_csv(
-        "international-airline-passengers.csv",
+        "./data/international-airline-passengers.csv",
         usecols=[2],
         engine="python",
         skipfooter=3,
     )
-    dataset = dataframe.values
+    dataset = dataframe.to_numpy()
     dataset = dataset.astype(np.float32)
 
     # normalize the dataset
@@ -46,63 +44,62 @@ def main() -> None:
 
     # split into train and test sets
     train_size = int(len(dataset) * 0.6)
-    test_size = len(dataset) - train_size
     train, test = dataset[0:train_size, :], dataset[train_size : len(dataset), :]
 
     # reshape into X=t and Y=t+1
     look_back = 1
-    trainX, trainY = create_dataset(train, look_back)
-    testX, testY = create_dataset(test, look_back)
+    trainx, trainy = create_dataset(train, look_back)
+    testx, testy = create_dataset(test, look_back)
 
     # reshape input to be [samples, time steps, features]
-    trainX = np.reshape(trainX, (trainX.shape[0], 1, trainX.shape[1]))
-    testX = np.reshape(testX, (testX.shape[0], 1, testX.shape[1]))
+    trainx = np.reshape(trainx, (trainx.shape[0], 1, trainx.shape[1]))
+    testx = np.reshape(testx, (testx.shape[0], 1, testx.shape[1]))
 
     # create and fit the LSTM network
     model = Sequential()
     model.add(LSTM(32, input_shape=(1, look_back)))
     model.add(Dense(1))
     model.compile(loss="mean_squared_error", optimizer="adam")
-    model.fit(trainX, trainY, epochs=30, batch_size=1, verbose=2)
+    model.fit(trainx, trainy, epochs=30, batch_size=1, verbose=2)
 
     # make predictions
-    trainPredict = model.predict(trainX)
-    testPredict = model.predict(testX)
+    train_predict = model.predict(trainx)
+    test_predict = model.predict(testx)
 
     # invert predictions
-    trainPredict = scaler.inverse_transform(trainPredict)
-    trainY = scaler.inverse_transform([trainY])
-    testPredict = scaler.inverse_transform(testPredict)
-    testY = scaler.inverse_transform([testY])
+    train_predict = scaler.inverse_transform(train_predict)
+    trainy = scaler.inverse_transform([trainy])
+    test_predict = scaler.inverse_transform(test_predict)
+    testy = scaler.inverse_transform([testy])
     # ==============================================================================
     # trainY = numpy.reshape(trainY, (1,trainX.shape[0]))
     # testY = numpy.reshape(testY, (1,testX.shape[0]))
     # ==============================================================================
 
     # calculate root mean squared error
-    trainScore = math.sqrt(mean_squared_error(trainY[0], trainPredict[:, 0]))
-    print("Train Score: %.2f RMSE" % (trainScore))
-    testScore = math.sqrt(mean_squared_error(testY[0], testPredict[:, 0]))
-    print("Test Score: %.2f RMSE" % (testScore))
+    train_score = math.sqrt(mean_squared_error(trainy[0], train_predict[:, 0]))
+    print(f"Train Score: {train_score:.2f} RMSE")
+    test_score = math.sqrt(mean_squared_error(testy[0], test_predict[:, 0]))
+    print(f"Test Score: {test_score:.2f} RMSE")
 
     # shift train predictions for plotting
-    trainPredictPlot = np.empty_like(dataset)
-    trainPredictPlot[:, :] = np.nan
-    trainPredictPlot[look_back - 1 : len(trainPredict) + look_back - 1, :] = (
-        trainPredict
+    train_predict_plot = np.empty_like(dataset)
+    train_predict_plot[:, :] = np.nan
+    train_predict_plot[look_back - 1 : len(train_predict) + look_back - 1, :] = (
+        train_predict
     )
 
     # shift test predictions for plotting
-    testPredictPlot = np.empty_like(dataset)
-    testPredictPlot[:, :] = np.nan
-    testPredictPlot[
-        len(trainPredict) + (look_back * 2) + 1 - 1 : len(dataset) - 1 - 1, :
-    ] = testPredict
+    test_predict_plot = np.empty_like(dataset)
+    test_predict_plot[:, :] = np.nan
+    test_predict_plot[
+        len(train_predict) + (look_back * 2) + 1 - 1 : len(dataset) - 1 - 1, :
+    ] = test_predict
 
     # plot baseline and predictions
     plt.plot(scaler.inverse_transform(dataset))
-    plt.plot(trainPredictPlot)
-    plt.plot(testPredictPlot)
+    plt.plot(train_predict_plot)
+    plt.plot(test_predict_plot)
     plt.show()
 
 

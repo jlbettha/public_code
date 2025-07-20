@@ -1,26 +1,27 @@
 """_summary_"""
 
+from keras import regularizers
 from keras.layers import (
-    Conv2D,
-    MaxPooling2D,
     AveragePooling2D,
     BatchNormalization,
-    LeakyReLU,
-    Dropout,
+    Conv2D,
     Conv2DTranspose,
-    UpSampling2D,
-    Flatten,
-    Reshape,
     Dense,
+    Dropout,
+    Flatten,
+    LeakyReLU,
+    MaxPooling2D,
+    Reshape,
+    UpSampling2D,
 )
 from keras.models import Model
-from keras import regularizers
 
 
 def autoencoder(
     input_tensor, dropout=0.2, batchnorm=True, n_filters=16, avg_pool=False
 ):
-    """_summary_
+    """
+    _summary_
 
     Args:
         input_tensor (_type_): _description_
@@ -31,6 +32,7 @@ def autoencoder(
 
     Returns:
         _type_: _description_
+
     """
     ### Encoder
     conv1 = Conv2D(n_filters * 1, (3, 3), activation="linear", padding="same")(
@@ -40,7 +42,7 @@ def autoencoder(
     if batchnorm:
         conv1 = BatchNormalization()(conv1)
     if avg_pool:
-        pool1 = AveragePooling2D(pool_size=(2, 2))(conv1)  #
+        pool1 = AveragePooling2D(pool_size=(2, 2))(conv1)
     else:
         pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
     pool1 = Dropout(dropout)(pool1)
@@ -50,7 +52,7 @@ def autoencoder(
     if batchnorm:
         conv2 = BatchNormalization()(conv2)
     if avg_pool:
-        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)  #
+        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)
     else:
         pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
     pool2 = Dropout(dropout)(pool2)
@@ -66,7 +68,7 @@ def autoencoder(
     if batchnorm:
         conv3 = BatchNormalization()(conv3)
     if avg_pool:
-        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)  #
+        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)
     else:
         pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
     pool3 = Dropout(dropout)(pool3)
@@ -102,7 +104,8 @@ def autoencoder_feature_bottleneck(
     avg_pool=False,
     image_dim=256,
 ):
-    """_summary_
+    """
+    _summary_
 
     Args:
         input_tensor (_type_): _description_
@@ -114,8 +117,8 @@ def autoencoder_feature_bottleneck(
 
     Returns:
         _type_: _description_
-    """
 
+    """
     ### Encoder
     conv1 = Conv2D(n_filters * 4, (3, 3), activation="linear", padding="same")(
         input_tensor
@@ -134,7 +137,7 @@ def autoencoder_feature_bottleneck(
     if batchnorm:
         conv2 = BatchNormalization()(conv2)
     if avg_pool:
-        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)  #
+        pool2 = AveragePooling2D(pool_size=(2, 2))(conv2)
     else:
         pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
     pool2 = Dropout(dropout)(pool2)
@@ -144,7 +147,7 @@ def autoencoder_feature_bottleneck(
     if batchnorm:
         conv3 = BatchNormalization()(conv3)
     if avg_pool:
-        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)  #
+        pool3 = AveragePooling2D(pool_size=(2, 2))(conv3)
     else:
         pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
     pool3 = Dropout(dropout)(pool3)

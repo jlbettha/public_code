@@ -1,12 +1,12 @@
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_regression
+import numpy as np
+from sklearn.linear_model import Lasso, LinearRegression, Ridge
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import LinearRegression, Lasso, Ridge
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     """_summary_"""
     noise_level = 5
 
@@ -34,25 +34,26 @@ def main() -> None:
     )
 
     ## add noise
-    err = noise_level * np.random.randn(len(f_x))
+    rng = np.random.default_rng()
+    err = noise_level * rng.normal(size=len(f_x))
     f_x_er = f_x + err
 
     xs = xs[..., np.newaxis]
     # f_x = f_x[..., np.newaxis]
     step = 0.02
-    X_grid = np.arange(np.min(xs), np.max(xs) + step, step)
-    X_grid = X_grid.reshape(len(X_grid), 1)
+    x_grid = np.arange(np.min(xs), np.max(xs) + step, step)
+    x_grid = x_grid.reshape(len(x_grid), 1)
 
     poly_reg = PolynomialFeatures(degree=poly_degree + 1)
-    X_poly = poly_reg.fit_transform(xs)
+    x_poly = poly_reg.fit_transform(xs)
     lin_reg = LinearRegression()
-    lin_reg.fit(X_poly, f_x_er)
+    lin_reg.fit(x_poly, f_x_er)
 
     lin_reg_l2 = Ridge(alpha=0.2)
-    lin_reg_l2.fit(X_poly, f_x_er)
+    lin_reg_l2.fit(x_poly, f_x_er)
 
     lin_reg_l1 = Lasso(alpha=0.2, tol=1e-7, max_iter=10000)
-    lin_reg_l1.fit(X_poly, f_x_er)
+    lin_reg_l1.fit(x_poly, f_x_er)
 
     # plots
     grid = plt.GridSpec(3, 3, wspace=0.4, hspace=0.3)
@@ -61,27 +62,27 @@ def main() -> None:
     plt.subplot(grid[:, 0:2])
     ax = plt.gca()
     ax.scatter(xs, f_x_er, color="green", s=5)
-    ax.grid(True)
+    ax.grid(visible=True)
     ax.spines["left"].set_position("zero")
     ax.spines["right"].set_color("none")
     ax.spines["bottom"].set_position("zero")
     ax.spines["top"].set_color("none")
     ax.plot(xs, f_x, label="Truth", c="k")
     ax.plot(
-        X_grid,
-        lin_reg.predict(poly_reg.fit_transform(X_grid)),
+        x_grid,
+        lin_reg.predict(poly_reg.fit_transform(x_grid)),
         label="L2 Est.",
         c="c",
     )
     ax.plot(
-        X_grid,
-        lin_reg_l2.predict(poly_reg.fit_transform(X_grid)),
+        x_grid,
+        lin_reg_l2.predict(poly_reg.fit_transform(x_grid)),
         label="Ridge Est.",
         c="m",
     )
     ax.plot(
-        X_grid,
-        lin_reg_l1.predict(poly_reg.fit_transform(X_grid)),
+        x_grid,
+        lin_reg_l1.predict(poly_reg.fit_transform(x_grid)),
         label="Lasso Est.",
         c="orange",
     )
@@ -121,4 +122,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")

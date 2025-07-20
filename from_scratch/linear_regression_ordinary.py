@@ -1,21 +1,22 @@
 import time
-import numpy as np
+
 import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.datasets import make_regression
 
 
 def main() -> None:
     """_summary_"""
-    N = 80
+    n = 80
     noise_level = 15
     num_features = 1
     xs, ys_noisy = make_regression(
-        n_samples=N, n_features=num_features, noise=noise_level, random_state=42
+        n_samples=n, n_features=num_features, noise=noise_level, random_state=42
     )
     xs = np.squeeze(xs)
 
     ### let y = Xb --> b = X^-1 y = (X^T X)^-1 X^T y
-    x_mat = np.stack((xs, np.ones(N))).T
+    x_mat = np.stack((xs, np.ones(n))).T
     pseudo_inverse = (
         np.linalg.inv(x_mat.T @ x_mat) @ x_mat.T
     )  # full pinv calculation (X^T X)^-1 X^T

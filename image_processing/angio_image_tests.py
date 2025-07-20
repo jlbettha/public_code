@@ -1,4 +1,6 @@
-import matplotlib, os, copy
+import copy
+
+import matplotlib
 
 matplotlib.rcParams["image.cmap"] = "gray"
 import matplotlib.pyplot as plt
@@ -7,9 +9,9 @@ import pydicom
 from scipy import ndimage as ndi
 from skimage import feature
 from skimage.filters import (
+    frangi,
     meijering,
     sato,
-    frangi,
     sobel,
 )
 
@@ -18,13 +20,12 @@ def image_norm(img):
     return (img - np.min(img)) / (np.max(img) - np.min(img))
 
 
-def identity(image, **kwargs):
+def identity(image):
     """Return the original image, ignoring any kwargs."""
     return image
 
 
-def main() -> None:
-    pwd = os.getcwd()
+def main() -> None:  # noqa: PLR0915
     dicom_file = "./data/42211"
     dicom_data = pydicom.dcmread(dicom_file)
     print(dicom_data.pixel_array.shape)
@@ -50,17 +51,17 @@ def main() -> None:
     img_edgepot = 1 - img_edgepot
 
     ## Edge detection, types: canny, roberts, sobel, scharr
-    struct = ndi.generate_binary_structure(2, 2)
+    struct = ndi.generate_binary_structure(2, 2)  # noqa: F841
 
-    imgCannyEdges = feature.canny(img_smoothed, sigma=sigma).astype(float)
-    # imgCannyEdges = ndi.binary_opening(imgCannyEdges, structure=struct, iterations=5).astype(float)
-    # imgCannyEdges = ndi.binary_closing(imgCannyEdges, structure=None, iterations=2).astype(
+    img_canny_edges = feature.canny(img_smoothed, sigma=sigma).astype(float)
+    # img_canny_edges = ndi.binary_opening(img_canny_edges, structure=struct, iterations=5).astype(float)
+    # img_canny_edges = ndi.binary_closing(img_canny_edges, structure=None, iterations=2).astype(
     #     float
     # )
-    # imgCannyEdges = ndi.binary_erosion(imgCannyEdges, structure=None, iterations=1).astype(
+    # img_canny_edges = ndi.binary_erosion(img_canny_edges, structure=None, iterations=1).astype(
     #     float
     # )
-    # imgCannyEdges = ndi.binary_dilation(imgCannyEdges, structure=None, iterations=1).astype(
+    # img_canny_edges = ndi.binary_dilation(img_canny_edges, structure=None, iterations=1).astype(
     #     float
     # )
 
@@ -70,7 +71,7 @@ def main() -> None:
     img_sobel = image_norm(img_sobel)
 
     ## Composite image
-    imgComposite = image_norm(((1 - img_smoothed) * img_edgepot))
+    img_composite = image_norm((1 - img_smoothed) * img_edgepot)
 
     plt.figure(figsize=(9, 6))
     plt.subplot(2, 3, 1)
@@ -84,7 +85,7 @@ def main() -> None:
     plt.title("Edge Potential")
 
     plt.subplot(2, 3, 3)
-    plt.imshow(imgCannyEdges, aspect="auto")
+    plt.imshow(img_canny_edges, aspect="auto")
     plt.axis("off")
     plt.title("Canny Edges")
 
@@ -94,7 +95,7 @@ def main() -> None:
     plt.title("Sobel Edges")
 
     plt.subplot(2, 3, 5)
-    plt.imshow(imgComposite, aspect="auto")
+    plt.imshow(img_composite, aspect="auto")
     plt.axis("off")
     plt.title("Composite Image")
 
@@ -127,9 +128,7 @@ def main() -> None:
             result = image_norm(result)
             axes[i, j].imshow(result, aspect="auto")
             if i == 0:
-                axes[i, j].set_title(
-                    ["Smoothed\nImage", 'Sato\n"Tubeness"', 'Frangi\n"Vesselness"'][j]
-                )
+                axes[i, j].set_title(["Smoothed\nImage", 'Sato\n"Tubeness"', 'Frangi\n"Vesselness"'][j])
             if j == 0:
                 axes[i, j].set_ylabel(f"{black_ridges=}")
             axes[i, j].set_xticks([])

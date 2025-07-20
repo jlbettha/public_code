@@ -1,0 +1,98 @@
+line-length = 120
+indent-width = 4
+target-version = "py312"
+
+exclude = [ # Exclude a variety of commonly ignored directories.
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+lint.select = [
+    "ALL", # include all the rules, including new ones
+]
+
+lint.ignore = [
+    #### modules
+    "ANN", # flake8-annotations
+    "COM", # flake8-commas
+    "C90", # mccabe complexity
+    "DJ",  # django
+    "ERA", # eradicate
+    "EXE", # flake8-executable
+    "T10", # debugger
+    "T20", # print blocker
+    "TID", # flake8-tidy-imports
+    "TRY", # triceratops
+    "S",   # bandit
+    "PERF", # perf
+    "PTH", # force use Path. instead of os.path.
+
+
+    #### specific rules
+    "D100",   # ignore missing docs
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "D200",
+    "D203",    # incorrect-blank-line-before-class
+    "D205",
+    "D212",
+    "D400",
+    "D401",
+    "D415",
+    "E402",    # false positives for local imports
+    "E501",    # line too long
+    "FBT001",  # Boolean default positional argument in function definition
+    "FBT002",  # Boolean default positional argument in function definition
+    "ICN001",  # {name} should be imported as {asname}
+    "N812",    # Lowercase `backend` imported as non-lowercase `K`
+    "PLR0913", # Too many arguments in function definition (6 > 5)
+    "PLR2044", # Line with empty comment
+    "TRY003",  # external messages in exceptions are too verbose
+    "TD002",
+    "TD003",
+    "TD005",   # missing description after # TODO:
+    "FIX002",  # too verbose descriptions of todos
+]
+
+
+# [lint]
+lint.exclude = ["*.pyi", "*kalman_filter*", "my_model_builder*", "my_convolution_block*"]
+# dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"  # Allow unused variables when underscore-prefixed.
+
+
+[format]
+quote-style = "double" #  Like Black, use double quotes for strings.
+exclude = ["*.pyi"]
+indent-style = "space"  # indent with spaces, rather than tabs.
+skip-magic-trailing-comma = false  # respect magic trailing commas.
+line-ending = "auto"  # automatically detect the appropriate line ending.
+docstring-code-line-length = "dynamic"
