@@ -48,6 +48,7 @@ Thumbs.db
 
 
 # Unfinished folders
+temporal_sequential/
 tflow_models/
 torch_models/
 image_segmentation/

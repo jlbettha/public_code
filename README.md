@@ -1,83 +1,66 @@
-# public_code/ 
+# Repository: `public_code/`
 
-Ongoing refactoring project being populated with tools I've built over the years. Because
-I am unable to share many of my work products publicly, I'm taking time to implement certain
-shareable aspects using different contexts & data.
+Ongoing refactoring project for converting tools I've built over the years to python. Current repository iteration is focused on being JIT-friendly (via `numba`) where possible, formatted by __Ruff__ (using `.ruff.toml` and `.pre-commit-config.yaml`), and package-managed by Astral's amazing __uv__ tool.
 
 ## Contents
 
-### from_scratch/  
-
-Manual implementations for fundamental ML methods and concepts.
-
-### data_compression/
-
+### Data Compression: [`./data_compression/`](public_code/data_compression/)
 * DCT compression
-* k-means compression
-* k-medians compression
-* orthonormal compression
-
-### image_processing/
-
-* angio image/video tests
-* pdf 2 text
-* image 2 text
+* _k_-means compression
+* _k_-medians compression
+* Orthonormal compression
 
 
-### image_segmentation/
-
-* content in-progress
-
-
-### image_classification/
-
-* content in-progress
-
-
-### optical_flow/
-
-* horn-schunck opflow
-* lucas-kanade opflow
-* in-built keypoint tracker
-* angiogram videos showing tracking of coronary arterial blockage
+### From Scratch: [`./from_scratch/`](public_code/from_scratch/)
+* My manual implementations for many fundamental ML methods and concepts.
+* __Projection methods:__ Singular Value Decomposition (SVD), Principal Component Analysis (PCA), and Linear Discriminant Analysis (LDA)
+* __Clustering methods:__ _k_-means clustering, _k_-Gaussian mixture model, and hierarchical clustering
+* __Optimization:__ gradient descent and stochastic gradient descent
+* __Regression methods:__ linear regression with ordinary least squares and  regularized ($\ell_0$, $\ell_1$, and $\ell_2$), logitic regression, and polynomial regression with regularization ($\ell_0$, $\ell_1$, and $\ell_2$)
+* __Classification methods:__ decision trees, support vector machine (SVM) with Gaussian radial basis function, and artificial neural network from multi-layer perceptrons (MLP)
+* __Partitioning functions:__ unweighted and weighted options
+* __Sorting functions:__ insertion sort, selection sort, heap sort, tim sort, radix sort, bubble sort, and counting sort
+* __Search methods:__ A\*, beam, breadth-first, and depth-first search functions (not yet implemented)
 
 
-### my_modules/
-
-* image feature extraction tools
-* distance functions: point to point, point to distribution, and distr to distr
-* helper/util functions
-* a basic model builder kit (from scratch)
-* loss functions
-* information theory tools
-* image quality assessment tools
-* all modules are also in ./from_scratch/
+### Image Classification/: [`./image_classification/`](public_code/image_classification/)
+* __Future content:__ in-progress and unavailable
 
 
-### temporal_sequential/
-
-* mouse tracker: kalman and unscented kalman
-* audio, time-series prediction/forecast, ML + DSP
-* temporal conv net, lstm, etc (models may also be in /tflow_models/ or /torch_models/)
-* optical flow
-* activity recognition
+### Image_processing: [`./image_processing/`](public_code/image_processing/)
+* Angiogram imaging/video tests
+* Bi-lateral filter
 
 
-### tflow_models/  
-
-Tensorflow models and implementations
-
-Done:
-* cnn, lstm, autoencoder, unet, vae, gan, attn and multihead, transformer, vision transformer
-
-To-do:
-* vq vae
-* vq gan
-* beta vae (next up)
+### Image Segmentation: [`./image_segmentation/`](public_code/image_segmentation/)
+* __Future content:__ in-progress and unavailable
 
 
-### torch_models/
+### My personal modules and utilities: [`./my_modules/`](public_code/my_modules/)
+* Image feature extraction tools
+* Distance functions: point-to-point, point-to-distribution, and distribution-to-distribution
+* Helper/utility functions
+* Loss functions (Keras style)
+* Activation functions
+* Information Theory tools
+* Image Quality Assessment tools
+* Kalman Filter and Unscented Kalman Filter
+* All modules are also in [`./from_scratch/`](public_code/from_scratch/)
 
-* content in-progress
-* PyTorch versions of certain models found in /tflow_models
 
+### Optical Flow: [`./optical_flow/`](public_code/optical_flow/)
+* Horn-Schunck optical flow
+* Lucas-Kanade optical flow
+* OpenCV keypoint tracker
+* Angiogram videos showing tracking of coronary arterial blockage
+
+
+### Tensorflow model implementations: [`./tflow_models/`](public_code/tflow_models/)
+* __Future content:__ in-progress and unavailable
+* __Done:__ CNN, LSTM, Autoencoder, UNet, VAE, $\beta$-VAE, GAN, Atention and Multi-head Attention, Transformer, Vision Transformer (ViT)
+* __To-do:__ VQ VAE, VQ GAN
+
+
+### PyTorch model implementations: [`./torch_models/`](public_code/torch_models/)
+* __Future content:__ in-progress and unavailable
+* PyTorch implementations of the same models as in [`./tflow_models`](public_code/tflow_models/)
