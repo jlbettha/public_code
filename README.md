@@ -16,7 +16,7 @@ Ongoing refactoring project for converting tools I've built over the years to py
 * __Projection methods:__ Singular Value Decomposition (SVD), Principal Component Analysis (PCA), and Linear Discriminant Analysis (LDA)
 * __Clustering methods:__ _k_-means clustering, _k_-Gaussian mixture model, and hierarchical clustering
 * __Optimization:__ gradient descent and stochastic gradient descent
-* __Regression methods:__ linear regression with ordinary least squares and  regularized ($\ell_0$, $\ell_1$, and $\ell_2$), logitic regression, and polynomial regression with regularization ($\ell_0$, $\ell_1$, and $\ell_2$)
+* __Regression methods:__ linear regression with ordinary least squares and  regularized ($\ell_0$, $\ell_1$, and $\ell_2$), logistic regression, and polynomial regression with regularization ($\ell_0$, $\ell_1$, and $\ell_2$)
 * __Classification methods:__ decision trees, support vector machine (SVM) with Gaussian radial basis function, and artificial neural network from multi-layer perceptrons (MLP)
 * __Partitioning functions:__ unweighted and weighted options
 * __Sorting functions:__ insertion sort, selection sort, heap sort, tim sort, radix sort, bubble sort, and counting sort
