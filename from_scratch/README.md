@@ -6,12 +6,12 @@
 - linear regression
 - linear regr w/ L0, L1, and L2 (ridge) regularization
 - polynomial regression w/ L0, L1, and L2 regularization
-- logistic regression 
+- logistic regression
 
 - gradient descent
 - stochastic grad descent
 
-- svd 
+- svd
 - pca
 - lda
 - mlp, nn - with only functions
