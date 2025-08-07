@@ -1,12 +1,12 @@
 import cv2
-# import matplotlib
 
+# import matplotlib
 # matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import convolve2d
 from numba import njit
 from scipy import ndimage as ndi
+from scipy.signal import convolve2d
 from skimage import feature
 
 EPS = 1e-12
@@ -37,7 +37,8 @@ def image_gaussian_smooth(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
 
 
 def image_gradient(ix: np.ndarray, iy: np.ndarray) -> tuple[np.ndarray]:
-    """Compute image gradient an partial differentials [Ix, Iy] of image Ir.
+    """
+    Compute image gradient an partial differentials [Ix, Iy] of image Ir.
 
     Args:
         ix (np.ndarray): _description_
@@ -45,14 +46,16 @@ def image_gradient(ix: np.ndarray, iy: np.ndarray) -> tuple[np.ndarray]:
 
     Returns:
         tuple[np.ndarray]: _description_
+
     """
     grad_mag = np.sqrt(ix**2 + iy**2)
     grad_angle = np.atan2(iy, ix)
     return grad_mag, grad_angle
 
 
-def image_LoG(img: np.ndarray, hsize: int, sigma: float) -> np.ndarray:
-    """Compute laplacian of gaussian.
+def image_lap_of_gauss(img: np.ndarray, hsize: int, sigma: float) -> np.ndarray:
+    """
+    Compute laplacian of gaussian.
 
     Args:
         img (np.ndarray): _description_
@@ -61,6 +64,7 @@ def image_LoG(img: np.ndarray, hsize: int, sigma: float) -> np.ndarray:
 
     Returns:
         np.ndarray: _description_
+
     """
     if hsize is None:
         size = int(6 * sigma + 1) if sigma >= 1 else 7
@@ -74,28 +78,30 @@ def image_LoG(img: np.ndarray, hsize: int, sigma: float) -> np.ndarray:
     )
     h = -(1 / (np.pi * sigma**4)) * (1 - ((x**2 + y**2) / (2 * sigma**2))) * np.exp(-(x**2 + y**2) / (2 * sigma**2))
     h = h / np.sum(np.abs(h))
-    imf = convolve2d(img, h, mode="same", boundary="symm")
-    return imf
+    return convolve2d(img, h, mode="same", boundary="symm")
 
 
 def image_partials_sobel_conv(img: np.ndarray) -> np.ndarray:
-    """Convolve sobel x,y with image (edges)
+    """
+    Convolve sobel x,y with image (edges)
 
     Args:
         img (np.ndarray): _description_
 
     Returns:
         np.ndarray: _description_
+
     """
     sobelx = [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]
-    Ix = convolve2d(img, sobelx, mode="same", boundary="symm")
+    ix = convolve2d(img, sobelx, mode="same", boundary="symm")
     sobely = sobelx.T
-    Iy = convolve2d(img, sobely, mode="same", boundary="symm")
-    return Ix, Iy
+    iy = convolve2d(img, sobely, mode="same", boundary="symm")
+    return ix, iy
 
 
 def image_edge_potential(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
-    """Edge potential, e.g., for GVF and active contours.
+    """
+    Edge potential, e.g., for GVF and active contours.
 
     Args:
         img (np.ndarray[float]): _description_
@@ -111,7 +117,8 @@ def image_edge_potential(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
 
 
 def canny_edge_mask(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
-    """Highlight edges with canny edge detector.
+    """
+    Highlight edges with canny edge detector.
 
     Args:
         img (np.ndarray[float]): _description_
@@ -125,7 +132,7 @@ def canny_edge_mask(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
     return feature.canny(img_smoothed, sigma=sigma).astype(float)
 
 
-def image_edge_density(img: np.ndarray) -> np.ndarray:
+def image_edge_density(img: np.ndarray) -> np.ndarray:  # noqa: ARG001
     """
     Edge density. We define the edge density at pixel (j, k) to be the ratio of edges to
         pixels in a small neighborhood surrounding the pixel. The edge representation of the
@@ -151,6 +158,7 @@ def image_texturedness(img: np.ndarray, hsize: int = 3) -> np.ndarray:
 
     Args:
         img (np.ndarray[float]): input image (m x n)
+        hsize (int, optional): size of the neighborhood. Defaults to 3.
 
     Returns:
         np.ndarray[float]: image_texturedness (m x n)
@@ -196,6 +204,7 @@ def image_rank(img: np.ndarray, hsize: int = 3) -> np.ndarray:
 
     Args:
         img (np.ndarray[float]): input image (m x n)
+        hsize (int, optional): size of the neighborhood. Defaults to 3.
 
     Returns:
         np.ndarray[float]: image_rank (m x n)

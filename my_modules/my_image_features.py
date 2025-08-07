@@ -1,4 +1,3 @@
-import sys
 
 import cv2
 import matplotlib.pyplot as plt
@@ -257,16 +256,16 @@ def main() -> None:
     star = cv2.xfeatures2d.StarDetector_create()
 
     # FAST:
-    fast = cv2.FastFeatureDetector_create(threshold=50, nonmaxSuppression=True)
+    cv2.FastFeatureDetector_create(threshold=50, nonmaxSuppression=True)
 
     # BRIEF:
     brief = cv2.xfeatures2d.BriefDescriptorExtractor_create(bytes=16, use_orientation=False)
 
     # BRISK:
-    brisk = cv2.BRISK_create(thresh=30, octaves=0, patternScale=1.0)
+    cv2.BRISK_create(thresh=30, octaves=0, patternScale=1.0)
 
     # AKAZE:
-    akaze = cv2.AKAZE_create(
+    cv2.AKAZE_create(
         descriptor_type=cv2.AKAZE_DESCRIPTOR_MLDB,
         descriptor_size=0,
         descriptor_channels=3,
@@ -277,7 +276,7 @@ def main() -> None:
     )
 
     # FREAK:
-    freak = cv2.xfeatures2d.FREAK_create(
+    cv2.xfeatures2d.FREAK_create(
         orientationNormalized=True, scaleNormalized=True, patternScale=22.0, nOctaves=4
     )
 
