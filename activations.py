@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
 """Betthauser, J. 2025 - This module contains various activation functions and their derivatives."""
+
+# pylint: disable=C0301
+# pylint: disable=C0103
+# pylint: disable=C0116
+
+# from math import erf
 import time
 
 import numpy as np

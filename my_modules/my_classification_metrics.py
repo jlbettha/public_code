@@ -121,9 +121,13 @@ def main():
     metrics = classification_metrics(conf_mat)
 
     print("Confusion Matrix:\n", conf_mat)
+    print("Class-normalized Conf. Matrix:\n", conf_mat / np.sum(conf_mat, axis=1, keepdims=True))
     print("Classification Metrics:")
     for k, v in metrics.items():
-        print(f"   {k:<20}------ {v:<10.4f}")
+        if isinstance(v, np.integer):
+            print(f"   {k:<20}------ {v:>10d}")
+        else:
+            print(f"   {k:<20}------ {v:>10.4f}")
 
 
 if __name__ == "__main__":

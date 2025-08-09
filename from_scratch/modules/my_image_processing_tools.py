@@ -249,7 +249,7 @@ def image_color_histogram(image: np.ndarray, bins: int = 64) -> np.ndarray:
 def main():
     # rng = np.random.default_rng()
     # image = rng.integers(0, 256, (128, 128, 3), dtype=np.uint64)  # Random image
-    image = cv2.imread("my_modules/einstein.jpg", cv2.IMREAD_COLOR)  # Read the image
+    image = cv2.imread("einstein.jpg", cv2.IMREAD_COLOR)  # Read the image
     image_norm = normalize_ndarray(image[:, :, 0])
     image_gauss = image_gaussian_smooth(image[:, :, 0], sigma=2.0)
     img_edge_potential = normalize_ndarray(image_edge_potential(image_gauss))

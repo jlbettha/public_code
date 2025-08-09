@@ -1,4 +1,3 @@
-
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
@@ -236,7 +235,7 @@ def jh5_image_features(image: np.ndarray) -> np.ndarray:
 def main() -> None:
     # rng = np.random.default_rng()
     # image = rng.integers(0, 256, (128, 128, 3), dtype=np.uint64)  # Random image
-    image = cv2.imread("lena-headey.jpg", cv2.IMREAD_COLOR)  # Read the image
+    image = cv2.imread("image_data/lena-headey.jpg", cv2.IMREAD_COLOR)  # Read the image
     # image_norm = minmax_scaling(image[:, :, 0], max_val=1)
     # image_gauss = image_gaussian_smooth(image[:, :, 0], sigma=1.0)
     # img_colors = image_color_histogram(image)
@@ -276,9 +275,7 @@ def main() -> None:
     )
 
     # FREAK:
-    cv2.xfeatures2d.FREAK_create(
-        orientationNormalized=True, scaleNormalized=True, patternScale=22.0, nOctaves=4
-    )
+    cv2.xfeatures2d.FREAK_create(orientationNormalized=True, scaleNormalized=True, patternScale=22.0, nOctaves=4)
 
     keypts = star.detect(image, None)
     keypts, descriptors = brief.compute(image, keypts)
