@@ -288,9 +288,9 @@ def main() -> None:
         flags=cv2.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS,
     )
 
-    print("Keypoints:", keypts, "\n")
+    # print("Keypoints:", keypts, "\n")
 
-    print("Descriptors:", descriptors, "\n")
+    # print("Descriptors:", descriptors, "\n")
 
     plt.imshow(kp_image)
     plt.show()
