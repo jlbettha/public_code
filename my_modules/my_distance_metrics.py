@@ -20,9 +20,9 @@ def sum_squared_error(x: np.ndarray[float], y: np.ndarray[float]) -> float:
 @njit
 def compute_r2(x: np.ndarray[float], y: np.ndarray[float]) -> float:
     """Compute R2 between two vectors x and y."""
-    ss_residual = sum_squared_error(x, y)
-    ss_total = sum_squared_error(x, np.mean(x))
-    return 1 - (ss_residual / ss_total)
+    cov_xy = np.cov(x, y)[0, 1]
+    std_xy = np.std(x) * np.std(y)
+    return (cov_xy / std_xy) ** 2
 
 
 ####  Point-to-point distance functions  ##########

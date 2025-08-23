@@ -148,3 +148,11 @@ def false_positive_volume(pred: np.ndarray, target: np.ndarray) -> float:
     """
     np.sum(pred * (1 - target))
     return NotImplementedError("This function is not implemented yet.")
+
+
+def main():
+    pass
+
+
+if __name__ == "__main__":
+    main()

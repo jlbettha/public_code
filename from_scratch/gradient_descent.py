@@ -19,7 +19,8 @@ def ssd(arr1: np.ndarray[float], arr2: np.ndarray[float]) -> float:
         float: sum of squared differences
 
     """
-    return np.sum((arr1 - arr2) * (arr1 - arr2))
+    diff = arr1 - arr2
+    return np.sum(diff * diff)
 
 
 @njit

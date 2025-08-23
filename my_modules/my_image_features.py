@@ -113,7 +113,7 @@ def image_edge_density(image: np.ndarray) -> np.ndarray:
             img_ranks[i, j] = np.sum(local_region < pxl_val)
     return NotImplementedError("image_edge_density not implemented yet")
 
-
+@njit
 def image_texturedness(image: np.ndarray) -> np.ndarray:
     """
     Texturedness. We define the texturedness at pixel (j, k) to be the number of neighboring
