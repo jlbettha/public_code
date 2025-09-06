@@ -121,7 +121,7 @@ def main() -> None:
         c="k",
         s=15,
         zorder=1,
-        marker="o",
+        marker="x",
         label="Cluster medians",
     )
     plt.title(f"k-medians clustering, converged in {iters} iterations.")

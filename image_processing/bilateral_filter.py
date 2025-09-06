@@ -14,6 +14,7 @@ sigma_d and the intensity-domain standard deviation is
 given by sigma_r.
 """
 
+import os
 import time
 
 import cv2
@@ -173,7 +174,9 @@ def bilateral_filter_color(img: np.ndarray, sigma_d: float = 3, sigma_r: float =
 def main() -> None:
     """_summary_"""
     #  img = Image.open("lena_noisy.png")
-    img = Image.open("./data/31734105968_14c1b75765_o.jpg")
+    pwd = os.path.dirname(os.path.abspath(__file__))
+    print(pwd)
+    img = Image.open(os.path.join(pwd, "data", "31734105968_14c1b75765_o.jpg"))
     img = np.array(img)
     print(img.shape)
 

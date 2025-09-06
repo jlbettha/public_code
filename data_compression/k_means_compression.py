@@ -94,13 +94,13 @@ def k_means_compression(
 def main() -> None:
     """_summary_"""
     num_pts = 5000
-    k = num_pts // 25
+    k = num_pts // 50
     num_dims = 2
 
     # x = np.linspace(0, 12, num_pts)
-    rng = np.random.default_rng()
-    data = rng.uniform(0, 10, size=(num_pts, num_dims))
-    labels, iters, k_means = k_means_compression(data, k, plot=False, rng=rng)
+    # rng = np.random.default_rng()
+    # data = rng.uniform(0, 10, size=(num_pts, num_dims))
+    # labels, iters, k_means = k_means_compression(data, k, plot=False, rng=rng)
     rng = np.random.default_rng()
     data = rng.uniform(0, 10, size=(num_pts, num_dims))
     labels, iters, k_means = k_means_compression(data, k, plot=False)
@@ -115,7 +115,7 @@ def main() -> None:
         c="k",
         s=15,
         zorder=1,
-        marker="o",
+        marker="x",
         label="Cluster means",
     )
     plt.title(f"k-means clustering, converged in {iters} iterations.")
