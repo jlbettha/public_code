@@ -11,6 +11,8 @@ do_not_import = [
     "main",
     "decorator",
     "wrapper",
+    "step",
+    "loss_name",
 ]
 
 
@@ -69,7 +71,7 @@ def update_current_init_file(folder_path):
 
 
 def main():
-    path_to_module_folder = "/home/jlbet/code/my_utils1/"
+    path_to_module_folder = "/home/jlbet/code/public_code/utils2"
     create_init_file(path_to_module_folder)
     update_current_init_file(path_to_module_folder)
 

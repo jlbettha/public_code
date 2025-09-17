@@ -56,14 +56,16 @@ def _f1(tn_fp_fn_tp: np.ndarray) -> float:
 
 @njit
 def get_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
-    """Get confusion matrix.
+    """
+    Get confusion matrix.
 
     Args:
-        y_true (np.ndarray): _description_
-        y_pred (np.ndarray): _description_
+        y_true (np.ndarray): Ground truth (correct) labels.
+        y_pred (np.ndarray): Predicted labels, as returned by a classifier.
 
     Returns:
-        np.ndarray: _description_
+        np.ndarray: Confusion matrix.
+
     """
     y_true = y_true.ravel()
     y_pred = y_pred.ravel()
@@ -78,13 +80,15 @@ def get_confusion_matrix(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
 
 
 def get_classification_metrics(conf_mat: np.ndarray) -> dict:
-    """Get classification metrics from confusion matrix.
+    """
+    Get classification metrics from confusion matrix.
 
     Args:
-        conf_mat (np.ndarray): confusion matrix
+        conf_mat (np.ndarray): Confusion matrix
 
     Returns:
-        dict: classification metrics
+        dict: Classification metrics
+
     """
     tn_fp_fn_tp: np.ndarray = conf_mat.ravel()
 

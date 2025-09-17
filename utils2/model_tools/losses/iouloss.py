@@ -1,13 +1,13 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
 def binary_iou_loss(pred, target):
-    Iand = torch.sum(pred * target, dim=1)
-    Ior = torch.sum(pred, dim=1) + torch.sum(target, dim=1) - Iand
-    IoU = 1 - Iand.sum() / Ior.sum()
-    return IoU.sum()
+    iand = torch.sum(pred * target, dim=1)
+    ior = torch.sum(pred, dim=1) + torch.sum(target, dim=1) - iand
+    iou = 1 - iand.sum() / ior.sum()
+    return iou.sum()
 
 
 class IoULoss(nn.Module):

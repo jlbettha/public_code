@@ -8,13 +8,12 @@
 # "FAdam: Adam is a natural gradient optimizer using diagonal empirical Fisher information"
 # https://www.arxiv.org/abs/2405.12807
 
-from typing import Optional
 
 import torch
 from torch.optim.optimizer import Optimizer
 
 try:
-    from torchtitan.logging_utils import logger  # type: ignore
+    from torchtitan.logging_utils import logger  # type: ignore  # noqa: PGH003
 except ModuleNotFoundError:  # pragma: no cover, TorchTitan is optional
     import logging
 
@@ -22,12 +21,6 @@ except ModuleNotFoundError:  # pragma: no cover, TorchTitan is optional
 
 
 class FAdam(Optimizer):
-    """_summary_
-
-    Args:
-        Optimizer (_type_): _description_
-    """
-
     def __init__(
         self,
         params,
@@ -41,43 +34,29 @@ class FAdam(Optimizer):
         fim_dtype: torch.dtype = torch.float32,
         maximize: bool = False,
     ):
-        """
-        Args:
-            params (iterable): iterable of parameters to optimize or dicts defining
-                parameter groups
-            lr (float, optional): learning rate (default: 1e-3)
-            betas (Tuple[float, float], optional): coefficients used for computing
-                running averages of gradient and its square (default: (0.9, 0.999))
-            eps (float, optional): term added to the denominator to improve
-                numerical stability (default: 1e-15)
-            clip (float, optional): maximum norm of the gradient (default: 1.0)
-            p (float, optional): power for Fisher Information Matrix (default: 0.5)
-            maximize (bool, optional): maximize the params based on the objective,
-                instead of minimizing (default: False)
-
-            # Usage
-            TODO
-        """
-        defaults = dict(
-            lr=lr,
-            betas=betas,
-            weight_decay=weight_decay,
-            eps=eps,
-            momentum_dtype=momentum_dtype,
-            fim_dtype=fim_dtype,
-            clip=clip,
-            p=p,
-            maximize=maximize,
-        )
+        defaults = {
+            "lr": lr,
+            "betas": betas,
+            "weight_decay": weight_decay,
+            "eps": eps,
+            "momentum_dtype": momentum_dtype,
+            "fim_dtype": fim_dtype,
+            "clip": clip,
+            "p": p,
+            "maximize": maximize,
+        }
 
         super().__init__(params, defaults)
 
     @torch.no_grad()
-    def step(self, closure: Optional[callable] = None) -> Optional[float]:
-        """Performs a single optimization step.
+    def step(self, closure: callable | None = None) -> float | None:
+        """
+        Performs a single optimization step.
+
         Args:
             closure (callable, optional): A closure that reevaluates the model
                 and returns the loss.
+
         """
         loss = None
         if closure is not None:
@@ -101,7 +80,8 @@ class FAdam(Optimizer):
                     continue
 
                 if p.grad.is_sparse:
-                    raise RuntimeError("FAdam does not support sparse gradients")
+                    msg = "FAdam does not support sparse gradients"
+                    raise RuntimeError(msg)
 
                 state = self.state[p]
 

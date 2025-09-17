@@ -396,11 +396,13 @@ def joint_histogram_2d(patch1: np.ndarray[float], patch2: np.ndarray[float], bin
     Compute joint histogram of 2 image sections/patches.
 
     Args:
-        img1 (np.ndarray[float]): image patch 1
-        img2 (np.ndarray[float]): image patch 2
+        patch1 (np.ndarray[float]): image patch 1
+        patch2 (np.ndarray[float]): image patch 2
         bins (float): number of bins
+
     Returns:
         np.ndarray[float]: joint_histogram
+
     """
     patch1 = minmax_scaling(patch1, max_val=bins).astype(np.uint8)
     patch2 = minmax_scaling(patch2, max_val=bins).astype(np.uint8)

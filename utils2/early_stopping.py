@@ -12,7 +12,9 @@ from torch.nn.modules import Module
 
 
 class EarlyStopping:
-    def __init__(self, patience: int = 5, min_delta: float = 0.0, verbose: bool = False, filename: str = "es_checkpoint.pt"):
+    def __init__(
+        self, patience: int = 5, min_delta: float = 0.0, verbose: bool = False, filename: str = "es_checkpoint.pt"
+    ):
         self.filename = filename
         self.patience = patience
         self.min_delta = min_delta
@@ -54,7 +56,8 @@ class EarlyStopping:
 
 
 def main():
-    """Stop training early if desired.
+    """
+    Stop training early if desired.
 
     # early_stopping = EarlyStopping(patience=5, verbose=True)
     # num_epochs = 20
@@ -95,7 +98,6 @@ def main():
     # model.load_state_dict(torch.load(<model's file name>))
 
     """
-    pass
 
 
 if __name__ == "__main__":

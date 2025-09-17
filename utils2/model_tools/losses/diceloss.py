@@ -1,9 +1,9 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
+from torch import nn
 
 
-def binary_dice_loss(pred, target, valid_mask, smooth=1, exponent=2, **kwards):
+def binary_dice_loss(pred, target, valid_mask, smooth=1, exponent=2, **kwargs):  # noqa: ARG001
     assert pred.shape[0] == target.shape[0]
     pred = pred.reshape(pred.shape[0], -1)
     target = target.reshape(target.shape[0], -1)
@@ -35,7 +35,8 @@ def dice_loss(pred, target, valid_mask, smooth=1, exponent=2, class_weight=None,
 
 
 class DiceLoss(nn.Module):
-    r"""DiceLoss.
+    r"""
+    DiceLoss.
 
     This loss is proposed in `V-Net: Fully Convolutional Neural Networks for
     Volumetric Medical Image Segmentation <https://arxiv.org/abs/1606.04797>`_.
@@ -55,6 +56,7 @@ class DiceLoss(nn.Module):
         loss_name (str, optional): Name of the loss item. If you want this loss
             item to be included into the backward graph, `loss_` must be the
             prefix of the name. Defaults to 'loss_dice'.
+
     """
 
     def __init__(
@@ -65,7 +67,7 @@ class DiceLoss(nn.Module):
         loss_weight=1.0,
         ignore_index=255,
         loss_name="loss_dice",
-        **kwards,
+        **kwargs,  # noqa: ARG002
     ):
         super().__init__()
         self.smooth = smooth
@@ -75,7 +77,7 @@ class DiceLoss(nn.Module):
         self.ignore_index = ignore_index
         self._loss_name = loss_name
 
-    def forward(self, pred, target, avg_factor=None, reduction_override=None, **kwards):
+    def forward(self, pred, target, avg_factor=None, reduction_override=None, **kwargs):  # noqa: ARG002
         assert reduction_override in (None, "none", "mean", "sum")
         reduction = reduction_override if reduction_override else self.reduction
 
@@ -84,7 +86,7 @@ class DiceLoss(nn.Module):
         one_hot_target = F.one_hot(torch.clamp(target, 0, num_classes - 1), num_classes=num_classes)
         valid_mask = (target != self.ignore_index).long()
 
-        loss = self.loss_weight * dice_loss(
+        return self.loss_weight * dice_loss(
             pred,
             one_hot_target,
             valid_mask=valid_mask,
@@ -95,18 +97,20 @@ class DiceLoss(nn.Module):
             class_weight=None,
             ignore_index=self.ignore_index,
         )
-        return loss
 
     @property
     def loss_name(self):
-        """Loss Name.
+        """
+        Loss Name.
 
         This function must be implemented and will return the name of this
         loss function. This name will be used to combine different loss items
         by simple sum operation. In addition, if you want this loss item to be
         included into the backward graph, `loss_` must be the prefix of the
         name.
+
         Returns:
             str: The name of this loss item.
+
         """
         return self._loss_name

@@ -12,7 +12,9 @@ from torch.nn.modules import Module
 
 
 class EarlyStopping:
-    def __init__(self, patience: int = 5, min_delta: float = 0.0, verbose: bool = False, filename: str = "es_checkpoint.pt"):
+    def __init__(
+        self, patience: int = 5, min_delta: float = 0.0, verbose: bool = False, filename: str = "es_checkpoint.pt"
+    ):
         self.filename = filename
         self.patience = patience
         self.min_delta = min_delta

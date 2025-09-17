@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Betthauser, J. 2025 - This module contains various decorators that can be used to enhance the functionality of functions.
+"""
+Betthauser, J. 2025 - This module contains various decorators that can be used to enhance the functionality of functions.
 
 These decorators include rate limiting, debugging, type
 enforcement, retrying on failure, and recording execution time.
@@ -9,17 +10,24 @@ Note: by design, this program will crash at the end to demonstrate the rate_limi
 
 import random
 import time
-from functools import wraps
 from collections.abc import Callable
+from functools import wraps
+
+ERROR_PROBABILITY = 0.6
 
 
 # decorator
 def rate_limit(num_allowed_calls: int = 2, period_seconds: float = 5) -> Callable:
-    """Limit the number of calls to a function.
+    """
+    Limit the number of calls to a function.
 
     Args:
-        num_allowed_calls (int, optional): _description_. Defaults to 2.
-        period_seconds (float, optional): _description_. Defaults to 5.
+        num_allowed_calls (int, optional): The maximum number of allowed calls within the time period. Defaults to 2.
+        period_seconds (float, optional): The time period (in seconds) for which the call limit applies. Defaults to 5.
+
+    Returns:
+        Callable: A decorator that applies the rate limiting to the function.
+
     """
 
     def decorator(func: Callable) -> Callable:
@@ -31,7 +39,8 @@ def rate_limit(num_allowed_calls: int = 2, period_seconds: float = 5) -> Callabl
             now = time.time()
             last_calls = [call_time for call_time in last_calls if now - call_time < period_seconds]
             if len(last_calls) > num_allowed_calls:
-                raise RuntimeError(f"Rate limit for function '{func.__name__}()' exceeded.")
+                msg = f"Rate limit exceeded: {num_allowed_calls} calls in {period_seconds} seconds."
+                raise RuntimeError(msg)
             last_calls.append(now)
             return func(*args, **kwargs)
 
@@ -60,9 +69,10 @@ def type_enforce(*expected_types: tuple) -> Callable:
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
-            for arg, exp_type in zip(args, expected_types):
+            for arg, exp_type in zip(args, expected_types, strict=False):
                 if not isinstance(arg, exp_type):
-                    raise TypeError(f"Expected {exp_type} but got {type(arg)}")
+                    msg = f"Expected {exp_type} but got {type(arg)}"
+                    raise TypeError(msg)
             return func(*args, **kwargs)
 
         return wrapper
@@ -129,8 +139,9 @@ def _process_input(n):
 
 @retry(retries=10, exception=ValueError)
 def _error_prone_function():
-    if random.random() < 0.6:
-        raise ValueError("Error!!!!")
+    if random.random() < ERROR_PROBABILITY:
+        msg = "Random failure occurred."
+        raise ValueError(msg)
     print("Success")
 
 

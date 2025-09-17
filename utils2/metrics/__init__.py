@@ -1,8 +1,8 @@
-from .classification_metrics import get_confusion_matrix, get_classification_metrics
 from .distance_metrics import sum_squared_error, compute_r2, euclidean_dist, cosine_similarity, manhattan_dist, minkowski_dist, mahalinobis_dist, z_score, pearson_correlation, jensen_shannon_divergence, jensen_shannon_dist, wasserstein_dist, wasserstein_dist_gaussian1d, kl_divergence, kl_div_bidirectional, kl_div_gaussian1d, kl_div_gaussian1d_bidirectional, bhattacharyya_dist, fisher_dist, entropy, minmax_scaling, joint_histogram_2d, hist1d, mutual_info
-from .image_features import normalize_ndarray, image_gaussian_smooth, image_edge_potential, canny_edge_mask, image_color_histogram, image_edge_density, image_texturedness, image_gradient_magnitude, image_rank, build_jointhist_n, jh5_image_features
-from .image_quality_metrics import blurriness1, blurriness2, otsu_threshold, otsu_interclass_distance, estimate_variance, estimate_noise, signal_to_noise, laplacian_edge_strength, get_iqa_metrics
-from .information_metrics import minmax_scaling, entropy, information_gain, gini_index, joint_histogram_2d, mutual_info, kl_divergence, kl_div_bidirectional, jensen_shannon_divergence, jensen_shannon_dist
 from .segmentation_metrics import mask_volume, dice_similarity_coefficient, generalized_jaccard_index, criterion1, criterion2, get_label_min_pt, segment_center_of_mass, criterion3, haziness_abs_norm, get_segmentation_metrics
 from .segtools import get_outline_points_from_mask, get_mask_from_outline_points, apply_clahe, resample_volume, plot_3d_volume, segment_center_of_mass
-from .ssim3d import gaussian, create_window, create_window_3d, SSIM, SSIM3D, ssim, ssim3d
+from .information_metrics import minmax_scaling, entropy, information_gain, gini_index, joint_histogram_2d, mutual_info, kl_divergence, kl_div_bidirectional, jensen_shannon_divergence, jensen_shannon_dist
+from .image_quality_metrics import blurriness1, blurriness2, otsu_threshold, otsu_interclass_distance, estimate_variance, estimate_noise, signal_to_noise, laplacian_edge_strength, get_iqa_metrics
+from .image_features import normalize_ndarray, image_gaussian_smooth, image_edge_potential, canny_edge_mask, image_color_histogram, image_edge_density, image_texturedness, image_gradient_magnitude, image_rank, build_jointhist_n, jh5_image_features
+from .classification_metrics import get_confusion_matrix, get_classification_metrics
+from .ssim3d import SSIM, SSIM3D, ssim, ssim3d

@@ -1,8 +1,8 @@
 import numpy as np
-from skimage.measure import regionprops, regionprops_table, shannon_entropy  # noqa: F401
 
 # import matplotlib.pyplot as plt
 from numba import njit
+from skimage.measure import regionprops, regionprops_table, shannon_entropy  # noqa: F401
 
 EPS = 1e-5
 ETA = 1e-5
@@ -99,7 +99,8 @@ def criterion2(pred: np.ndarray, target: np.ndarray) -> bool:
 
 @njit
 def get_label_min_pt(img: np.ndarray, label: np.ndarray) -> tuple[int]:
-    """Get the index of the maximum value in the image where the label is non-zero.
+    """
+    Get the index of the maximum value in the image where the label is non-zero.
 
     Args:
         img (np.ndarray): _description_
@@ -107,6 +108,7 @@ def get_label_min_pt(img: np.ndarray, label: np.ndarray) -> tuple[int]:
 
     Returns:
         tuple[int]: _description_
+
     """
     masked_img = img * label
     return np.argmin(masked_img, axis=None)
@@ -114,13 +116,15 @@ def get_label_min_pt(img: np.ndarray, label: np.ndarray) -> tuple[int]:
 
 # @njit
 def segment_center_of_mass(label_mask: np.ndarray) -> np.ndarray:
-    """Calculate the center of mass of a label mask.
+    """
+    Calculate the center of mass of a label mask.
 
     Args:
         label_mask (np.ndarray): The label mask to calculate the center of mass from.
 
     Returns:
         tuple[int, int, int]: The coordinates of the center of mass.
+
     """
     # if not isinstance(label_mask, np.ndarray):
     #     raise TypeError("label_mask must be a numpy array")
@@ -178,19 +182,21 @@ def _hist1d(
 
 # @njit
 def haziness_abs_norm(label: np.ndarray, img: np.ndarray) -> float:
-    """Calculate the normalized histogram for background (B) and foreground (F). The metric is defined as the absolute
+    """
+    Calculate the normalized histogram for background (B) and foreground (F). The metric is defined as the absolute
     value of the B histogram minus  F histogram, divided by their sum (B_hist + F_hist).
 
 
     Args:
         label (np.ndarray): _description_
-        image (np.ndarray): _description_
+        img (np.ndarray): _description_
 
     Returns:
         float: _description_
+
     """
-    background_vals = img[np.where(label < 0.5)]
-    foreground_vals = img[np.where(label >= 0.5)]
+    background_vals = img[np.where(label < THRESHOLD)]
+    foreground_vals = img[np.where(label >= THRESHOLD)]
 
     mean_f = np.mean(foreground_vals) if foreground_vals.size > 0 else 0.0
     mean_b = np.mean(background_vals)
@@ -217,6 +223,7 @@ def get_segmentation_metrics(true: np.ndarray, pred: np.ndarray, img: np.ndarray
 
     Returns:
         dict: Dictionary containing segmentation metrics.
+
     """
     metrics = {}
     metrics["intensity_max"] = np.max(img) if img is not None else None

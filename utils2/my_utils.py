@@ -45,12 +45,6 @@ logger = logging.getLogger("FAdam")
 
 
 class FAdam(Optimizer):
-    """_summary_.
-
-    Args:
-        Optimizer (_type_): _description_
-    """
-
     def __init__(
         self,
         params,
@@ -64,27 +58,29 @@ class FAdam(Optimizer):
         fim_dtype: torch.dtype = torch.float32,
         maximize: bool = False,
     ):
-        defaults = dict(
-            lr=lr,
-            betas=betas,
-            weight_decay=weight_decay,
-            eps=eps,
-            momentum_dtype=momentum_dtype,
-            fim_dtype=fim_dtype,
-            clip=clip,
-            p=p,
-            maximize=maximize,
-        )
+        defaults = {
+            "lr": lr,
+            "betas": betas,
+            "weight_decay": weight_decay,
+            "eps": eps,
+            "momentum_dtype": momentum_dtype,
+            "fim_dtype": fim_dtype,
+            "clip": clip,
+            "p": p,
+            "maximize": maximize,
+        }
 
         super().__init__(params, defaults)
 
     @torch.no_grad()
     def step(self, closure: Callable | None = None) -> float | None:
-        """Perform a single optimization step.
+        """
+        Perform a single optimization step.
 
         Args:
             closure (Callable, optional): A closure that reevaluates the model
                 and returns the loss.
+
         """
         loss = None
         if closure is not None:
@@ -108,7 +104,8 @@ class FAdam(Optimizer):
                     continue
 
                 if p.grad.is_sparse:
-                    raise RuntimeError("FAdam does not support sparse gradients")
+                    msg = "FAdam does not support sparse gradients"
+                    raise RuntimeError(msg)
 
                 state = self.state[p]
 
@@ -182,8 +179,7 @@ class FAdam(Optimizer):
 # @njit
 def normalize_image(image):
     """Normalize the image to the range [0, 1]."""
-    image = (image - np.min(image)) / (np.max(image) - np.min(image))
-    return image
+    return (image - np.min(image)) / (np.max(image) - np.min(image))
 
 
 def plot_3d_volume(
@@ -226,19 +222,19 @@ def plot_3d_volume(
         surface_count=10,
     )
 
-    camera = dict(
-        up=dict(x=0.0, y=1, z=0.0),
+    camera = {
+        "up": {"x": 0.0, "y": 1, "z": 0.0},
         # eye=dict(x=1.25, y=1.25, z=1.25),
-        eye=dict(x=1.0, y=1, z=2),
-    )
+        "eye": {"x": 1.0, "y": 1, "z": 2},
+    }
 
     fig.update_layout(
         title=title,
-        scene=dict(xaxis_title="X", yaxis_title="Y", zaxis_title="Z", aspectmode="data"),
+        scene={"xaxis_title": "X", "yaxis_title": "Y", "zaxis_title": "Z", "aspectmode": "data"},
         showlegend=True,
         width=350,
         height=400,
-        margin=dict(l=0, r=0, b=0, t=30),
+        margin={"l": 0, "r": 0, "b": 0, "t": 30},
         scene_camera=camera,
         scene_xaxis_showticklabels=False,
         scene_yaxis_showticklabels=False,
@@ -254,15 +250,17 @@ def resample_volume(
     factor: int = 2,
     mode="area",
 ) -> np.ndarray:
-    """_summary_.
+    """
+    _summary_
 
     Args:
         volume (np.ndarray): _description_
         factor (int, optional): _description_. Defaults to 2.
-        output_shape (tuple, optional): _description_. Defaults to None.
+        mode (str, optional): _description_. Defaults to "area".
 
     Returns:
         np.ndarray: _description_
+
     """
     volume = np.squeeze(volume)
     output_shape = (
@@ -278,14 +276,17 @@ def resample_volume(
     return np.squeeze(data_dowmsample(Tensor(volume)).numpy()).astype(get_dtype)
 
 
-def get_transforms(data_mode="clean_test", downsample_factor: float = 1):
-    """_summary_.
+def get_transforms(data_mode="clean_test", downsample_factor: float = 1) -> Compose:
+    """
+    Get data transforms for training or inference.
 
     Args:
-        downsample_factor (float, optional): _description_. Defaults to 1.
+        data_mode (str, optional): Mode of data transformation. Options are 'random_augment_patch', 'random_augment',
+        downsample_factor (float, optional): Factor by which to downsample the input images. Defaults to 1.
 
     Returns:
-        _type_: _description_
+        Compose: A composition of data transforms.
+
     """
     match data_mode:
         case "random_augment_patch":
@@ -371,23 +372,29 @@ def get_transforms(data_mode="clean_test", downsample_factor: float = 1):
                 lazy=True,
             )
         case _:
-            raise ValueError(f"Unknown data mode: {data_mode}")
+            msg = f"Unknown data mode: {data_mode}"
+            raise ValueError(msg)
+    return None
 
 
 def segment_center_of_mass(label_mask: np.ndarray) -> np.ndarray:
-    """Calculate the center of mass of a label mask.
+    """
+    Calculate the center of mass of a label mask.
 
     Args:
         label_mask (np.ndarray): The label mask to calculate the center of mass from.
 
     Returns:
         tuple[int, int, int]: The coordinates of the center of mass.
+
     """
     if not isinstance(label_mask, np.ndarray):
-        raise TypeError("label_mask must be a numpy array")
+        msg = "label_mask must be a numpy array"
+        raise TypeError(msg)
 
     if label_mask.ndim not in {2, 3}:
-        raise ValueError("label_mask must be a 2D or 3D array")
+        msg = "label_mask must be a 2D or 3D array"
+        raise ValueError(msg)
 
     if np.sum(label_mask) == 0:
         return (0.5 * np.array(label_mask.shape)).astype(int)
@@ -396,7 +403,8 @@ def segment_center_of_mass(label_mask: np.ndarray) -> np.ndarray:
 
 
 def ez_dice_score(ypred, ytrue, threshold=0.5):
-    """Calculate the Dice score for binary segmentation.
+    """
+    Calculate the Dice score for binary segmentation.
 
     Args:
         ypred (np.ndarray): Predicted binary mask.
@@ -405,6 +413,7 @@ def ez_dice_score(ypred, ytrue, threshold=0.5):
 
     Returns:
         float: Dice score.
+
     """
     ypred = ypred.numpy() >= threshold
     ytrue = ytrue.numpy() >= threshold

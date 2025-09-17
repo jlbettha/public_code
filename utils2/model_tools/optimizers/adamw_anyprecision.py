@@ -17,19 +17,13 @@ from torch.optim.optimizer import Optimizer
 
 
 class AnyPrecisionAdamW(Optimizer):
-    """_summary_
-
-    Args:
-        Optimizer (_type_): _description_
-    """
-
     def __init__(
         self,
         params,
         lr=1e-3,
         betas=(0.9, 0.999),
         eps=1e-8,
-        eps2=1e-5,
+        eps2=1e-5,  # noqa: ARG002
         weight_decay=0.0,
         use_kahan_summation=False,
         use_numerical_guarantee: bool = True,
@@ -37,58 +31,30 @@ class AnyPrecisionAdamW(Optimizer):
         variance_dtype=torch.float16,
         compensation_buffer_dtype=torch.bfloat16,
     ):
-        """
-        Args:
-            params (iterable): iterable of parameters to optimize or dicts defining
-                parameter groups
-            lr (float, optional): learning rate (default: 1e-3)
-            betas (Tuple[float, float], optional): coefficients used for computing
-                running averages of gradient and its square (default: (0.9, 0.999))
-            eps (float, optional): term added to the denominator to improve
-                numerical stability (default: 1e-8)
-            weight_decay (float, optional): weight decay coefficient (default: 1e-2)
-
-            # Any Precision specific
-            use_kahan_summation = creates auxiliary buffer to ensure high precision
-            model param updates (default: False)
-            momentum_dtype = dtype for momentum  (default: BFloat32)
-            variance_dtype = dtype for uncentered variance (default: BFloat16)
-            compensation_buffer_dtype  = dtype for Kahan summation
-                                         buffer (default: BFloat16). Only used if
-                                         ``use_kahan_summation=True``.
-
-            # Usage
-            This optimizer implements optimizer states, and Kahan summation
-            for high precision updates, all in user controlled dtypes.
-            Defaults are variance in BF16, Momentum in FP32.
-            This can be run in FSDP mixed precision, amp, or full precision,
-            depending on what training pipeline you wish to work with.
-
-            Setting to use_kahan_summation = False, and changing momentum and
-            variance dtypes to FP32, reverts this to a standard AdamW optimizer.
-        """
-        defaults = dict(
-            lr=lr,
-            betas=betas,
-            eps=eps,
-            weight_decay=weight_decay,
-            use_kahan_summation=use_kahan_summation,
-            momentum_dtype=momentum_dtype,
-            variance_dtype=variance_dtype,
-            compensation_buffer_dtype=compensation_buffer_dtype,
-            use_numerical_guarantee=use_numerical_guarantee,
-        )
+        defaults = {
+            "lr": lr,
+            "betas": betas,
+            "eps": eps,
+            "weight_decay": weight_decay,
+            "use_kahan_summation": use_kahan_summation,
+            "momentum_dtype": momentum_dtype,
+            "variance_dtype": variance_dtype,
+            "compensation_buffer_dtype": compensation_buffer_dtype,
+            "use_numerical_guarantee": use_numerical_guarantee,
+        }
 
         super().__init__(params, defaults)
 
     @torch.no_grad()
-    def step(self, closure=None):
-        """Performs a single optimization step.
+    def step(self, closure=None):  # noqa: PLR0915
+        """
+        Performs a single optimization step.
+
         Args:
             closure (callable, optional): A closure that reevaluates the model
                 and returns the loss.
-        """
 
+        """
         if closure is not None:
             with torch.enable_grad():
                 # to fix linter, we do not keep the returned loss for use atm.
@@ -98,7 +64,7 @@ class AnyPrecisionAdamW(Optimizer):
             beta1, beta2 = group["betas"]
             lr = group["lr"]
             weight_decay = group["weight_decay"]
-            eps = group["eps"]
+            eps = group["eps"]  # noqa: F841
             use_kahan_summation = group["use_kahan_summation"]
 
             momentum_dtype = group["momentum_dtype"]
@@ -111,7 +77,8 @@ class AnyPrecisionAdamW(Optimizer):
                     continue
 
                 if p.grad.is_sparse:
-                    raise RuntimeError("AnyPrecisionAdamW does not support sparse gradients")
+                    msg = "AnyPrecisionAdamW does not support sparse gradients"
+                    raise RuntimeError(msg)
 
                 state = self.state[p]
 

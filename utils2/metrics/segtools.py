@@ -1,20 +1,11 @@
-import torch
-import numpy as np
-import onnxruntime as ort
-from PIL import Image
-import sys
-import os
 import cv2
-import matplotlib.pyplot as plt
-import torchvision.transforms as transforms
+import numpy as np
+import plotly.graph_objects as go
 import scipy.ndimage as ndi
 from skimage import measure
-from skimage.filters import gaussian
-from skimage.segmentation import active_contour
 from skimage.draw import polygon
 from torch import Tensor
 from torch.nn import Upsample
-import plotly.graph_objects as go
 
 
 def get_outline_points_from_mask(mask):
@@ -44,15 +35,17 @@ def resample_volume(
     output_shape: tuple[int] = (128, 128, 128),
     mode="area",
 ) -> np.ndarray:
-    """_summary_.
+    """
+    Resample a 3D volume to a new shape.
 
     Args:
-        volume (np.ndarray): _description_
-        output_shape (tuple, optional): _description_. Defaults to (128,128,128).
-        mode (str, optional): _description_. Defaults to "area".
+        volume (np.ndarray): The input 3D volume to resample.
+        output_shape (tuple, optional): The desired output shape. Defaults to (128,128,128).
+        mode (str, optional): The resampling mode. Defaults to "area".
 
     Returns:
-        np.ndarray: _description_
+        np.ndarray: The resampled 3D volume.
+
     """
     volume = np.squeeze(volume)
     get_dtype = volume.dtype
@@ -105,19 +98,19 @@ def plot_3d_volume(
         surface_count=10,
     )
 
-    camera = dict(
-        up=dict(x=0.0, y=1, z=0.0),
-        # eye=dict(x=1.25, y=1.25, z=1.25),
-        eye=dict(x=1.0, y=1, z=2),
-    )
+    camera = {
+        "up": {"x": 0.0, "y": 1, "z": 0.0},
+        # eye={"x": 1.25, "y": 1.25, "z": 1.25},
+        "eye": {"x": 1.0, "y": 1, "z": 2},
+    }
 
     fig.update_layout(
         title=title,
-        scene=dict(xaxis_title="X", yaxis_title="Y", zaxis_title="Z", aspectmode="data"),
+        scene={"xaxis_title": "X", "yaxis_title": "Y", "zaxis_title": "Z", "aspectmode": "data"},
         showlegend=True,
         width=350,
         height=400,
-        margin=dict(l=0, r=0, b=0, t=30),
+        margin={"l": 0, "r": 0, "b": 0, "t": 30},
         scene_camera=camera,
         scene_xaxis_showticklabels=False,
         scene_yaxis_showticklabels=False,
@@ -128,19 +121,23 @@ def plot_3d_volume(
 
 
 def segment_center_of_mass(label_mask: np.ndarray) -> np.ndarray:
-    """Calculate the center of mass of a label mask.
+    """
+    Calculate the center of mass of a label mask.
 
     Args:
         label_mask (np.ndarray): The label mask to calculate the center of mass from.
 
     Returns:
         tuple[int, int, int]: The coordinates of the center of mass.
+
     """
     if not isinstance(label_mask, np.ndarray):
-        raise TypeError("label_mask must be a numpy array")
+        msg = f"label_mask must be a numpy array, got {type(label_mask)}"
+        raise TypeError(msg)
 
     if label_mask.ndim not in {2, 3}:
-        raise ValueError("label_mask must be a 2D or 3D array")
+        msg = f"label_mask must be 2D or 3D, got {label_mask.ndim}D"
+        raise ValueError(msg)
 
     if np.sum(label_mask) == 0:
         return (0.5 * np.array(label_mask.shape)).astype(int)

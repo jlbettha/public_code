@@ -4,6 +4,9 @@ import os
 
 import yaml
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # TODO: Implement the function to build config files in the workspace.
 def build_config_files(workspace: str) -> None:
@@ -12,8 +15,10 @@ def build_config_files(workspace: str) -> None:
 
     Args:
         workspace (str): The path to the workspace directory.
+
     """
-    raise NotImplementedError("This function is not implemented yet.")
+    msg = "This function is not implemented yet."
+    raise NotImplementedError(msg)
 
 
 def read_yaml_file(filename: str) -> dict:
@@ -23,17 +28,16 @@ def read_yaml_file(filename: str) -> dict:
     out: contents of the .yaml file as a python dictionary
     """
     with open(filename, encoding="utf-8") as f:
-        out = yaml.safe_load(f)
-    return out
+        return yaml.safe_load(f)
 
 
 def load_config_from_checkpoint_folder(checkpoint_path: str) -> dict | None:
     """Load the configuration file from a checkpoint folder if it is present."""
-    if os.path.isfile(os.path.join(checkpoint_path, "config.json")):
-        logging.info("Local config file located.")
-        with open(os.path.join(checkpoint_path, "config.json"), encoding="utf-8") as f:
-            config = json.load(f)
-        return config
+    config_path = os.path.join(checkpoint_path, "config.json")
+    if os.path.isfile(config_path):
+        logger.info("Local config file located.")
+        with open(config_path, encoding="utf-8") as f:
+            return json.load(f)
     return None
 
 
@@ -44,6 +48,7 @@ def convert_yaml_to_json(yaml_file_path, json_file_path):
     Args:
         yaml_file_path (str): The path to the input YAML file.
         json_file_path (str): The path to the output JSON file.
+
     """
     try:
         with open(yaml_file_path, encoding="utf-8") as yaml_file:
@@ -72,6 +77,7 @@ def convert_json_to_yaml(json_file_path, yaml_file_path):
     Args:
         json_file_path (str): The path to the output JSON file.
         yaml_file_path (str): The path to the input YAML file.
+
     """
     try:
         with open(json_file_path, encoding="utf-8") as json_file:

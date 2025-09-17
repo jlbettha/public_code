@@ -1,15 +1,21 @@
-from metrics.ssim3d import ssim3d, SSIM3D, ssim, SSIM
-import torch
-from torch.autograd import Variable
-from torch import optim
 import cv2
 import numpy as np
+import torch
+from metrics import SSIM, SSIM3D, ssim, ssim3d
+from torch import optim
+from torch.autograd import Variable
+
+SSIM_WINDOW_SIZE_2D = 11  # Must be odd.
+SSIM_WINDOW_SIZE_3D = 7  # Must be odd.
+SSIM_SIGMA_2D = 1.5
+SSIM_SIGMA_3D = 1.5
+GOOD_SSIM = 0.95
 
 
 def example_2d():
-    npImg1 = cv2.imread("/home/joseph/workspace/jlb_dev/utils/einstein.jpg")
+    np_img1 = cv2.imread("/home/joseph/workspace/jlb_dev/utils/einstein.jpg")
 
-    img1 = torch.from_numpy(np.rollaxis(npImg1, 2)).float().unsqueeze(0) / 255.0
+    img1 = torch.from_numpy(np.rollaxis(np_img1, 2)).float().unsqueeze(0) / 255.0
     img2 = torch.rand(img1.size())
     print("img1 shape:", img1.shape)
 
@@ -25,9 +31,9 @@ def example_2d():
 
     ssim_loss = SSIM()
 
-    optimizer = optim.AdamW([img2], lr=1e-2)
+    optimizer = optim.AdamW([img2])
 
-    while ssim_value < 0.95:
+    while ssim_value < GOOD_SSIM:
         optimizer.zero_grad()
         ssim_out = -ssim_loss(img1, img2)
         ssim_value = -ssim_out.data  # [0]
@@ -56,9 +62,9 @@ def example_3d():
 
     ssim_loss = SSIM3D()
 
-    optimizer = optim.AdamW([img2], lr=1e-2)
+    optimizer = optim.AdamW([img2])
 
-    while ssim_value < 0.95:
+    while ssim_value < GOOD_SSIM:
         optimizer.zero_grad()
         ssim_out = -ssim_loss(img1, img2)
         ssim_value = -ssim_out.data  # [0]

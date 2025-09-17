@@ -18,11 +18,13 @@ class ModelArgs:
 
 
 def metadata_to_onnx_model(onnx_model_path: str, args: ModelArgs) -> None:
-    """_summary_.
+    """
+    _summary_.
 
     Args:
         onnx_model_path (str): _description_
         args (ModelArgs): _description_
+
     """
     onnx_model = onnx.load(onnx_model_path)
     m1 = onnx_model.metadata_props.add()
@@ -49,12 +51,14 @@ def metadata_to_onnx_model(onnx_model_path: str, args: ModelArgs) -> None:
 
 
 def validate_onnx_model(torch_model: torch.nn.Module, onnx_model_path: str, input_tensor: torch.torch.Tensor) -> None:
-    """_summary_.
+    """
+    Validate the ONNX model by comparing its output with the PyTorch model output.
 
     Args:
-        torch_model (torch.nn.Module): _description_
-        onnx_model_path (str): _description_
-        input_tensor (torch.torch.Tensor): _description_
+        torch_model (torch.nn.Module): The PyTorch model to compare against.
+        onnx_model_path (str): The file path to the ONNX model.
+        input_tensor (torch.torch.Tensor): The input tensor to the models.
+
     """
     torch_model.eval()  # Run inference with Pytorch model
     with torch.no_grad():
@@ -71,13 +75,15 @@ def validate_onnx_model(torch_model: torch.nn.Module, onnx_model_path: str, inpu
 
 
 def torch_to_onnx(torch_model: torch.nn.Module, onnx_model_path: str, input_tensor: torch.torch.Tensor) -> None:
-    """Export a Pytorch model to ONNX format, optimizes it for inference, and saves it to the specified path.
+    """
+    Export a Pytorch model to ONNX format, optimizes it for inference, and saves it to the specified path.
 
     Args:
-        torch_model (torch.nn.Module): _description_
-        onnx_model_path (str): _description_
-        input_tensor (torch.torch.Tensor): _description_
-        args (OnnxModelArgs): _description_
+        torch_model (torch.nn.Module): The PyTorch model to export.
+        onnx_model_path (str): The file path to save the ONNX model.
+        input_tensor (torch.torch.Tensor): The input tensor for the model.
+        args (OnnxModelArgs): The arguments for the ONNX model.
+
     """
     torch_model.eval()  # Set the model to evaluation mode
 
@@ -107,7 +113,8 @@ def onnx_to_torch(
     torch_model_path: str | None = None,
     input_tensor: torch.torch.Tensor = None,
 ) -> None:
-    """_summary_.
+    """
+    _summary_.
 
     Args:
         onnx_model (ort.InferenceSession): _description_
@@ -116,9 +123,11 @@ def onnx_to_torch(
 
     Raises:
         NotImplementedError: _description_
+
     """
     # TO-DO: Implement this function to convert ONNX model back to PyTorch
-    raise NotImplementedError("onnx_to_torch() function is not implemented yet.")
+    msg = "onnx_to_torch() function is not implemented yet."
+    raise NotImplementedError(msg)
 
 
 def onnx_to_tflow(
@@ -126,22 +135,26 @@ def onnx_to_tflow(
     tflow_model_path: str | None = None,
     input_tensor=None,
 ) -> None:
-    """_summary_.
+    """
+    Convert an ONNX model to a TensorFlow/Keras model.
 
     Args:
-        onnx_model (ort.InferenceSession): _description_
-        tflow_model_path (str): _description_
-        input_tensor (_type_): _description_
+        onnx_model (ort.InferenceSession): The ONNX model to convert.
+        tflow_model_path (str): The file path to save the TensorFlow model.
+        input_tensor (_type_): The input tensor for the model.
 
     Raises:
         NotImplementedError: _description_
+
     """
     # TO-DO: Implement this function to convert ONNX model back to Tensorflow/Keras
-    raise NotImplementedError("onnx_to_tflow() function is not implemented yet.")
+    msg = "onnx_to_tflow() function is not implemented yet."
+    raise NotImplementedError(msg)
 
 
 def tflow_to_onnx(tflow_model=None, onnx_model_path: str | None = None, input_tensor=None) -> None:
-    """_summary_.
+    """
+    Convert a TensorFlow/Keras model to ONNX format.
 
     Args:
         tflow_model (_type_): _description_
@@ -150,17 +163,18 @@ def tflow_to_onnx(tflow_model=None, onnx_model_path: str | None = None, input_te
 
     Raises:
         NotImplementedError: _description_
+
     """
     # TO-DO: Implement this function to convert Tensorflow/Keras model to ONNX
-    raise NotImplementedError("tflow_to_onnx() function is not implemented yet.")
+    msg = "tflow_to_onnx() function is not implemented yet."
+    raise NotImplementedError(msg)
 
 
 def predict_segmentation(tensor, onnx_model_path):
     ort_session = ort.InferenceSession(onnx_model_path)
     input_name = ort_session.get_inputs()[0].name
     input_data = tensor.numpy()
-    outputs = ort_session.run(None, {input_name: input_data})
-    return outputs
+    return ort_session.run(None, {input_name: input_data})
 
 
 def describe_onnx_model(onnx_model_path):

@@ -9,7 +9,9 @@ from torch.nn.modules.loss import _Loss
 
 
 class TvmfDiceLoss(_Loss):
-    def __init__(self, n_classes: int, kappa: int | None = None, softmax: bool = True, include_background: bool = False):
+    def __init__(
+        self, n_classes: int, kappa: int | None = None, softmax: bool = True, include_background: bool = False
+    ):
         super().__init__()
         self.n_classes = n_classes
         kappa_tensor = kappa * torch.ones(n_classes) if kappa is not None else torch.ones(n_classes)
@@ -33,9 +35,7 @@ class TvmfDiceLoss(_Loss):
         target = F.normalize(target, p=2, dim=[0, 1, 2])
         cosine = torch.sum(score * target)
         intersect = (1.0 + cosine).div(1.0 + (1.0 - cosine).mul(kappa)) - 1.0
-        loss = (1 - intersect) ** 2.0
-
-        return loss
+        return (1 - intersect) ** 2.0
 
     def forward(self, inputs, target):
         if self.softmax:
@@ -55,7 +55,9 @@ class TvmfDiceLoss(_Loss):
 
 
 class AdaptiveTvmfDiceLoss(_Loss):
-    def __init__(self, n_classes: int, kappa: int | None = None, softmax: bool = True, include_background: bool = False):
+    def __init__(
+        self, n_classes: int, kappa: int | None = None, softmax: bool = True, include_background: bool = False
+    ):
         super().__init__()
         self.n_classes = n_classes
         kappa_tensor = kappa * torch.ones(n_classes) if kappa is not None else torch.ones(n_classes)
@@ -79,9 +81,7 @@ class AdaptiveTvmfDiceLoss(_Loss):
         target = F.normalize(target, p=2, dim=[0, 1, 2])
         cosine = torch.sum(score * target)
         intersect = (1.0 + cosine).div(1.0 + (1.0 - cosine).mul(kappa)) - 1.0
-        loss = (1 - intersect) ** 2.0
-
-        return loss
+        return (1 - intersect) ** 2.0
 
     def forward(self, inputs, target):
         if self.softmax:

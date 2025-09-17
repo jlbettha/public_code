@@ -186,14 +186,15 @@ def image_rank(image: np.ndarray) -> np.ndarray:
     return img_ranks
 
 
-def build_jointhist_n(img_colors, img_edges, img_textures, img_grads, img_ranks, n=5) -> np.ndarray:
+def build_jointhist_n(img_colors, img_edges, img_textures, img_grads, img_ranks, n=5) -> np.ndarray:  # noqa: ARG001
     # img_colors
     # img_edges
     # img_textures
     # img_grads
     # img_ranks
     # n
-    return NotImplementedError("build_jointhist_n not implemented yet")
+    msg = "build_jointhist_n not implemented yet"
+    return NotImplementedError(msg)
 
 
 def jh5_image_features(image: np.ndarray) -> np.ndarray:
