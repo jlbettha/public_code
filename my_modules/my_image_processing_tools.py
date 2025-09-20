@@ -20,6 +20,31 @@ def normalize_ndarray(arr: np.ndarray, scale: float = 1.0) -> np.ndarray:
     return scale * (arr - min_val) / (np.max(arr) - min_val)
 
 
+def autocorrelate_image_fft(image: np.ndarray, subtract_mean: bool = True, full_fft: bool = True) -> np.ndarray:
+    if image is None:
+        msg = "Invalid image provided."
+        raise ValueError(msg)
+
+    if subtract_mean:
+        image = image - np.mean(image)
+
+    # Perform 2D autocorrelation using FFT
+    if full_fft:
+        m, n = image.shape
+        f1 = np.fft.fft2(image, s=(m * 2 - 1, n * 2 - 1))
+        result = np.fft.ifft2(f1 * np.conj(f1)).real
+        # result = np.fft.fftshift(result)[M // 2 : -M // 2 + 1, N // 2 : -N // 2 + 1]
+        result = np.roll(result, m // 2 - 1, axis=0)[:m, :]
+        result = np.roll(result, n // 2 - 1, axis=1)[:, :n]
+    else:
+        f1 = np.fft.fft2(image)
+        complexp = np.fft.ifft2(f1 * np.conj(f1))
+        result = np.fft.fftshift(complexp.real)
+
+    # Normalize result for visualization
+    return result / np.max(result)
+
+
 def image_gaussian_smooth(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
     """
     _summary_
