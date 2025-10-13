@@ -1,4 +1,5 @@
 import pathlib
+import time
 
 import cv2
 import matplotlib.pyplot as plt
@@ -60,15 +61,20 @@ def main():
     img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     img = minmax_scaling(img, max_val=1.0)
 
+    t1 = time.perf_counter()
     result_norm = autocorrelate_image_scipy(img, subtract_mean=True)
+    t2 = time.perf_counter()
     result_norm_fft = autocorrelate_image_fft(img, subtract_mean=True)
+    t3 = time.perf_counter()
 
     abs_diff = np.abs(result_norm_fft - result_norm)
     print(f"Max difference (FFT vs SciPy): {np.max(abs_diff)}")
     print(f"Total difference (FFT vs SciPy): {np.sum(abs_diff)}")
     if np.allclose(result_norm, result_norm_fft, atol=1e-7):
-        print("Results from FFT and SciPy are a very close match! FFT is ~100x faster.")
-
+        print("Results from FFT and SciPy are a very close match!")
+    print(f"Time taken (SciPy): {t2 - t1:.4f} seconds")
+    print(f"Time taken (FFT): {t3 - t2:.4f} seconds")
+    print(f"Speedup (FFT vs SciPy): {(t2 - t1) / (t3 - t2):.2f}x")
     # Save or display result(s)
     plt.figure(figsize=(12, 12))
     plt.subplot(2, 2, 1)

@@ -11,7 +11,7 @@ from numba import njit
 
 # from scipy.special import erf
 
-# TODO: there is a bug, also extend functionality to multiclass
+EPS = 1e-12
 
 
 @njit
@@ -26,7 +26,6 @@ def _sigmoid(x: float | np.ndarray[float]) -> float:
         float: sigmoid(x)
 
     """
-    # sigx = (1 + np.exp(x)) ** -1
     return 1 / (1 + np.exp(-x))
 
 
@@ -44,8 +43,8 @@ def _d_sigmoid_dz(z):
 def logistic_regression(
     xs: np.ndarray[float],
     ys: np.ndarray[float],
-    learning_rate: float = 0.1,
-    tolerance: float = 1e-6,
+    learning_rate: float = 0.01,
+    tolerance: float = 1e-7,
     plot: bool = False,
 ) -> Any:
     """
@@ -67,15 +66,14 @@ def logistic_regression(
 
     # init conditions
     rng = np.random.default_rng()
-    wts = rng.standard_normal(dim)
+    wts = rng.normal(size=dim)
     wx_b = np.dot(xs, wts)
     sigmoid_all_wx_b = _sigmoid(wx_b)
 
     pointwise_costs1 = ys * np.log(sigmoid_all_wx_b)
-    pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b)
-
+    pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b + EPS)
     j_cost = -np.sum(pointwise_costs1 + pointwise_costs2) / num_pts
-    ll_last = j_cost
+
     likelihoods = []
     iters = 0
     while True:
@@ -83,19 +81,27 @@ def logistic_regression(
 
         # update weights with gradient descent,  rule: d_loss/dwt_j = (1/N)*SUM[sigmoid(x_i)-y_i)*x_j_i]
         # z = np.dot(xs.T, sigmoid_all_wx_b - ys)
+        # wts = wts - learning_rate * _d_sigmoid_dz(sigmoid_all_wx_b - ys) / num_pts
         wts = wts - learning_rate * np.dot(xs.T, sigmoid_all_wx_b - ys) / num_pts
 
         wx_b = np.dot(xs, wts)
         sigmoid_all_wx_b = _sigmoid(wx_b)
 
         pointwise_costs1 = ys * np.log(sigmoid_all_wx_b)
-        pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b)
+        pointwise_costs2 = (1 - ys) * np.log(1 - sigmoid_all_wx_b + EPS)
 
+        ll_last = j_cost
         j_cost = -np.sum(pointwise_costs1 + pointwise_costs2) / num_pts
+        likelihoods.append(j_cost)
+
+        # return, if required.
+        if np.abs(j_cost - ll_last) < tolerance:
+            print(f"logistic regression took {iters} iterations.")
+            return wts, likelihoods
 
         if iters % 50000 == 0:
             print(
-                f"Iter: {iters} -- J_cost: {j_cost:.4f}, weights: {wts}",
+                f"Iter: {iters} -- J_cost: {j_cost:.4f}, weights: {wts}, diff: {np.abs(j_cost - ll_last)}",
                 flush=True,
             )
 
@@ -113,51 +119,46 @@ def logistic_regression(
             plt.legend(loc=4, bbox_to_anchor=(1, 0.1))
             plt.pause(0.001)
 
-        # return, if required.
-        if np.abs(j_cost - ll_last) < tolerance:
-            print(f"logistic regression took {iters} iterations.")
-            return wts, likelihoods
-
-        ll_last = j_cost
 
 
 @njit
-def normal_cdf_at_x(x: float, mean: float, variance: float) -> float:
+def normal_cdf_at_x(x: float, mean: float, sigma: float) -> float:
     """
     Normal distr. integral, cdf at x | mean, variance
 
     Args:
         x (float): value at which to evaluate the CDF
         mean (float): sample mean
-        variance (float): sample variance
+        sigma (float): sample variance
 
     Returns:
         float: cdf at x | mean, variance
 
     """
-    return (1 + math.erf((x - mean) / np.sqrt(2 * variance))) / 2
+    return (1 + math.erf((x - mean) / (sigma * np.sqrt(2)))) / 2
 
 
 def main() -> None:
     """_summary_"""
     # generate data
-    num_points = 100
-    xrange = [5, 80]
+    num_points = 200
+    xrange = [5, 95]
     mid_range = (xrange[0] + xrange[1]) / 2
     rng = np.random.default_rng()
-    mean = rng.uniform(0.75 * mid_range, 1.25 * mid_range)
-    variance = rng.uniform(0.1 * (2 * mid_range), 0.30 * (2 * mid_range))
+    mean = rng.uniform(0.7 * mid_range, 1.3 * mid_range)
+    stddev = rng.uniform(4, 9)
     xs = np.linspace(xrange[0], xrange[1], num_points)
 
     ## ground truth CDF(xs)
-    prob_xs_equal_1 = list(map(normal_cdf_at_x, xs, repeat(mean), repeat(variance)))
+    prob_xs_equal_1 = np.array(list(map(normal_cdf_at_x, xs, repeat(mean), repeat(stddev))))
 
     ## generate labels from noise + probabilities
-    err = 0.00005
-    random_prob_error = err * rng.normal(size=num_points)
-    prob_xs_plus_err = np.array(prob_xs_equal_1) + random_prob_error
-    prob_xs_plus_err[prob_xs_plus_err > 1] = 1.0
-    prob_xs_plus_err[prob_xs_plus_err < 0] = 0.0
+    min_err = 0.02  # 000001
+    random_prob_error = min_err * rng.uniform(size=num_points)
+
+    prob_xs_plus_err = prob_xs_equal_1 + random_prob_error
+    # prob_xs_plus_err = (1 - 2 * min_err) * prob_xs_plus_err / np.max(prob_xs_plus_err) + min_err
+    prob_xs_plus_err = (prob_xs_equal_1 - prob_xs_equal_1.min()) / (prob_xs_equal_1.max() - prob_xs_equal_1.min())
 
     labels = np.array(
         [
@@ -169,17 +170,19 @@ def main() -> None:
     )
 
     xs = np.stack((xs, np.ones(num_points))).T
-    weights, _ = logistic_regression(
-        xs, labels, learning_rate=0.003, tolerance=1e-8, plot=False
-    )
+
+    weights, _ = logistic_regression(xs, labels, learning_rate=0.003, tolerance=5e-8, plot=False)
 
     est_prob_xs = _sigmoid(np.dot(xs, weights))
 
     one_over_p = weights[0]
     t_over_p = -weights[1]
 
+    actual_mean = mean
+    actual_std = stddev
+
     est_mean = t_over_p * (1 / one_over_p)
-    est_var = (np.pi**2 * (1 / one_over_p) ** 2) / 3
+    est_std = np.sqrt((np.pi**2 * (1 / one_over_p) ** 2) / 3)
 
     # plot results
     plt.figure(figsize=(8, 5))
@@ -189,17 +192,17 @@ def main() -> None:
         c=labels,
         cmap="Spectral",
         s=8,
-        label=f"Synthetic labels, error: \u00b1{err:.2f}",
+        label=f"Synthetic labels, min. error: \u00b1{min_err:.2f}",
     )
     plt.plot(
         xs[:, 0],
         prob_xs_equal_1,
-        label=f"Ground Truth, mean: {mean:.1f}, variance: {variance:.1f}",
+        label=f"Ground Truth, mean: {actual_mean:.1f}, std dev.: {actual_std:.1f}",
     )
     plt.plot(
         xs[:, 0],
         est_prob_xs,
-        label=f"Estimate, mean: {est_mean:.1f}, variance: {est_var:.1f}",
+        label=f"Estimate, mean: {est_mean:.1f}, std dev.: {est_std:.1f}",
     )
     plt.legend(loc=4, bbox_to_anchor=(1, 0.1))
     plt.show()
