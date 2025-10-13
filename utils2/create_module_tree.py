@@ -23,7 +23,7 @@ def create_init_file(path):
 
 def get_file_function_names(file_path):
     function_names = []
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         lines = file.readlines()
         for line in lines:
             line = line.strip()

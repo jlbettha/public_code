@@ -1,5 +1,6 @@
-import os
 import asyncio
+import os
+
 from playwright.async_api import async_playwright
 
 
@@ -33,7 +34,7 @@ def main():
                 html_file_path = os.path.join(dir, file)
                 pdf_file_path = os.path.join(dir, file.replace(".html", ".pdf"))
                 print(f"Converting {html_file_path} to {pdf_file_path}")
-                with open(html_file_path, "r", encoding="utf-8") as f:
+                with open(html_file_path, encoding="utf-8") as f:
                     html_content = f.read()
                 try:
                     asyncio.run(html_to_pdf(html_content, pdf_file_path))

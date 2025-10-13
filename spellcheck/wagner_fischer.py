@@ -1,9 +1,9 @@
-import time
 import os
+import time
 
 
 def load_dictionary(file_path):
-    with open(file_path, "r") as file:
+    with open(file_path) as file:
         return [line.strip() for line in file]
 
 

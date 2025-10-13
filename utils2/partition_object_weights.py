@@ -3,13 +3,15 @@
 # import time
 import numpy as np
 import pandas as pd
+
 # import matplotlib.pyplot as plt
 
 np.random.seed(42)
 
 
 def simple_partition(wts: np.ndarray[float], ids: np.ndarray[float], k: int = 2) -> list[list[float]]:
-    """Partition array s into k approx equal sum groups
+    """
+    Partition array s into k approx equal sum groups
 
     Args:
         s (np.ndarray): array of numbers
@@ -20,12 +22,13 @@ def simple_partition(wts: np.ndarray[float], ids: np.ndarray[float], k: int = 2)
 
     Returns:
         list[list[float]]: list of k partition subsets
+
     """
     n = len(wts)
     if n < k:
         raise ValueError(f"To partition into {k} groups, the number array must have at least {k} values.")
 
-    wts, ids = (list(x) for x in zip(*sorted(zip(wts, ids), key=lambda pair: pair[0], reverse=True)))
+    wts, ids = (list(x) for x in zip(*sorted(zip(wts, ids, strict=False), key=lambda pair: pair[0], reverse=True), strict=False))
 
     groups: list[tuple[np.float64, str]] = [[tuple([wts[i], ids[i]])] for i in range(k)]
     # print(groups)
