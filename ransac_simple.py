@@ -92,7 +92,7 @@ def main():
     regressor.fit(x, y)
 
     plt.style.use("seaborn-v0_8-whitegrid")
-    fig, ax = plt.subplots(1, 1)
+    _, ax = plt.subplots(1, 1)
     ax.set_box_aspect(1)
 
     plt.scatter(x, y)

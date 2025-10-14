@@ -113,8 +113,8 @@ def main() -> None:
     ndim = 2
 
     # xs, labels = make_circles(n_samples=num_points, shuffle=True, noise=0.1, random_state=42)
-    # xs, labels = make_moons(n_samples=num_points, shuffle=True, noise=0.1, random_state=42)
-    xs, labels = make_multilabel_classification(n_samples=num_points, n_features=ndim, n_classes=1, random_state=1123)
+    xs, labels = make_moons(n_samples=num_points, shuffle=True, noise=0.1, random_state=42)
+    # xs, labels = make_multilabel_classification(n_samples=num_points, n_features=ndim, n_classes=1, random_state=1123)
 
     xs = np.concatenate((xs, np.ones((num_points, 1))), axis=1)
 

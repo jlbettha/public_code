@@ -38,10 +38,9 @@ def main():
                     html_content = f.read()
                 try:
                     asyncio.run(html_to_pdf(html_content, pdf_file_path))
-                except Exception as e:
+                except TimeoutError as e:
                     msg = f"Error converting {file} to PDF: {e}"
                     print(msg)
-                    exit(1)
 
 
 if __name__ == "__main__":

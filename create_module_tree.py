@@ -1,3 +1,4 @@
+import json
 import os
 
 do_not_import = [
@@ -19,7 +20,7 @@ do_not_import = [
 def create_init_file(path):
     init_file_path = os.path.join(path, "__init__.py")
     open(init_file_path, "w").close()
-    print(f"Created {init_file_path}")
+    # print(f"Created {init_file_path}")
     return init_file_path
 
 
@@ -28,9 +29,9 @@ def get_file_function_names(file_path):
     with open(file_path) as file:
         lines = file.readlines()
         for line in lines:
-            line = line.strip()
-            if line.startswith("def "):
-                func_name = line.split("(")[0][4:]  # Extract function name
+            line = line.strip()  # noqa: PLW2901
+            if line.startswith(("def ", "async def ")):
+                func_name = line.split("(")[0][4:] if line.startswith("def ") else line.split("(")[0][10:]
                 if func_name.startswith("_") or func_name in do_not_import:
                     continue
                 function_names.append(func_name)
@@ -47,19 +48,27 @@ def get_file_function_names(file_path):
 def update_current_init_file(folder_path):
     if folder_path.startswith("_") or folder_path in do_not_import:
         return
+
     init_file_path = create_init_file(folder_path)
 
+    all_function_names = []
     for f in os.listdir(folder_path):
         if f.startswith("__") or not (f.endswith(".py") or os.path.isdir(os.path.join(folder_path, f))):
             continue
 
         if f.endswith(".py"):
             module_name = f[:-3]
+
             with open(init_file_path, "a") as file:
-                f_str = f"from .{module_name} import {get_file_function_names(os.path.join(folder_path, f))}\n"
-                f_str = f_str.replace("'", "").replace("[", "").replace("]", "").replace(":", "")
+                imports = get_file_function_names(os.path.join(folder_path, f))
+                if not imports:
+                    continue
+                imports = [str(x).replace("'", "").replace("[", "").replace("]", "").replace(":", "") for x in imports]
+                all_function_names.extend(imports)
+                f_str = f"from .{module_name} import {', '.join(imports)}\n"
+                # f_str = f_str.replace("'", "").replace("[", "").replace("]", "").replace(":", "")
                 file.write(f_str)
-                print(f"Added import for {module_name} in {init_file_path}")
+                # print(f"Added import for {module_name} in {init_file_path}")
         else:
             module_name = f
             # If it's a folder, we need to create an __init__.py file inside it
@@ -67,8 +76,12 @@ def update_current_init_file(folder_path):
             with open(init_file_path, "a") as file:
                 f_str = f"from .{module_name} import *\n"
                 file.write(f_str)
-                print(f"Added import for {module_name} in {init_file_path}")
+                # print(f"Added import for {module_name} in {init_file_path}")
 
+    # print(f"All functions and classes in {folder_path}: {all_function_names}")
+
+    with open(init_file_path, "a") as file:
+        file.write(f"\n__all__ = {json.dumps(sorted(all_function_names))}\n")
 
 def main():
     path_to_module_folder = "/home/jlbet/code/public_code/utils2"
@@ -81,7 +94,7 @@ def main():
         if not (os.path.isdir(os.path.join(path_to_module_folder, f)) or f.endswith(".py")):
             continue
 
-        print(f)
+        # print(f)
 
 
 if __name__ == "__main__":
