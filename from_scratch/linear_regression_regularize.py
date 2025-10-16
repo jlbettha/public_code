@@ -107,7 +107,7 @@ def main() -> None:
     ys_l2 = a_mat @ x_l2  # noqa: F841
 
     ### Lasso Regression: least squares w/ L1 penalty
-    x_l1 = sparse_ell_1_lasso(ys_noisy, a_mat, lambda1=0.8)
+    x_l1 = sparse_ell_1_lasso(ys_noisy, a_mat, lambda1=0.5)
     print(
         f"L1 --- sparsity {100 * (num_features - np.count_nonzero(x_l1)) / num_features:.1f}%, Sum|weights| = {np.sum(np.abs(x_l1))}\n"
     )

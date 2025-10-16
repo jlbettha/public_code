@@ -26,17 +26,14 @@ def pca_projection(a: np.ndarray, use_my_svd: bool = False) -> np.ndarray:
     a_c = a - np.mean(a, axis=0)
 
     if use_my_svd:
-        u, sigmas, vt = singular_value_decomposition(a_c)
+        u, sigmas, _ = singular_value_decomposition(a_c)  # u, sigmas, vt
     else:
-        u, sigmas, vt = np.linalg.svd(a_c, full_matrices=False)
+        u, sigmas, _ = np.linalg.svd(a_c, full_matrices=False)  # u, sigmas, vt
 
     return u @ np.diag(sigmas)
 
 
-
-def _generate_data(
-    num_clusters: int, dim: int, size_clusters: int
-) -> np.ndarray[float]:
+def _generate_data(num_clusters: int, dim: int, size_clusters: int) -> np.ndarray[float]:
     """
     Generate synthetic data of gaussian clusters
 
@@ -61,9 +58,7 @@ def _generate_data(
     rand_factor = rng.uniform(0, 5, size=num_clusters)
 
     data = [
-        rng.multivariate_normal(
-            means[c, :], covs[c, :, :] * rand_factor[c], size=(size_clusters)
-        )
+        rng.multivariate_normal(means[c, :], covs[c, :, :] * rand_factor[c], size=(size_clusters))
         for c in range(num_clusters)
     ]
 
@@ -72,19 +67,14 @@ def _generate_data(
     # data = data[rand_idx, :]
 
 
-
 def main() -> None:
     """PCA: principal component analysis"""
     ## init vars
     num_points = 600
     dim = 10
     num_classes = 3
-    labels = np.vstack(
-        [c * np.ones(num_points // num_classes) for c in range(num_classes)]
-    )
-    a = _generate_data(
-        num_clusters=num_classes, dim=dim, size_clusters=num_points // num_classes
-    )
+    labels = np.vstack([c * np.ones(num_points // num_classes) for c in range(num_classes)])
+    a = _generate_data(num_clusters=num_classes, dim=dim, size_clusters=num_points // num_classes)
 
     pcs = pca_projection(a)
     plt.figure(figsize=(10, 5))
@@ -100,4 +90,4 @@ def main() -> None:
 if __name__ == "__main__":
     tmain = time.perf_counter()
     main()
-    print(f"Program took {time.perf_counter()-tmain:.3f} seconds.")
+    print(f"Program took {time.perf_counter() - tmain:.3f} seconds.")
