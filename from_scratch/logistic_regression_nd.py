@@ -110,7 +110,7 @@ def main() -> None:
     """_summary_"""
     # generate data
     num_points = 400
-    ndim = 2
+    ndim = 2  # noqa: F841
 
     # xs, labels = make_circles(n_samples=num_points, shuffle=True, noise=0.1, random_state=42)
     xs, labels = make_moons(n_samples=num_points, shuffle=True, noise=0.1, random_state=42)
@@ -130,18 +130,19 @@ def main() -> None:
 
     # plot results
     plt.figure(figsize=(5, 5))
-    plt.scatter(
-        xs[:, 0],
-        xs[:, 1],
-        c=labels,
-        cmap="rainbow",
-        s=8,
-    )
-
     # est_prob_class[est_prob_class>0.5] = 1
     # est_prob_class[est_prob_class<=0.5] = 0
     plt.contourf(xx0, xx1, est_prob_class, levels=np.linspace(0, 1, 20), cmap="plasma", alpha=0.3)
     plt.contour(xx0, xx1, est_prob_class, colors="k", levels=1, linewidths=1)
+    plt.scatter(
+        xs[:, 0],
+        xs[:, 1],
+        c=labels,
+        cmap="plasma",
+        s=20,
+        edgecolor="k",
+        linewidth=0.5,
+    )
     plt.show()
 
 

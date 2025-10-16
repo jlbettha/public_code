@@ -6,9 +6,10 @@ from collections.abc import Callable
 import matplotlib.pyplot as plt
 import numpy as np
 from numba import njit
-from sklearn.datasets import make_moons
+from sklearn.datasets import make_circles, make_moons, make_multilabel_classification  # noqa: F401
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler  # noqa: F401
 
 EPS = 1e-12
 
@@ -197,7 +198,7 @@ def support_vector_machine(
     return final_weights, min_it
 
 
-def main() -> None:
+def main() -> None:  # noqa: PLR0915
     """_summary_"""
     ## init vars
     learning_rate = 1e-3
@@ -206,9 +207,10 @@ def main() -> None:
     c = 0.1
     tol = 1e-8
 
-    # x, y = load_iris(return_X_y=True)
-    # x = x[:, :2]
-    x, y = make_moons(n_samples=400, noise=0.1, random_state=42)
+    x, y = make_moons(n_samples=600, noise=0.1, random_state=22)
+    # x, y = make_circles(n_samples=600, shuffle=True, noise=0.05, random_state=42)
+    y = np.squeeze(y)
+
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.35)
 
     # scaler = MinMaxScaler()
@@ -254,15 +256,19 @@ def main() -> None:
         test_pt_rbf = np.array([radial_basis_func(test_pt, x_train[j, :], gamma=gamma) for j in range(len(y_train))])
         test_pt_rbf = np.append(test_pt_rbf, 1.0)
         one_hot_test = weights @ test_pt_rbf
-        z.append(np.argmax(one_hot_test))
+        # print(one_hot_test)
+        z.append(one_hot_test[1] - one_hot_test[0])  # np.argmax(one_hot_test))
 
     print(f"avg predict time: {(time.perf_counter() - t0) / len(xx_long):.3f} seconds")
     print(f"predict time for {len(xx_long)} examples: {(time.perf_counter() - t0):.3f} seconds")
 
     z = np.array(z).reshape(xx.shape)
+    z = (z - z.min()) / (z.max() - z.min())
 
-    plt.contourf(xx, yy, z, alpha=0.3)
-    plt.scatter(x_test[:, 0], x_test[:, 1], c=y_test, s=30, edgecolor="k")
+    # plt.contourf(xx, yy, z > 0.5, alpha=0.3)
+    plt.contourf(xx, yy, z, levels=np.linspace(0, 1, 20), alpha=0.3)
+    plt.contour(xx, yy, z, colors="k", levels=1, linewidths=1)
+    plt.scatter(x_test[:, 0], x_test[:, 1], c=y_test, s=20, edgecolor="k", linewidth=0.5)
     # plt.title(title)
     plt.xlabel("Feature 1")
     plt.ylabel("Feature 2")
