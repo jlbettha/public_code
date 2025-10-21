@@ -190,7 +190,7 @@ def jlb_iqa(img: np.ndarray[float]) -> tuple[float]:
 
 
 def main() -> None:
-    img = cv2.imread("einstein.jpg")
+    img = cv2.imread("image_data/einstein.jpg")
     img = rgb2gray(img)
     img = minmax_scaling(img) / 255.0
 

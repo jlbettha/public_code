@@ -100,11 +100,11 @@ def classification_metrics(conf_mat: np.ndarray) -> dict:
         "tp": tn_fp_fn_tp[3],
         "total": np.sum(tn_fp_fn_tp),
         "accuracy": _accuracy(tn_fp_fn_tp),
-        "tpr": _sensitivity_tpr(tn_fp_fn_tp),
+        "tpr (sens./recall)": _sensitivity_tpr(tn_fp_fn_tp),
         "fnr": _fnr(tn_fp_fn_tp),
-        "tnr": _specificity_tnr(tn_fp_fn_tp),
+        "tnr (spec.)": _specificity_tnr(tn_fp_fn_tp),
         "fpr": _fpr(tn_fp_fn_tp),
-        "ppv": _ppv(tn_fp_fn_tp),
+        "ppv (precision)": _ppv(tn_fp_fn_tp),
         "npv": _npv(tn_fp_fn_tp),
         "balanced_accuracy": _balanced_accuracy(tn_fp_fn_tp),
         "f1": _f1(tn_fp_fn_tp),
@@ -121,9 +121,13 @@ def main():
     metrics = classification_metrics(conf_mat)
 
     print("Confusion Matrix:\n", conf_mat)
+    print("Class-normalized Conf. Matrix:\n", conf_mat / np.sum(conf_mat, axis=1, keepdims=True))
     print("Classification Metrics:")
     for k, v in metrics.items():
-        print(f"   {k:<20}------ {v:<10.4f}")
+        if isinstance(v, np.integer):
+            print(f"   {k:<20}------ {v:>10d}")
+        else:
+            print(f"   {k:<20}------ {v:>10.4f}")
 
 
 if __name__ == "__main__":
