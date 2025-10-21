@@ -124,6 +124,23 @@ def image_partials_sobel_conv(img: np.ndarray) -> np.ndarray:
     return ix, iy
 
 
+@njit
+def gamma_correction(img: np.ndarray, gamma: float = 0.5) -> np.ndarray:
+    """
+    Apply gamma correction to an image.
+
+    Args:
+        img (np.ndarray): _description_
+        gamma (float, optional): _description_. Defaults to 0.5.
+
+    Returns:
+        np.ndarray: _description_
+
+    """
+    img_gamma_corrected = np.power(normalize_ndarray(img, scale=1), gamma)
+    return normalize_ndarray(img_gamma_corrected, scale=1)
+
+
 def image_edge_potential(img: np.ndarray, sigma: float = 1.0) -> np.ndarray:
     """
     Edge potential, e.g., for GVF and active contours.
