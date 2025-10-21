@@ -87,7 +87,7 @@ class VideoTracker:
                 # If we have a point selected, track it
                 if self.state.point_selected and self.state.old_points is not None:
                     # Calculate optical flow
-                    new_points, status, error = cv2.calcOpticalFlowPyrLK(
+                    new_points, status, _ = cv2.calcOpticalFlowPyrLK(
                         old_gray, frame_gray, self.state.old_points, None, **self.lk_params
                     )
 

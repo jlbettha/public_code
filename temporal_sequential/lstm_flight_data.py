@@ -27,7 +27,6 @@ def create_dataset(dataset, look_back):
 
 
 def main() -> None:
-
     # load the dataset
     dataframe = read_csv(
         "./data/international-airline-passengers.csv",
@@ -85,16 +84,12 @@ def main() -> None:
     # shift train predictions for plotting
     train_predict_plot = np.empty_like(dataset)
     train_predict_plot[:, :] = np.nan
-    train_predict_plot[look_back - 1 : len(train_predict) + look_back - 1, :] = (
-        train_predict
-    )
+    train_predict_plot[look_back - 1 : len(train_predict) + look_back - 1, :] = train_predict
 
     # shift test predictions for plotting
     test_predict_plot = np.empty_like(dataset)
     test_predict_plot[:, :] = np.nan
-    test_predict_plot[
-        len(train_predict) + (look_back * 2) + 1 - 1 : len(dataset) - 1 - 1, :
-    ] = test_predict
+    test_predict_plot[len(train_predict) + (look_back * 2) + 1 - 1 : len(dataset) - 1 - 1, :] = test_predict
 
     # plot baseline and predictions
     plt.plot(scaler.inverse_transform(dataset))

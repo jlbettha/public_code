@@ -6,37 +6,39 @@ import pandas as pd
 
 # import matplotlib.pyplot as plt
 
-np.random.seed(42)
-
 
 def simple_partition(wts: np.ndarray[float], ids: np.ndarray[float], k: int = 2) -> list[list[float]]:
     """
-    Partition array s into k approx equal sum groups
+    _summary_
 
     Args:
-        s (np.ndarray): array of numbers
-        k (int, optional): number of partitions. Defaults to 2.
+        wts (np.ndarray[float]): _description_
+        ids (np.ndarray[float]): _description_
+        k (int, optional): _description_. Defaults to 2.
 
     Raises:
-        ValueError: len(s) < k
+        ValueError: _description_
 
     Returns:
-        list[list[float]]: list of k partition subsets
+        list[list[float]]: _description_
 
     """
     n = len(wts)
     if n < k:
-        raise ValueError(f"To partition into {k} groups, the number array must have at least {k} values.")
+        msg = f"To partition into {k} groups, the number array must have at least {k} values."
+        raise ValueError(msg)
 
-    wts, ids = (list(x) for x in zip(*sorted(zip(wts, ids, strict=False), key=lambda pair: pair[0], reverse=True), strict=False))
+    wts, ids = (
+        list(x) for x in zip(*sorted(zip(wts, ids, strict=False), key=lambda pair: pair[0], reverse=True), strict=False)
+    )
 
-    groups: list[tuple[np.float64, str]] = [[tuple([wts[i], ids[i]])] for i in range(k)]
+    groups: list[tuple[np.float64, str]] = [[(wts[i], ids[i])] for i in range(k)]
     # print(groups)
     group_sums = wts[:k]
 
     for i in np.arange(k, n):
         idx = np.argmin(group_sums)
-        groups[idx].append([tuple([wts[i], ids[i]])])
+        groups[idx].append([(wts[i], ids[i])])
         group_sums[idx] += wts[i]
 
     return groups
@@ -49,7 +51,8 @@ def main() -> None:
     ids = df["id"]
     wts = df["wt"]
     num_items = len(df["id"])
-    wts = wts + 1e-8 * np.random.randn(num_items)
+    rng = np.random.default_rng()
+    wts = wts + 1e-8 * rng.standard_normal(num_items)
     num_unique = len(np.unique(wts))
     print(f"Fraction unique: {num_unique}/{num_items} = {num_unique / num_items:.3f}")
     assert num_unique == num_items
@@ -71,12 +74,12 @@ def main() -> None:
         ids = []
         for item in group:
             if isinstance(item, list):
-                item = item[0]
+                item0 = item[0]
             # print(type(item))
-            wt, id = item
+            wt, idx = item0
             grp_wt += wt
             # grp_wt = float(np.sum([item[0] for item in group]))
-            ids.append(id)
+            ids.append(idx)
         actual_group_sums.append(float(grp_wt))
         splits.append(ids)
 

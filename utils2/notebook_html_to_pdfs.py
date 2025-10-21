@@ -24,15 +24,15 @@ async def html_to_pdf(html_content, output_path):
 def main():
     pwd = os.getcwd()
     html_directory = os.path.join(pwd, "saved_notebook_docs")  # Directory containing Jupyter notebooks
-    for dir, subdirs, files in os.walk(html_directory):
-        print(f"Current directory: {dir}")
+    for direc, subdirs, files in os.walk(html_directory):
+        print(f"Current directory: {direc}")
         print(f"Subdirectories: {subdirs}")
         print(f"Files: {files}")
 
         for file in files:
             if file.endswith(".html"):
-                html_file_path = os.path.join(dir, file)
-                pdf_file_path = os.path.join(dir, file.replace(".html", ".pdf"))
+                html_file_path = os.path.join(direc, file)
+                pdf_file_path = os.path.join(direc, file.replace(".html", ".pdf"))
                 print(f"Converting {html_file_path} to {pdf_file_path}")
                 with open(html_file_path, encoding="utf-8") as f:
                     html_content = f.read()

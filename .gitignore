@@ -54,6 +54,7 @@ torch_models/
 image_segmentation/
 image_classification/
 notebooks_ipython/
+optical_flow/
 utils/
 config/
 .ruff_cache/

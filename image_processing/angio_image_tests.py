@@ -117,7 +117,7 @@ def main() -> None:  # noqa: PLR0915
     kwargs = {}
     kwargs["sigmas"] = [sigma]
 
-    fig, axes = plt.subplots(2, 3, figsize=(9, 6))
+    _, axes = plt.subplots(2, 3, figsize=(9, 6))
     for i, black_ridges in enumerate([1, 0]):
         for j, func in enumerate([identity, sato, frangi]):
             kwargs["black_ridges"] = black_ridges

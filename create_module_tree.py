@@ -83,6 +83,7 @@ def update_current_init_file(folder_path):
     with open(init_file_path, "a") as file:
         file.write(f"\n__all__ = {json.dumps(sorted(all_function_names))}\n")
 
+
 def main():
     path_to_module_folder = "/home/jlbet/code/public_code/utils2"
     create_init_file(path_to_module_folder)
